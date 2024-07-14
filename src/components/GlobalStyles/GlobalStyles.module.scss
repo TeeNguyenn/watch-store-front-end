@@ -3,12 +3,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
 
 :root {
-    --primary-color: rgba(178, 153, 210);
+    --primary-color: #b299d2;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 html {
     font-size: 62.5%;
-    box-sizing: border-box;
 }
 
 body {
