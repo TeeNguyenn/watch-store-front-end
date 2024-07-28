@@ -1,0 +1,249 @@
+@import 'normalize.css';
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import './keyframe';
+
+:root {
+    --primary-color: #b299d2;
+    --white-color: #fff;
+    --text-color: #000;
+    --caption-color: #797979;
+    --background-color: #eeeeee;
+    --header-height: 78px;
+    --header-background-color: #000;
+    --font-family: 'Rubik', sans-serif;
+    --transition-config: all 0.3s linear;
+    --s-container-width: 1280px;
+}
+
+*,
+*::after,
+*::before {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-size: 1.6rem;
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+
+    &.hide-scroll {
+        overflow: hidden;
+    }
+
+    // Custom Tooltip
+    .tippy-box {
+        background-color: var(--primary-color);
+        font-size: 1.2rem;
+        color: var(--white-color);
+        line-height: normal;
+    }
+
+    .tippy-content {
+        padding: 3px 9px;
+    }
+
+    .tippy-arrow {
+        color: var(--primary-color);
+    }
+
+    .tippy-box[data-placement^='top'] > .tippy-arrow:before {
+        border-width: 10px 8px 0;
+    }
+}
+
+// Custom slick slider - slide show
+
+.slide-show-header .slick-slide.slick-active img {
+    animation: ZoomInImage 5s;
+    transition: all 5s !important;
+}
+
+.slide-show-header .slick-slide.slick-active .banner-heading {
+    opacity: 1;
+    animation: FadeInUp 1.5s ease both 0.1s;
+}
+
+.slide-show-header .slick-slide.slick-active .banner-text {
+    opacity: 1;
+    animation: FadeInUp 1.5s ease both 0.6s;
+}
+
+.slide-show-header .slick-slide.slick-active .banner-btn {
+    opacity: 1;
+    animation: FadeInUp 1.5s ease both 1.2s;
+}
+
+// Custom slick slider - home product
+.home-product-slider .slick-slider:first-child .slick-list {
+    height: 679px;
+    border-radius: 30px;
+    margin-bottom: 10px;
+}
+
+.home-product-slider .slick-slider:last-child .slick-list {
+    margin: 0 -5px;
+    border-radius: 20px;
+}
+
+.home-product-slider .slick-slider:last-child .slick-track {
+    display: flex;
+    gap: 10px;
+}
+
+.home-product-slider .slick-slider:last-child .slick-slide img {
+    border-radius: 20px;
+}
+
+.home-product-slider .slider-container *:focus-visible {
+    outline: none;
+    border: none;
+}
+
+// Custom slick slider - Testimonial
+.testimonial-slide .slick-list {
+    cursor: grab;
+    margin-right: -20px;
+}
+
+// Custom slick slider - News
+.news-slide .slick-list {
+    margin-right: -30px;
+    cursor: grab;
+}
+
+.news-slide .slick-dots {
+    bottom: -42px;
+}
+
+.news-slide .slick-dots li,
+.news-slide .slick-dots li button {
+    width: 5px;
+    height: 3px;
+    border-radius: 10px;
+    transition: var(--transition-config);
+    background-color: var(--text-color);
+    opacity: 1;
+    margin: 0 2px;
+    padding: 0;
+}
+
+.news-slide .slick-dots li button::before {
+    content: '';
+    display: none;
+}
+
+.news-slide .slick-dots li.slick-active {
+    width: 25px;
+}
+
+a {
+    text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+a {
+    font-family: 'Montserrat', sans-serif;
+}
+
+button,
+input,
+select,
+area {
+    font-family: var(--font-family);
+    font-size: 1.6rem;
+}
+
+img {
+    object-fit: cover;
+    height: auto;
+    max-width: 100%;
+    display: flex;
+}
+
+// remove arrow up and arrow dow
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+::selection {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+// Embed fonts
+@font-face {
+    font-family: Rubik;
+    src: url('/assets/fonts/rubik_n4.cc9422f2e84f41ed4707ebaebe66b6de39308266.woff2');
+}
+
+// Common
+
+.text-one-line {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.line-clamp {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.line-clamp.line-clamp-3 {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+}
+
+.line-clamp.line-clamp-4 {
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+}
+
+.line-clamp.line-clamp-5 {
+    -webkit-line-clamp: 5;
+    line-clamp: 5;
+}
+
+.sub-heading {
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 2px;
+    font-size: 1.2rem;
+    line-height: 2.16rem;
+    margin-bottom: 10px;
+}
+
+.title {
+    font-size: 4.2rem;
+    line-height: 5.46rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 10px;
+}
+
+.desc {
+    line-height: 2.88rem;
+    color: var(--text-color);
+}
+
+.disabled {
+    opacity: 0.6 !important;
+    cursor: default !important;
+}

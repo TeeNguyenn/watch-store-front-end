@@ -1,0 +1,80 @@
+.contact-form {
+    &__heading {
+        align-items: flex-start;
+    }
+
+    &__group {
+        margin-bottom: 20px;
+    }
+
+    &__input {
+        width: 100%;
+        padding: 10px 30px;
+        height: 60px;
+        min-height: 60px;
+        line-height: 3.8rem;
+        background: transparent;
+        border: 1px solid #797979;
+        border-radius: 999px;
+        outline: none;
+        transition: var(--transition-config);
+
+        &::placeholder {
+            color: rgb(49, 48, 48);
+        }
+
+        &:focus {
+            border-color: var(--primary-color);
+        }
+    }
+
+    &__bottom {
+        padding: 10px 0;
+    }
+
+    &__label {
+        position: relative;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding-left: 2px;
+        font-size: 1.4rem;
+
+        &::before,
+        &::after {
+            content: '';
+            display: inline-block;
+        }
+
+        &::before {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            border: 1px solid var(--text-color);
+            border-radius: 3px;
+            transition: 0.15s all ease-out;
+        }
+    }
+
+    &__checkbox:checked ~ &__label::after {
+        width: 12px;
+        height: 6px;
+        rotate: -45deg;
+        border-left: 2px solid var(--text-color);
+        border-bottom: 2px solid var(--text-color);
+        position: absolute;
+        top: 5px;
+        left: 6px;
+    }
+
+    &__btn {
+        margin-top: 20px;
+        padding: 0 33px;
+        height: 55px;
+        transition: var(--transition-config);
+
+        &:hover {
+            background-color: var(--text-color);
+        }
+    }
+}

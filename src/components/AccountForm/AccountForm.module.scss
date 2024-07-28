@@ -1,0 +1,85 @@
+.form {
+    &__heading {
+        margin-bottom: 35px;
+    }
+
+    &__title {
+        margin-bottom: 20px;
+        font-size: 4.8rem;
+        line-height: 6.24rem;
+    }
+
+    &__desc {
+        margin: 16px 0;
+        line-height: 2.88rem;
+    }
+
+    &__group {
+        margin-bottom: 20px;
+        position: relative;
+        transition: box-shadow 0.1s ease;
+        width: 100%;
+        display: flex;
+    }
+
+    &__icon {
+        content: '';
+        position: absolute;
+        right: 12px;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        width: 24px;
+        height: 24px;
+        z-index: 1;
+    }
+
+    &__input {
+        padding: 0 60px 0 32px;
+        line-height: 5rem;
+        height: 60px;
+        border: 1px solid rgb(0, 0, 0, 0.2);
+        width: 100%;
+        border-radius: 40px;
+        transition: var(--transition-config);
+        outline: none;
+
+        // &[type='email'] {
+        //     border-color: var(--text-color);
+        // }
+
+        &:focus {
+            border-color: var(--text-color);
+        }
+    }
+
+    &__links {
+        margin: 20px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        > * {
+            font-family: var(--font-family);
+            color: var(--text-color) !important;
+            transition: var(--transition-config);
+        }
+
+        > *:hover {
+            color: var(--primary-color) !important;
+        }
+    }
+
+    &__submit-btn {
+        -webkit-appearance: none;
+        white-space: nowrap;
+        appearance: none;
+        transition: var(--transition-config);
+        font-family: 'Montserrat', sans-serif;
+        padding: 17px 33px;
+
+        &:hover {
+            background-color: var(--text-color);
+        }
+    }
+}

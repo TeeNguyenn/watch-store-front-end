@@ -1,0 +1,8 @@
+.color-item {
+    border: 2px solid var(--white-color);
+    transition: var(--transition-config);
+    cursor: pointer;
+    &:hover {
+        box-shadow: 0 0 0 1.4px var(--text-color);
+    }
+}

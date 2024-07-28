@@ -1,0 +1,124 @@
+.footer {
+    margin-bottom: 30px;
+    margin-top: 60px;
+    background-color: #0d0d0d;
+    border-radius: 22px;
+    color: var(--white-color);
+
+    &__top {
+        padding: 92px 0 64px;
+    }
+
+    &__row {
+        margin: 0 50px;
+        --grid-gutter-x: 65px;
+    }
+
+    &__info {
+        border-right: 1px solid rgba($color: #eee, $alpha: 0.18);
+    }
+
+    &__logo {
+        max-width: 179px;
+        width: 100%;
+        object-fit: cover;
+        height: auto;
+    }
+
+    &__contacts {
+        list-style: none;
+        margin-top: 40px;
+    }
+
+    &__icon {
+        flex-shrink: 0;
+        color: var(--primary-color);
+    }
+
+    &__contact {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+
+        &:not(:last-child) {
+            margin-bottom: 18px;
+        }
+
+        &:not(:first-child) &-text:hover {
+            color: var(--primary-color);
+        }
+    }
+
+    &__contact-text {
+        color: rgba($color: #fff, $alpha: 0.9);
+        line-height: 2.6rem;
+        transition: var(--transition-config);
+        font-family: var(--font-family);
+    }
+
+    &__blocks {
+        --grid-gutter-x: 65px;
+    }
+
+    &__wrapper {
+        margin: 0 50px;
+        padding: 15px 0;
+        border-top: 1px solid rgba($color: #eee, $alpha: 0.39);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    &__copyright {
+        color: rgba($color: #fff, $alpha: 0.9);
+    }
+
+    &__author {
+        color: rgba($color: #fff, $alpha: 0.9);
+        transition: var(--transition-config);
+
+        &:hover {
+            color: var(--primary-color);
+        }
+    }
+
+    &__payment-list {
+        display: flex;
+        align-items: center;
+    }
+
+    &__payment {
+        padding: 5px;
+    }
+}
+
+.footer-item {
+    &__title {
+        margin-bottom: 20px;
+        font-size: 2rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        line-height: 2.6rem;
+    }
+
+    &__list {
+        list-style: none;
+    }
+
+    &__item {
+        &:not(:last-child) {
+            margin-bottom: 18px;
+        }
+    }
+
+    &__item-link {
+        color: rgba($color: #fff, $alpha: 0.9);
+        transition: var(--transition-config);
+        width: 100%;
+        display: block;
+
+        &:hover {
+            color: var(--primary-color);
+        }
+    }
+}
