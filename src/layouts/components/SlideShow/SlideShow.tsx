@@ -8,10 +8,13 @@ import PrevArrow from './PrevArrow';
 import NextArrow from './NextArrow';
 import Button from '../../../components/Button';
 import styles from './SlideShow.module.scss';
+import { useMediaQuery } from 'react-responsive';
 
 const cx = classNames.bind(styles);
 
 const SlideShow = () => {
+    const isMobileScreen = useMediaQuery({ query: '(max-width: 768px)' });
+
     const settings = {
         dots: false,
         fade: true,
@@ -29,7 +32,11 @@ const SlideShow = () => {
             <Slider {...settings}>
                 <div>
                     <Image
-                        src={images.slider1}
+                        src={
+                            !isMobileScreen
+                                ? images.slider1
+                                : images.MobileSlider1
+                        }
                         alt="Slide show image"
                         className={cx('slide-show__img')}
                     ></Image>
@@ -65,7 +72,11 @@ const SlideShow = () => {
                 </div>
                 <div>
                     <Image
-                        src={images.slider2}
+                        src={
+                            !isMobileScreen
+                                ? images.slider2
+                                : images.MobileSlider2
+                        }
                         alt="Slide show image"
                         className={cx('slide-show__img')}
                     ></Image>
@@ -101,7 +112,11 @@ const SlideShow = () => {
                 </div>
                 <div>
                     <Image
-                        src={images.slider3}
+                        src={
+                            !isMobileScreen
+                                ? images.slider3
+                                : images.MobileSlider3
+                        }
                         alt="Slide show image"
                         className={cx('slide-show__img')}
                     ></Image>

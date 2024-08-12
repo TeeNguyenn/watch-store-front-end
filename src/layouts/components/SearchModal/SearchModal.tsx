@@ -1,11 +1,11 @@
 import React, { useRef, useState } from 'react';
 import classNames from 'classnames/bind';
+import Slider from 'react-slick';
 
 import styles from './SearchModal.module.scss';
 import { CloseIcon, SearchIcon } from '../../../components/Icons';
 import Button from '../../../components/Button';
 import CardItem from '../CardItem';
-import ProductIcons from '../../../components/ProductIcons';
 
 const cx = classNames.bind(styles);
 
@@ -33,8 +33,39 @@ const SearchModal = ({ handleCloseSearchModal }: SearchModalProps) => {
         refInput.current?.focus();
     };
 
+    const settings = {
+        slidesToShow: 5,
+        slidesToScroll: 1,
+        speed: 300,
+        autoplay: true,
+        autoplaySpeed: 3000,
+        cssEase: 'linear',
+        arrows: false,
+        infinite: true,
+        responsive: [
+            {
+                breakpoint: 1199.98,
+                settings: {
+                    slidesToShow: 4,
+                },
+            },
+            {
+                breakpoint: 991.98,
+                settings: {
+                    slidesToShow: 3,
+                },
+            },
+            {
+                breakpoint: 767.98,
+                settings: {
+                    slidesToShow: 2,
+                },
+            },
+        ],
+    };
+
     return (
-        <div className={cx('search-modal')}>
+        <div className={cx('search-modal', { 'search-modal-slider': true })}>
             <div className={cx('modal-overlay')}></div>
             <div className={cx('search-modal__content')}>
                 <div className={cx('search-modal__top')}>
@@ -95,17 +126,17 @@ const SearchModal = ({ handleCloseSearchModal }: SearchModalProps) => {
                         Recommended products
                     </h3>
                     <div className={cx('card-list')}>
-                        <div
-                            className={cx('card-list__inner', {
-                                row: true,
-                                'row-cols-5': true,
-                            })}
-                        >
-                            <CardItem></CardItem>
-                            <CardItem></CardItem>
-                            <CardItem></CardItem>
-                            <CardItem></CardItem>
-                            <CardItem></CardItem>
+                        <div className="slider-container">
+                            <Slider {...settings}>
+                                <CardItem soldOut></CardItem>
+                                <CardItem></CardItem>
+                                <CardItem></CardItem>
+                                <CardItem></CardItem>
+                                <CardItem></CardItem>
+                                <CardItem></CardItem>
+                                <CardItem></CardItem>
+                                <CardItem></CardItem>
+                            </Slider>
                         </div>
                     </div>
                 </div>

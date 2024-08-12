@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames/bind';
 
 import styles from './Footer.module.scss';
@@ -115,7 +115,7 @@ const Footer = () => {
     ];
 
     return (
-        <div className={cx('', { container: true })}>
+        <div className={cx('', { 'container-spacing': true })}>
             <div className={cx('footer')}>
                 <div className={cx('footer__top')}>
                     <div className={cx('footer__row')}>
@@ -124,6 +124,8 @@ const Footer = () => {
                                 className={cx('', {
                                     col: true,
                                     'col-3': true,
+                                    'col-xl-4': true,
+                                    'col-md-12': true,
                                 })}
                             >
                                 <div className={cx('footer__info')}>
@@ -181,6 +183,8 @@ const Footer = () => {
                                 className={cx('footer__blocks', {
                                     col: true,
                                     'col-9': true,
+                                    'col-xl-8': true,
+                                    'col-md-12': true,
                                 })}
                             >
                                 <div
@@ -194,6 +198,8 @@ const Footer = () => {
                                             className={cx('', {
                                                 col: true,
                                                 'col-3': true,
+                                                'col-xl-6': true,
+                                                'col-md-12': true,
                                             })}
                                         >
                                             <FooterItem

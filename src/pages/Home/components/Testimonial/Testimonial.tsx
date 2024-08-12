@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import classNames from 'classnames/bind';
 import Slider from 'react-slick';
 
@@ -62,6 +62,31 @@ const testimonialList = [
 ];
 
 const Testimonial = () => {
+    // set same height for all the items in slider
+    // run only one
+    // useEffect(() => {
+    //     const handleMaxHeight = () => {
+    //         let maxHeight = 0;
+
+    //         const items = document.querySelectorAll('.testimonial-item-slide');
+
+    //         items.forEach((item) => {
+    //             const height = item.clientHeight;
+    //             if (height > maxHeight) {
+    //                 maxHeight = height;
+    //             }
+    //         });
+
+    //         items.forEach((item) => {
+    //             (item as HTMLElement).style.height = `${maxHeight}px`;
+    //         });
+    //     };
+
+    //     window.addEventListener('resize', handleMaxHeight);
+
+    //     return () => window.removeEventListener('resize', handleMaxHeight);
+    // }, []);
+
     const settings = {
         dots: false,
         infinite: true,
@@ -71,6 +96,22 @@ const Testimonial = () => {
         arrows: false,
         autoplay: true,
         autoplaySpeed: 5000,
+        responsive: [
+            {
+                breakpoint: 1199.98,
+                settings: {
+                    slidesToShow: 2,
+                    slidesToScroll: 1,
+                },
+            },
+            {
+                breakpoint: 575.98,
+                settings: {
+                    slidesToShow: 1,
+                    slidesToScroll: 1,
+                },
+            },
+        ],
     };
 
     return (
@@ -78,6 +119,7 @@ const Testimonial = () => {
             <Heading
                 subHeading="TESTIMONIAL"
                 title="Feedback From Our Users"
+                className={cx('testimonial__heading')}
             ></Heading>
             <div className={cx('testimonial__list')}>
                 <div className="slider-container">
@@ -89,6 +131,7 @@ const Testimonial = () => {
                                 country={item.country}
                                 rate={item.rate}
                                 content={item.content}
+                                key={index}
                             ></TestimonialItem>
                         ))}
                     </Slider>

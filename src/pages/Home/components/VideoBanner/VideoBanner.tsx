@@ -51,7 +51,7 @@ const VideoBanner = () => {
                 <h2 className={cx('video-banner__title', { title: true })}>
                     Built to Last
                 </h2>
-                <p className={cx('', { desc: true })}>
+                <p className={cx('video-banner__desc', { desc: true })}>
                     Fringilla urna porttitor rhoncus dolor purus non enim
                     praesent. Adipiscing elit pellentesque habitant morbi
                     tristique senectusViverra nibh cras.
@@ -60,8 +60,8 @@ const VideoBanner = () => {
             <div className={cx('video-banner__video-wrapper')}>
                 <video
                     ref={videoRef}
-                    muted
                     loop
+                    muted={true}
                     className={cx('video-banner__video', {
                         remove: removeAnimation,
                     })}

@@ -8,7 +8,10 @@ import Image from '../../../components/Image';
 import images from '../../../assets/images';
 import {
     CartIcon,
+    CloseIcon,
+    RightArrowIcon,
     SearchIcon,
+    SubMenuIcon,
     UpArrowIcon,
     UserIcon,
 } from '../../../components/Icons';
@@ -28,6 +31,8 @@ const Header = () => {
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [isSlideShow, setIsSlideShow] = useState(true);
     const [showScrollToTop, setShowScrollToTop] = useState(false);
+    const [showMobileMenu, setShowMobileMenu] = useState(false);
+    const [showMobileSubMenu, setShowMobileSubMenu] = useState(false);
 
     const location = useLocation();
     const pathName = location.pathname;
@@ -64,7 +69,12 @@ const Header = () => {
         setShowCartDrawer(false);
     };
 
-    if (showSearchModal || showCartDrawer) {
+    if (
+        showSearchModal ||
+        showCartDrawer ||
+        showMobileMenu ||
+        showMobileSubMenu
+    ) {
         document.body.classList.add('hide-scroll');
     } else {
         document.body.classList.remove('hide-scroll');
@@ -74,8 +84,13 @@ const Header = () => {
         setShowLoginModal(false);
     };
 
+    const handleMobileSubMenu = () => {
+        setShowMobileMenu(false);
+        setShowMobileSubMenu(false);
+    };
+
     return (
-        <div className={cx('', { container: true })}>
+        <div className={cx('', { 'container-spacing': true })}>
             <div
                 className={cx('header-container', {
                     'header-container__slide-show': isSlideShow,
@@ -86,10 +101,166 @@ const Header = () => {
                         'header__slide-show': isSlideShow,
                     })}
                 >
+                    {/* Mobile menu */}
+                    <div
+                        className={cx('mobile-menu', {
+                            'd-none': true,
+                            'd-xl-block': true,
+                        })}
+                    >
+                        <SubMenuIcon
+                            className={cx('mobile-menu__icon')}
+                            onClick={() => setShowMobileMenu(true)}
+                        ></SubMenuIcon>
+                        <div className={cx('mobile-menu__menu-drawer')}>
+                            <span
+                                className={cx('menu-drawer__overlay', {
+                                    show: showMobileMenu,
+                                })}
+                                onClick={handleMobileSubMenu}
+                            ></span>
+                            <div
+                                className={cx('menu-drawer__inner', {
+                                    show: showMobileMenu,
+                                })}
+                            >
+                                <div className={cx('menu-drawer__header')}>
+                                    <span
+                                        className={cx('menu-drawer__heading')}
+                                    >
+                                        Menu
+                                    </span>
+                                    <Button
+                                        className={cx('menu-drawer__close-btn')}
+                                        onClick={() => setShowMobileMenu(false)}
+                                    >
+                                        <CloseIcon
+                                            width="1.5rem"
+                                            height="1.5rem"
+                                        ></CloseIcon>
+                                    </Button>
+                                </div>
+                                <nav className={cx('menu-drawer__navbar')}>
+                                    <NavLink
+                                        to={config.routes.home}
+                                        className={(nav) =>
+                                            cx('menu-drawer__nav-item', {
+                                                active: nav.isActive,
+                                            })
+                                        }
+                                        onClick={() => setShowMobileMenu(false)}
+                                    >
+                                        Home
+                                    </NavLink>
+                                    <NavLink
+                                        to={config.routes.shop}
+                                        className={(nav) =>
+                                            cx('menu-drawer__nav-item', {
+                                                active: nav.isActive,
+                                            })
+                                        }
+                                        onClick={() => setShowMobileMenu(false)}
+                                    >
+                                        Shop
+                                    </NavLink>
+                                    <NavLink
+                                        to={config.routes.about}
+                                        className={(nav) =>
+                                            cx('menu-drawer__nav-item', {
+                                                active: nav.isActive,
+                                            })
+                                        }
+                                        onClick={() => setShowMobileMenu(false)}
+                                    >
+                                        About
+                                    </NavLink>
+                                    <div
+                                        className={cx('menu-drawer__nav-item')}
+                                        onClick={() =>
+                                            setShowMobileSubMenu(true)
+                                        }
+                                    >
+                                        <span>Pages</span>
+                                        <RightArrowIcon></RightArrowIcon>
+                                    </div>
+                                </nav>
+                            </div>
+                            {/* Mobile sub menu */}
+                            <div
+                                className={cx('menu-drawer__content', {
+                                    show: showMobileSubMenu,
+                                })}
+                            >
+                                <div className={cx('mobile-sub-menu')}>
+                                    <div
+                                        className={cx(
+                                            'mobile-sub-menu__header',
+                                            {
+                                                active: showMobileSubMenu,
+                                            }
+                                        )}
+                                        onClick={() =>
+                                            setShowMobileSubMenu(false)
+                                        }
+                                    >
+                                        <RightArrowIcon
+                                            className={cx(
+                                                'mobile-sub-menu__icon'
+                                            )}
+                                        ></RightArrowIcon>
+                                        <span>Pages</span>
+                                    </div>
+                                    <nav
+                                        className={cx(
+                                            'mobile-sub-menu__navbar'
+                                        )}
+                                    >
+                                        <NavLink
+                                            to={config.routes.blog}
+                                            className={(nav) =>
+                                                cx(
+                                                    'mobile-sub-menu__nav-item',
+                                                    { active: nav.isActive }
+                                                )
+                                            }
+                                            onClick={handleMobileSubMenu}
+                                        >
+                                            Blog
+                                        </NavLink>
+                                        <NavLink
+                                            to={config.routes.faq}
+                                            className={(nav) =>
+                                                cx(
+                                                    'mobile-sub-menu__nav-item',
+                                                    { active: nav.isActive }
+                                                )
+                                            }
+                                            onClick={handleMobileSubMenu}
+                                        >
+                                            Faq
+                                        </NavLink>
+                                        <NavLink
+                                            to={config.routes.contact}
+                                            className={(nav) =>
+                                                cx(
+                                                    'mobile-sub-menu__nav-item',
+                                                    { active: nav.isActive }
+                                                )
+                                            }
+                                            onClick={handleMobileSubMenu}
+                                        >
+                                            Contact
+                                        </NavLink>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Navbar */}
-                    <nav className={cx('navbar')}>
+                    <nav className={cx('navbar', { 'd-xl-none': true })}>
                         <NavLink
-                            to={'/'}
+                            to={config.routes.home}
                             className={(nav) =>
                                 cx('navbar-item', {
                                     active: nav.isActive,
@@ -99,7 +270,7 @@ const Header = () => {
                             <span className={cx('navbar-content')}>Home</span>
                         </NavLink>
                         <NavLink
-                            to={'/shop'}
+                            to={config.routes.shop}
                             className={(nav) =>
                                 cx('navbar-item', { active: nav.isActive })
                             }
@@ -107,7 +278,7 @@ const Header = () => {
                             <span className={cx('navbar-content')}>Shop</span>
                         </NavLink>
                         <NavLink
-                            to={'/about'}
+                            to={config.routes.about}
                             className={(nav) =>
                                 cx('navbar-item', { active: nav.isActive })
                             }
@@ -187,7 +358,7 @@ const Header = () => {
                             <SearchIcon
                                 width={'2.6rem'}
                                 height={'2.6rem'}
-                                className=""
+                                className={cx('actions__icon')}
                             ></SearchIcon>
                         </span>
                         <div
@@ -197,11 +368,12 @@ const Header = () => {
                             <CartIcon
                                 width={'2.6rem'}
                                 height={'2.6rem'}
+                                className={cx('actions__icon')}
                             ></CartIcon>
                             <span className={cx('quantity')}>1</span>
                         </div>
                         <span
-                            className={cx('icon')}
+                            className={cx('icon', { 'd-xl-none': true })}
                             onClick={() => setShowLoginModal(true)}
                         >
                             <UserIcon

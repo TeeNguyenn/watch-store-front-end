@@ -1,3 +1,5 @@
+@use '../abstracts';
+
 @import 'normalize.css';
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 @import './keyframe';
@@ -6,6 +8,7 @@
     --primary-color: #b299d2;
     --white-color: #fff;
     --text-color: #000;
+    --text-second-color: #000000b3;
     --caption-color: #797979;
     --background-color: #eeeeee;
     --header-height: 78px;
@@ -13,6 +16,24 @@
     --font-family: 'Rubik', sans-serif;
     --transition-config: all 0.3s linear;
     --s-container-width: 1280px;
+}
+
+@media (max-width: 1280px) {
+    :root {
+        --s-container-width: 100%;
+    }
+}
+
+@media (max-width: 1198px) {
+    :root {
+        --s-container-width: 1040px;
+    }
+}
+
+@media (max-width: 1040px) {
+    :root {
+        --s-container-width: 100%;
+    }
 }
 
 *,
@@ -59,8 +80,107 @@ body {
     }
 }
 
-// Custom slick slider - slide show
+// Custom Tippy Shop Card
+body .tippy-box.card-color-tooltip {
+    background-color: var(--text-color);
+    border-radius: 4px;
+    box-shadow: #63636333 0 2px 8px;
+    text-transform: capitalize;
 
+    .tippy-arrow {
+        color: var(--text-color);
+    }
+}
+
+// Custom Tippy Shop Product Icon Card Sidebar
+body .tippy-box.card-popup-product-icon {
+    background-color: var(--text-color);
+    border-radius: 4px;
+    box-shadow: #63636333 0 2px 8px;
+    text-transform: capitalize;
+    font-size: 1.4rem;
+    font-weight: 400;
+
+    .tippy-content {
+        padding: 8px;
+    }
+
+    .tippy-arrow {
+        color: var(--text-color);
+    }
+}
+
+// Custom slick slider - slide show
+.sidebar-card-slider .slider-container:hover .slick-arrow {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.sidebar-card-slider .slick-arrow {
+    width: 30px;
+    height: 30px;
+    background-color: var(--text-color);
+    color: var(--white-color);
+    border-radius: 50%;
+    z-index: 1;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-config);
+
+    &:hover {
+        background-color: var(--primary-color);
+    }
+
+    &::before {
+        display: none;
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 54%;
+        left: 35%;
+        transform: translate(-50%, -50%);
+        width: 10px;
+        height: 10px;
+        border-left: 2px solid var(--white-color);
+        border-bottom: 2px solid var(--white-color);
+        rotate: 45deg;
+
+        // @include abstracts.screen(sm) {
+        //     top: 56%;
+        //     left: 38%;
+        // }
+    }
+}
+
+.sidebar-card-slider .slick-prev {
+    left: 0;
+    top: 56%;
+    transform: translateX(-30%);
+    opacity: 0;
+}
+
+.sidebar-card-slider .slick-next {
+    right: 0;
+    top: 56%;
+    transform: translateX(30%);
+    opacity: 0;
+
+    &::after {
+        rotate: 225deg;
+        top: 8%;
+        left: 26%;
+
+        // @include abstracts.screen(sm) {
+        //     left: 26%;
+        //     top: 8%;
+        // }
+    }
+}
+
+// Custom slick slider - slide show
 .slide-show-header .slick-slide.slick-active img {
     animation: ZoomInImage 5s;
     transition: all 5s !important;
@@ -83,14 +203,30 @@ body {
 
 // Custom slick slider - home product
 .home-product-slider .slick-slider:first-child .slick-list {
-    height: 679px;
-    border-radius: 30px;
     margin-bottom: 10px;
+
+    @include abstracts.screen(xxl) {
+        margin-bottom: 14px;
+    }
+}
+
+.home-product-slider .slick-slider:last-child .slick-slide.slick-current img {
+    transition: var(--transition-config);
+
+    border: 1px solid;
 }
 
 .home-product-slider .slick-slider:last-child .slick-list {
     margin: 0 -5px;
     border-radius: 20px;
+
+    @include abstracts.screen(md) {
+        margin: 0 45px;
+    }
+
+    @include abstracts.screen(sm) {
+        margin: 0 38px;
+    }
 }
 
 .home-product-slider .slick-slider:last-child .slick-track {
@@ -102,7 +238,71 @@ body {
     border-radius: 20px;
 }
 
+.home-product-slider .slick-slider:last-child .slick-arrow {
+    width: 34px;
+    height: 34px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    transition: var(--transition-config);
+
+    @include abstracts.screen(sm) {
+        width: 25px;
+        height: 25px;
+    }
+
+    &:hover {
+        background-color: var(--text-color);
+    }
+
+    &::before {
+        display: none;
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 53%;
+        left: 40%;
+        transform: translate(-50%, -50%);
+        width: 8px;
+        height: 8px;
+        border-left: 3px solid var(--white-color);
+        border-bottom: 3px solid var(--white-color);
+        rotate: 45deg;
+
+        @include abstracts.screen(sm) {
+            top: 56%;
+            left: 38%;
+        }
+    }
+}
+
+.home-product-slider .slick-slider:last-child .slick-prev {
+    left: 0;
+}
+
+.home-product-slider .slick-slider:last-child .slick-next {
+    right: 0;
+
+    &::after {
+        rotate: 225deg;
+        top: 18%;
+        left: 37%;
+
+        @include abstracts.screen(sm) {
+            left: 26%;
+            top: 8%;
+        }
+    }
+}
+
 .home-product-slider .slider-container *:focus-visible {
+    outline: none;
+    border: none;
+}
+
+//Custom slick slider - Shop Sidebar Card
+.sidebar-card-slide .slider-container *:focus-visible {
     outline: none;
     border: none;
 }
@@ -115,12 +315,21 @@ body {
 
 // Custom slick slider - News
 .news-slide .slick-list {
-    margin-right: -30px;
     cursor: grab;
+    margin: 0 -15px;
+
+    @include abstracts.screen(md) {
+        margin: 0 -5px;
+    }
 }
 
 .news-slide .slick-dots {
     bottom: -42px;
+}
+
+//Custom slick slider - Search modal
+.search-modal-slider .slick-list {
+    margin: -10px;
 }
 
 .news-slide .slick-dots li,
@@ -231,6 +440,7 @@ input[type='number']::-webkit-inner-spin-button {
 }
 
 .title {
+    text-align: center;
     font-size: 4.2rem;
     line-height: 5.46rem;
     font-weight: 700;
@@ -246,4 +456,12 @@ input[type='number']::-webkit-inner-spin-button {
 .disabled {
     opacity: 0.6 !important;
     cursor: default !important;
+}
+
+.primary-hover {
+    transition: var(--transition-config);
+
+    &:hover {
+        color: var(--primary-color);
+    }
 }

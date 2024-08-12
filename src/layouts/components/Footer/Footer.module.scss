@@ -1,3 +1,7 @@
+@use '../../../styles/abstracts';
+
+@import '../../../styles/base/keyframe';
+
 .footer {
     margin-bottom: 30px;
     margin-top: 60px;
@@ -5,17 +9,48 @@
     border-radius: 22px;
     color: var(--white-color);
 
+    @include abstracts.screen(md) {
+        margin-top: 45px;
+    }
+
+    @include abstracts.screen(sm) {
+        margin-top: 30;
+    }
+
     &__top {
         padding: 92px 0 64px;
+        @include abstracts.screen(md) {
+            padding: 69px 0 28px;
+        }
+        @include abstracts.screen(sm) {
+            padding: 46px 0 32px;
+        }
     }
 
     &__row {
         margin: 0 50px;
         --grid-gutter-x: 65px;
+
+        @include abstracts.screen(xxl) {
+            --grid-gutter-x: 20px;
+            margin: 0 3.5%;
+        }
+
+        @include abstracts.screen(md) {
+            --grid-gutter-y: 20px;
+        }
     }
 
     &__info {
         border-right: 1px solid rgba($color: #eee, $alpha: 0.18);
+
+        @include abstracts.screen(xl) {
+            height: 100%;
+        }
+
+        @include abstracts.screen(md) {
+            border: none;
+        }
     }
 
     &__logo {
@@ -28,6 +63,14 @@
     &__contacts {
         list-style: none;
         margin-top: 40px;
+
+        @include abstracts.screen(md) {
+            margin-bottom: 50px;
+        }
+
+        @include abstracts.screen(sm) {
+            margin-bottom: 30px;
+        }
     }
 
     &__icon {
@@ -54,10 +97,27 @@
         line-height: 2.6rem;
         transition: var(--transition-config);
         font-family: var(--font-family);
+
+        @include abstracts.screen(sm) {
+            font-style: 1.5rem;
+        }
     }
 
     &__blocks {
         --grid-gutter-x: 65px;
+
+        @include abstracts.screen(xxl) {
+            --grid-gutter-x: 20px;
+        }
+
+        @include abstracts.screen(xl) {
+            --grid-gutter-y: 40px;
+            margin-top: 0;
+        }
+
+        @include abstracts.screen(md) {
+            --grid-gutter-y: 20px;
+        }
     }
 
     &__wrapper {
@@ -67,10 +127,26 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+
+        @include abstracts.screen(xxl) {
+            margin: 0 3.5%;
+        }
+
+        @include abstracts.screen(md) {
+            flex-direction: column;
+        }
+
+        @include abstracts.screen(sm) {
+            padding: 20px 0;
+        }
     }
 
     &__copyright {
         color: rgba($color: #fff, $alpha: 0.9);
+
+        @include abstracts.screen(md) {
+            margin: 10px 0;
+        }
     }
 
     &__author {
@@ -85,10 +161,19 @@
     &__payment-list {
         display: flex;
         align-items: center;
+
+        @include abstracts.screen(md) {
+            padding-top: 10px;
+            margin-bottom: 10px;
+        }
     }
 
     &__payment {
         padding: 5px;
+
+        @include abstracts.screen(sm) {
+            padding: 3px;
+        }
     }
 }
 
@@ -99,10 +184,52 @@
         font-weight: 600;
         text-transform: uppercase;
         line-height: 2.6rem;
+
+        @include abstracts.screen(lg) {
+            font-size: 1.8rem;
+            line-height: 2.34rem;
+        }
+
+        @include abstracts.screen(md) {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 0;
+        }
+    }
+
+    &__icon {
+        width: 9px;
+        height: 9px;
+        border-left: 3px solid var(--white-color);
+        border-bottom: 3px solid var(--white-color);
+        rotate: -45deg;
+        transition: var(--transition-config);
+
+        &.active {
+            rotate: 135deg;
+        }
     }
 
     &__list {
         list-style: none;
+
+        @include abstracts.screen(md) {
+            animation: FadeInDown 1s ease-out 0.05s both;
+            transition: var(--transition-config);
+            opacity: 0;
+            visibility: hidden;
+            display: none;
+            margin: 15px 0 10px;
+        }
+
+        &.show {
+            @include abstracts.screen(md) {
+                opacity: 1;
+                visibility: visible;
+                display: block;
+            }
+        }
     }
 
     &__item {

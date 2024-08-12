@@ -53,6 +53,8 @@ const Abilities = () => {
                 className={cx('abilities__row', {
                     row: true,
                     'row-cols-3': true,
+                    'row-cols-md-2': true,
+                    'row-cols-sm-1': true,
                 })}
             >
                 {abilityList.map((abilityItem, index) => (

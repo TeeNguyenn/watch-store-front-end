@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import classNames from 'classnames/bind';
 
 import styles from './Testimonial.module.scss';
@@ -23,7 +23,11 @@ const TestimonialItem = ({
     content,
 }: TestimonialItemProps) => {
     return (
-        <article className={cx('testimonial-item')}>
+        <article
+            className={cx('testimonial-item', {
+                'testimonial-item-slide': true,
+            })}
+        >
             <div className={cx('testimonial-item__top')}>
                 <div className={cx('testimonial-item__img-wrapper')}>
                     <Image
@@ -48,7 +52,14 @@ const TestimonialItem = ({
                 <div className={cx('testimonial-item__stars')}>
                     {renderRating(rate)}
                 </div>
-                <p className={cx('testimonial-item__content')}>{content}</p>
+                <p
+                    className={cx('testimonial-item__content', {
+                        'line-clamp': true,
+                        'line-clamp-5': true,
+                    })}
+                >
+                    {content}
+                </p>
             </div>
         </article>
     );

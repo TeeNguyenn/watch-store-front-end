@@ -1,5 +1,25 @@
+@use '../../../../styles/abstracts';
+
 .testimonial {
     padding: 72px 40px;
+
+    @include abstracts.screen(xl) {
+        padding: 36px 40px;
+    }
+
+    @include abstracts.screen(md) {
+        padding: 36px 15px;
+    }
+
+    @include abstracts.screen(sm) {
+        padding: 18px 15px;
+    }
+
+    &__heading {
+        @include abstracts.screen(xl) {
+            margin-bottom: 5px;
+        }
+    }
 }
 
 .testimonial-item {
@@ -9,6 +29,10 @@
     background-color: var(--white-color);
     text-align: center;
     margin-right: 20px;
+
+    @include abstracts.screen(xl) {
+        padding: 50px 0;
+    }
 
     &__img-wrapper {
         width: 80px;
@@ -33,6 +57,10 @@
         gap: 5px;
         line-height: 2.88rem;
         font-style: italic;
+
+        @include abstracts.screen(md) {
+            font-size: 1.5rem;
+        }
     }
 
     &__author {

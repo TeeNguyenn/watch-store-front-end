@@ -106,7 +106,11 @@ const Specification = () => {
                 </div>
 
                 {/* Main block */}
-                <div className={cx('specification__main', { col: true })}>
+                <div
+                    className={cx('specification__main', {
+                        col: true,
+                    })}
+                >
                     <div className={cx('specification__block-img')}>
                         <Image
                             className={cx('specification__main-img')}

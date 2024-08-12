@@ -1,8 +1,13 @@
+@use '../../../../styles/abstracts';
 @import '../../../../styles/base/keyframe';
 
 .video-banner {
     text-align: center;
     padding: 56px 40px 44px;
+
+    @include abstracts.screen(md) {
+        padding: 42px 15px 33px;
+    }
 
     &__top {
         margin-bottom: 50px;
@@ -14,6 +19,20 @@
         }
     }
 
+    &__title {
+        @include abstracts.screen(md) {
+            font-size: 2.8rem;
+            line-height: 3.64rem;
+        }
+    }
+
+    &__desc {
+        @include abstracts.screen(md) {
+            font-size: 1.5rem;
+            line-height: 2.7rem;
+        }
+    }
+
     &__video-wrapper {
         display: flex;
         justify-content: center;
@@ -22,11 +41,18 @@
         height: 100%;
         border-radius: 30px;
         overflow: hidden;
+        will-change: transform;
+        backface-visibility: hidden;
+
+        @include abstracts.screen(sm) {
+            height: 350px;
+        }
     }
 
     &__video {
         object-fit: cover;
         width: 100%;
+        height: 100%;
         animation: scale 20s linear infinite;
 
         &.remove {
@@ -49,6 +75,11 @@
         width: 85px;
         height: 85px;
         padding: 0;
+
+        @include abstracts.screen(md) {
+            width: 55px;
+            height: 55px;
+        }
 
         &.hide:first-child {
             display: none;

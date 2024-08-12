@@ -17,12 +17,13 @@ const Contact = () => {
                     'row-cols-2': true,
                 })}
             >
-                <div className={cx('', { col: true })}>
+                <div className={cx('', { col: true, 'col-lg-12': true })}>
                     <div className={cx('contact__info')}>
                         <div className={cx('contact__group')}>
                             <AddressIcon
                                 width="3.5rem"
                                 height="3.5rem"
+                                className={cx('contact__icon')}
                             ></AddressIcon>
                             <div className={cx('contact__body')}>
                                 <h6 className={cx('contact__label')}>
@@ -35,7 +36,11 @@ const Contact = () => {
                             </div>
                         </div>
                         <div className={cx('contact__group')}>
-                            <MailIcon width="3.5rem" height="3.5rem"></MailIcon>
+                            <MailIcon
+                                className={cx('contact__icon')}
+                                width="3.5rem"
+                                height="3.5rem"
+                            ></MailIcon>
                             <div className={cx('contact__body')}>
                                 <h6 className={cx('contact__label')}>
                                     Chat with us
@@ -50,6 +55,7 @@ const Contact = () => {
                         </div>
                         <div className={cx('contact__group')}>
                             <PhoneIcon
+                                className={cx('contact__icon')}
                                 width="3.5rem"
                                 height="3.5rem"
                             ></PhoneIcon>
@@ -67,7 +73,7 @@ const Contact = () => {
                         </div>
                     </div>
                 </div>
-                <div className={cx('', { col: true })}>
+                <div className={cx('', { col: true, 'col-lg-12': true })}>
                     <ContactForm></ContactForm>
                 </div>
             </div>

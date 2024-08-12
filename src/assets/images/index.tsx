@@ -8,6 +8,9 @@ const images = {
     slider1: require('./slide-show/Slider1.webp'),
     slider2: require('./slide-show/Slider2.webp'),
     slider3: require('./slide-show/Slider_3.webp'),
+    MobileSlider1: require('./slide-show/Mobile_Slider_1.jpg'),
+    MobileSlider2: require('./slide-show/Mobile_Slider_2.jpg'),
+    MobileSlider3: require('./slide-show/Mobile_Slider_3.jpg'),
 };
 
 export default images;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames/bind';
 import HeadlessTippy from '@tippyjs/react/headless';
 
@@ -7,16 +7,21 @@ import styles from './Companion.module.scss';
 import Heading from '../Heading';
 import Image from '../../../../components/Image';
 import images from '../../../../assets/images/home';
-import ColorItem from '../../../../components/ColorItem';
-import ProductIcons from '../../../../components/ProductIcons';
-import { Link } from 'react-router-dom';
+import { CloseIcon } from '../../../../components/Icons';
+import Card from '../../../../components/Card';
+import { useMediaQuery } from 'react-responsive';
 
 const cx = classNames.bind(styles);
 
 const Companion = () => {
+    const isMobileScreen = useMediaQuery({ query: '(max-width: 575.98px)' });
+
+    const [showMobilePopup, setShowMobilePopup] = useState(false);
+
     return (
         <section className={cx('companion')}>
             <Heading
+                className={cx('companion__heading')}
                 subHeading="SMART FEATURES"
                 title="The Ultimate Companion"
                 desc="Sed Ut Perspiunde Omnis Iste Voluptatem Accusantium Doloremque Laudantium, Totam Rem Aperiam, Eaque Ipsa Quae Ab Illo Inventore Veritatis Et Quasi Architecto Beatae Vitae Dicta Sunt Explicabo."
@@ -27,41 +32,46 @@ const Companion = () => {
                     className={cx('companion__img')}
                 ></Image>
                 <div className={cx('companion__item')}>
-                    <Button className={cx('companion__btn')}></Button>
+                    <Button
+                        className={cx('companion__btn')}
+                        onClick={() => setShowMobilePopup(true)}
+                    ></Button>
 
-                    <div className={cx('companion__popup')}>
-                        <div className={cx('companion__content')}>
-                            <div className={cx('card')}>
-                                <Link to="#!" className={cx('card__media')}>
-                                    <Image
-                                        src={images.popupProductImg}
-                                        className={cx('card__img')}
-                                    ></Image>
-                                    <ProductIcons
-                                        className={cx('show')}
-                                    ></ProductIcons>
-                                </Link>
-                                <div className={cx('card__body')}>
-                                    <h3>
-                                        <Button
-                                            to="#!"
-                                            className={cx('card__heading')}
-                                        >
-                                            Unisex Smartwatch
-                                        </Button>
-                                    </h3>
-                                    <div className={cx('card__color-options')}>
-                                        <ColorItem color="#7989b8"></ColorItem>
-                                        <ColorItem color="#54ad68"></ColorItem>
-                                        <ColorItem color="#b0e1e7"></ColorItem>
-                                    </div>
-                                    <p className={cx('card__price')}>
-                                        $14.3369
-                                    </p>
+                    {!isMobileScreen ? (
+                        <div className={cx('companion__popup')}>
+                            <div className={cx('companion__content')}>
+                                <Card></Card>
+                            </div>
+                        </div>
+                    ) : (
+                        <div
+                            className={cx('mobile-popup', {
+                                show: showMobilePopup,
+                            })}
+                        >
+                            <div
+                                className={cx('mobile-popup__overlay')}
+                                onClick={() => setShowMobilePopup(false)}
+                            ></div>
+                            <Button
+                                className={cx('mobile-popup__close-btn')}
+                                onClick={() => setShowMobilePopup(false)}
+                            >
+                                <CloseIcon
+                                    width="1rem"
+                                    height="1rem"
+                                ></CloseIcon>
+                            </Button>
+                            <div className={cx('mobile-popup__inner')}>
+                                <div className={cx('mobile-popup__body')}>
+                                    <Card
+                                        soldOut
+                                        className={cx('mobile-popup__card')}
+                                    ></Card>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </section>

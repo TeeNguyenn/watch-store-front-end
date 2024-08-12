@@ -10,9 +10,15 @@ interface QuantityProps {
     className?: string;
     widthBtn: string;
     heightBtn: string;
+    handleErrorQuantity?: (isError: boolean) => void;
 }
 
-const Quantity = ({ className, widthBtn, heightBtn }: QuantityProps) => {
+const Quantity = ({
+    className,
+    widthBtn,
+    heightBtn,
+    handleErrorQuantity = () => {},
+}: QuantityProps) => {
     const [quantityInputValue, setQuantityInputValue] = useState('1');
 
     const handleIncreaseQuantity = () => {
@@ -37,6 +43,19 @@ const Quantity = ({ className, widthBtn, heightBtn }: QuantityProps) => {
         setQuantityInputValue(quantity);
     };
 
+    const handleOnBlur = (e: ChangeEvent<HTMLInputElement>) => {
+        const quantity = e.target.value;
+        if (Number(quantity) >= 100) {
+            // handleErrorQuantity(true);
+            setQuantityInputValue('100');
+        } else if (Number(quantity) <= 1) {
+            // handleErrorQuantity(true);
+            setQuantityInputValue('1');
+        } else {
+            setQuantityInputValue(quantity);
+        }
+    };
+
     return (
         <div className={cx('quantity__wrapper', className)}>
             <Button
@@ -51,6 +70,7 @@ const Quantity = ({ className, widthBtn, heightBtn }: QuantityProps) => {
                 className={cx('quantity__input')}
                 value={quantityInputValue}
                 onChange={handleInputQuantity}
+                onBlur={handleOnBlur}
             />
             <Button
                 style={{ width: widthBtn, height: heightBtn }}

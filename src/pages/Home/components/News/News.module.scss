@@ -1,19 +1,41 @@
+@use '../../../../styles/abstracts';
+
 @import '../../../../styles/base/keyframe';
 
 .news {
     padding: 40px;
+
+    @include abstracts.screen(md) {
+        padding: 30px 15px;
+    }
+
+    @include abstracts.screen(sm) {
+        padding: 20px 15px;
+    }
 
     &__title {
         font-size: 4.8rem;
         line-height: 6.24rem;
         margin-bottom: 50px;
         text-align: center;
+
+        @include abstracts.screen(xl) {
+            margin-bottom: 15px;
+        }
+
+        @include abstracts.screen(md) {
+            font-size: 3.2rem;
+            line-height: 4.16rem;
+        }
     }
 }
 
 .news-item {
     display: flex;
-    margin-right: 30px;
+    padding: 0 15px;
+    @include abstracts.screen(sm) {
+        flex-direction: column;
+    }
 
     &:hover &__img {
         transform: scale(1.1);
@@ -24,6 +46,22 @@
         flex-shrink: 0;
         overflow: hidden;
         border-radius: 22px;
+
+        @include abstracts.screen(xl) {
+            width: 46%;
+        }
+
+        @include abstracts.screen(lg) {
+            width: 44%;
+        }
+
+        @include abstracts.screen(md) {
+            width: 43%;
+        }
+
+        @include abstracts.screen(sm) {
+            width: 100%;
+        }
     }
 
     &__img {
@@ -53,6 +91,11 @@
         color: var(--text-color);
         transition: var(--transition-config);
 
+        @include abstracts.screen(md) {
+            font-size: 2rem;
+            line-height: 2.6rem;
+        }
+
         &:hover {
             color: var(--primary-color);
         }
@@ -66,6 +109,15 @@
         font-size: 1.8rem;
         line-height: 3.24rem;
         transition: var(--transition-config);
+
+        @include abstracts.screen(xl) {
+            height: auto;
+        }
+
+        @include abstracts.screen(md) {
+            font-size: 1.6rem;
+            line-height: 2.88rem;
+        }
     }
 
     &__btn {

@@ -1,17 +1,39 @@
+@use '../../../../styles/abstracts';
 @import '../../../../styles/base/keyframe';
 
 .feature {
     padding: 92px 40px 48px;
 
+    @include abstracts.screen(md) {
+        padding: 69px 15px 36px;
+    }
+
+    @include abstracts.screen(sm) {
+        padding: 46px 15px 24px;
+    }
+
     &__row {
         align-items: center;
         --grid-gutter-x: 20px;
+        --grid-gutter-y: 20px;
+
+        @include abstracts.screen(lg) {
+            flex-direction: column-reverse;
+        }
     }
 
     &__specification {
         display: flex;
         flex-direction: column;
         gap: 20px;
+
+        @include abstracts.screen(lg) {
+            width: auto !important;
+        }
+
+        @include abstracts.screen(md) {
+            padding: 20px !important;
+        }
     }
 
     &__sub-heading {
@@ -20,6 +42,11 @@
 
     &__title {
         margin: 15px 0 0px !important;
+        text-align: left !important;
+
+        @include abstracts.screen(md) {
+            font-size: 2.8rem !important;
+        }
     }
 
     &__blocks {
@@ -50,11 +77,19 @@
         font-size: 2rem;
         font-weight: 700;
         line-height: 2.6rem;
+
+        @include abstracts.screen(md) {
+            font-size: 1.8rem;
+        }
     }
 
     &__desc {
         margin-top: 5px;
         line-height: 2.88rem;
+
+        @include abstracts.screen(md) {
+            font-size: 1.5rem;
+        }
     }
 
     &__img-wrapper {

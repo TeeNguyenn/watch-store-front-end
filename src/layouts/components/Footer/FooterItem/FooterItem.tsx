@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames/bind';
 
 import styles from '../Footer.module.scss';
 import { Link } from 'react-router-dom';
+import { RightArrowIcon } from '../../../../components/Icons';
 
 const cx = classNames.bind(styles);
 
@@ -17,10 +18,28 @@ interface FooterItemProps {
 }
 
 const FooterItem = ({ title, list }: FooterItemProps) => {
+    const [showList, setShowList] = useState(false);
+
     return (
         <div className={cx('footer-item')}>
-            <h2 className={cx('footer-item__title')}>{title}</h2>
-            <ul className={cx('footer-item__list')}>
+            <h2
+                className={cx('footer-item__title')}
+                onClick={() => setShowList(!showList)}
+            >
+                {title}
+                <span
+                    className={cx('footer-item__icon', {
+                        'd-none': true,
+                        'd-md-block': true,
+                        active: showList,
+                    })}
+                ></span>
+            </h2>
+            <ul
+                className={cx('footer-item__list', {
+                    show: showList,
+                })}
+            >
                 {list.map((item, index) => (
                     <li key={index} className={cx('footer-item__item')}>
                         <Link

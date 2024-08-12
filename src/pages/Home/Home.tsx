@@ -17,17 +17,17 @@ const cx = classNames.bind(styles);
 const Home = () => {
     return (
         <div className={cx('full-width')}>
-            <div className={cx('container-s', { container: true })}>
+            <div className={cx('container-s', { 'container-spacing': true })}>
                 <Feature></Feature>
                 <VideoBanner></VideoBanner>
                 <Specification></Specification>
                 <Companion></Companion>
                 <Abilities></Abilities>
             </div>
-            <div className={cx('', { container: true })}>
+            <div className={cx('', { 'container-spacing': true })}>
                 <HomeProduct></HomeProduct>
             </div>
-            <div className={cx('container-s', { container: true })}>
+            <div className={cx('container-s', { 'container-spacing': true })}>
                 <Testimonial></Testimonial>
                 <News></News>
                 <Contact></Contact>

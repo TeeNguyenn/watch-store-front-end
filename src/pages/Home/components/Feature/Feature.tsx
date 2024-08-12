@@ -18,6 +18,7 @@ const Feature = () => {
                 className={cx('feature__row', {
                     row: true,
                     'row-cols-2': true,
+                    'row-cols-lg-1': true,
                 })}
             >
                 <div className={cx('feature__specification', { col: true })}>

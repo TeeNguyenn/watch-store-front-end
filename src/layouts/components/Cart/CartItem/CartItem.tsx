@@ -12,9 +12,14 @@ import Quantity from '../../../../components/Quantity';
 const cx = classNames.bind(styles);
 
 const CartItem = () => {
+    const [isErrorQuantity, setIsErrorQuantity] = useState(false);
+
+    const handleErrorQuantity = (isError: boolean) => {
+        setIsErrorQuantity(isError);
+    };
     return (
         <div className={cx('cart-item')}>
-            <Link to={'#!'}>
+            <Link to={'#!'} className={cx('cart-item__img-link')}>
                 <Image
                     src={images.cartItem}
                     alt="cart-item"
@@ -37,21 +42,29 @@ const CartItem = () => {
                 </div>
                 <div className={cx('cart-item__quantity-wrapper')}>
                     {/* Onblur when input error = -1... */}
-                    <div className={cx('cart-item__error')}>
+                    <div
+                        className={cx('cart-item__error', {
+                            show: isErrorQuantity,
+                        })}
+                    >
                         <ErrorIcon></ErrorIcon>
                         <p className={cx('cart-item__error-text')}>
-                            You can only add 1 of this item to your cart.
+                            You can only add from 1 to 100 of this item to your
+                            cart.
                         </p>
                     </div>
                     <Quantity
                         className={cx('cart-item__quantity')}
                         widthBtn="35px"
                         heightBtn="36px"
+                        handleErrorQuantity={handleErrorQuantity}
                     ></Quantity>
                 </div>
                 <div className={cx('cart-item__remove-wrapper')}>
                     <Button className={cx('cart-item__remove-btn')}>
-                        <RemoveIcon></RemoveIcon>
+                        <RemoveIcon
+                            className={cx('cart-item__remove-icon')}
+                        ></RemoveIcon>
                     </Button>
                 </div>
             </div>

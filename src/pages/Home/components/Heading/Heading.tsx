@@ -23,7 +23,7 @@ const Heading = ({ subHeading, title, desc, className }: HeadingProps) => {
             data-aos-anchor-placement="top-bottom"
         >
             <h6 className={cx('', { 'sub-heading': true })}>{subHeading}</h6>
-            <h2 className={cx('', { title: true })}>{title}</h2>
+            <h2 className={cx('heading__title', { title: true })}>{title}</h2>
             <p className={cx('heading__desc', { desc: true })}>{desc}</p>
         </div>
     );

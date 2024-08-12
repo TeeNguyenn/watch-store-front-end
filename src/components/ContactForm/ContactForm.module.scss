@@ -1,10 +1,20 @@
+@use '../../styles/abstracts';
+
 .contact-form {
     &__heading {
         align-items: flex-start;
+
+        @include abstracts.screen(md) {
+            margin-bottom: 5px;
+        }
     }
 
     &__group {
         margin-bottom: 20px;
+
+        @include abstracts.screen(sm) {
+            margin-bottom: 25px;
+        }
     }
 
     &__input {
@@ -39,6 +49,8 @@
         cursor: pointer;
         padding-left: 2px;
         font-size: 1.4rem;
+        line-height: normal;
+        height: 32px;
 
         &::before,
         &::after {
@@ -53,17 +65,25 @@
             border: 1px solid var(--text-color);
             border-radius: 3px;
             transition: 0.15s all ease-out;
+
+            @include abstracts.screen(lg) {
+                border-color: var(--primary-color);
+            }
+
+            @include abstracts.screen(sm) {
+                margin-right: 12px;
+            }
         }
     }
 
     &__checkbox:checked ~ &__label::after {
-        width: 12px;
+        width: 11px;
         height: 6px;
         rotate: -45deg;
         border-left: 2px solid var(--text-color);
         border-bottom: 2px solid var(--text-color);
         position: absolute;
-        top: 5px;
+        top: 11px;
         left: 6px;
     }
 
@@ -72,6 +92,13 @@
         padding: 0 33px;
         height: 55px;
         transition: var(--transition-config);
+
+        @include abstracts.screen(lg) {
+            margin-top: 30px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
         &:hover {
             background-color: var(--text-color);

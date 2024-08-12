@@ -1,18 +1,19 @@
-.show {
-    opacity: 0;
-    visibility: hidden;
-    transition: var(--transition-config);
-    transform: translateY(20px);
-}
+@use '../../../styles/abstracts';
 
 .card-item {
     cursor: pointer;
+    padding: 0 10px;
+
+    @include abstracts.screen(md) {
+        padding: 0 5px;
+    }
+
     &:hover &__img {
         transform: scale(1.12);
         // opacity: 0;
     }
 
-    &:hover .show {
+    &:hover &__product-icons {
         opacity: 1;
         visibility: visible;
         transform: translateY(0);
@@ -35,12 +36,25 @@
         flex-direction: column;
         align-items: center;
         padding: 20px;
+
+        @include abstracts.screen(sm) {
+            padding: 15px 10px;
+        }
     }
 
     &__name {
+        display: block;
+        width: 100%;
         font-size: 1.8rem;
+        line-height: 2.34rem;
+        text-align: center;
         color: var(--text-color);
         transition: var(--transition-config);
+
+        @include abstracts.screen(sm) {
+            font-size: 1.4rem;
+            line-height: 1.82rem;
+        }
 
         &:hover {
             color: var(--primary-color);
@@ -50,6 +64,10 @@
     &__price {
         margin-top: 5px;
         font-weight: 500;
+
+        @include abstracts.screen(sm) {
+            font-size: 1.2rem;
+        }
     }
 }
 

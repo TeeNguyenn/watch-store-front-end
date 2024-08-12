@@ -22,9 +22,9 @@ interface CartProps {
 }
 
 const Cart = ({ handleCloseCartDrawer }: CartProps) => {
-    const currentUser = true;
+    const currentUser = false;
 
-    if (currentUser && cartList.length > 0) {
+    if (cartList.length > 0) {
         return (
             <div className={cx('cart-list')}>
                 {/* Header */}

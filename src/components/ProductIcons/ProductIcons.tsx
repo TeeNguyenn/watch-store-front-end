@@ -17,12 +17,34 @@ import Button from '../Button';
 const cx = classNames.bind(styles);
 
 interface ProductIconsProps {
+    mobile?: boolean;
     className?: string;
 }
 
-const ProductIcons = ({ className }: ProductIconsProps) => {
+const ProductIcons = ({ mobile, className }: ProductIconsProps) => {
+    if (mobile) {
+        return (
+            <div className={cx('product-icons', 'modifier')}>
+                <div className={cx('wishlist-content')}>
+                    <HeartIcon
+                        width="1.5rem"
+                        height="1.5rem"
+                        className={cx('icon')}
+                    ></HeartIcon>
+                </div>
+                <Button className={cx('btn')}>
+                    <AddToCartIcon
+                        width="1.7rem"
+                        height="1.7rem"
+                        className={cx('icon')}
+                    ></AddToCartIcon>
+                </Button>
+            </div>
+        );
+    }
+
     return (
-        <div className={cx('product-icons', { [className + '']: className })}>
+        <div className={cx('product-icons', className)}>
             <Tippy delay={[0, 150]} content="Wishlist" placement="top">
                 <div className={cx('wishlist-content')}>
                     <HeartIcon className={cx('icon')}></HeartIcon>

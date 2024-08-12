@@ -32,7 +32,7 @@ const AbilityItem = ({ src, title, desc }: AbilityItemProps) => {
             <div className={cx('ability-item__body')}>
                 <h4
                     className={cx('ability-item__title', {
-                        'text-one-line': true,
+                        'line-clamp': true,
                     })}
                 >
                     {title}
