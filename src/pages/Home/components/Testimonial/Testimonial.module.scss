@@ -28,11 +28,6 @@
     height: 100%;
     background-color: var(--white-color);
     text-align: center;
-    margin-right: 20px;
-
-    @include abstracts.screen(xl) {
-        padding: 50px 0;
-    }
 
     &__img-wrapper {
         width: 80px;

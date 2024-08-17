@@ -8,11 +8,11 @@ interface DefaultLayoutProps {
 
 const DefaultLayout = ({ children }: DefaultLayoutProps) => {
     return (
-        <div>
+        <>
             <Header></Header>
             {children}
             <Footer></Footer>
-        </div>
+        </>
     );
 };
 

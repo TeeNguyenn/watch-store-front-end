@@ -1,12 +1,29 @@
 @use '../../styles/abstracts';
 
 .form {
+    max-width: 650px;
+    background-color: var(--white-color);
+    margin: 100px auto 100px;
+    padding: 40px;
+    text-align: center;
+    border-radius: 22px;
+
+    @include abstracts.screen(md) {
+        margin: 25px 20px 0;
+        max-width: 100%;
+    }
+
+    @include abstracts.screen(sm) {
+        margin: 10px 10px 0;
+        padding: 20px;
+    }
+
     &__heading {
         margin-bottom: 35px;
     }
 
     &__title {
-        margin-bottom: 20px;
+        margin-bottom: 40px;
         font-size: 4.8rem;
         line-height: 6.24rem;
 
@@ -27,30 +44,53 @@
         }
     }
 
+    &__desc-link {
+        font-weight: 500;
+        line-height: 2.88rem;
+        color: var(--text-color);
+        padding: 0 7px;
+        text-decoration: underline;
+    }
+
     &__group {
         margin-bottom: 20px;
         position: relative;
         transition: box-shadow 0.1s ease;
         width: 100%;
-        display: flex;
+    }
+
+    &__group.modifier &__icon {
+        top: 18px;
+
+        @include abstracts.screen(sm) {
+            top: 13px;
+        }
+    }
+
+    &__group.modifier &__input {
+        height: 60px;
+
+        @include abstracts.screen(sm) {
+            height: 50px;
+        }
     }
 
     &__icon {
-        content: '';
         position: absolute;
         right: 12px;
-        top: 0;
+        top: 24px;
         bottom: 0;
-        margin: auto;
-        width: 24px;
-        height: 24px;
         z-index: 1;
+
+        &.valid {
+            color: #8ccd67;
+        }
     }
 
     &__input {
         padding: 0 60px 0 32px;
         line-height: 5rem;
-        height: 60px;
+        height: 70px;
         border: 1px solid rgb(0, 0, 0, 0.2);
         width: 100%;
         border-radius: 40px;
@@ -61,13 +101,17 @@
         //     border-color: var(--text-color);
         // }
 
-        @include abstracts.screen(sm) {
-            height: 50px;
-        }
-
         &:focus {
             border-color: var(--text-color);
         }
+    }
+
+    &__error {
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        font-size: 1.4rem;
+        gap: 10px;
     }
 
     &__links {
@@ -102,6 +146,10 @@
 
         &:hover {
             background-color: var(--text-color);
+        }
+
+        @include abstracts.screen(sm) {
+            width: 100%;
         }
     }
 }

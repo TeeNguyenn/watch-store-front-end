@@ -9,6 +9,10 @@ const cx = classNames.bind(styles);
 interface ButtonProps {
     to?: string;
     href?: string;
+    target?: string;
+    type?: string;
+    name?: string;
+    value?: string;
     primary?: boolean;
     outline?: boolean;
     text?: boolean;
@@ -29,6 +33,10 @@ const Button = forwardRef(
         {
             to,
             href,
+            target,
+            type,
+            name,
+            value,
             primary = false,
             outline = false,
             text = false,
@@ -70,6 +78,7 @@ const Button = forwardRef(
             Comp = Link;
         } else if (href) {
             props.href = href;
+            props.target = target;
             Comp = 'a';
         }
 
@@ -85,7 +94,15 @@ const Button = forwardRef(
         });
 
         return (
-            <Comp ref={ref} className={classes} style={style} {...props}>
+            <Comp
+                type={type}
+                name={name}
+                value={value}
+                ref={ref}
+                className={classes}
+                style={style}
+                {...props}
+            >
                 {leftIcon}
                 {children}
                 {rightIcon}

@@ -19,9 +19,10 @@ interface CardProps {
     SoldOut?: boolean;
     Sale?: boolean;
     oneProduct?: boolean;
+    isReview?: boolean;
 }
 
-const Card = ({ SoldOut, Sale, oneProduct }: CardProps) => {
+const Card = ({ SoldOut, Sale, oneProduct, isReview = true }: CardProps) => {
     const isMobileScreen = useMediaQuery({ query: '(max-width: 575.98px)' });
 
     return (
@@ -114,15 +115,19 @@ const Card = ({ SoldOut, Sale, oneProduct }: CardProps) => {
                             </div>
                         )}
                     </div>
-                    <div className={cx('card__review')}>
-                        <div className={cx('card__stars')}>
-                            {renderRating(4)}
+                    {isReview && (
+                        <div className={cx('card__review')}>
+                            <div className={cx('card__stars')}>
+                                {renderRating(4)}
+                            </div>
+                            <p className={cx('card__review-title')}>
+                                <span className={cx('card__review_count')}>
+                                    1
+                                </span>
+                                review
+                            </p>
                         </div>
-                        <p className={cx('card__review-title')}>
-                            <span className={cx('card__review_count')}>1</span>
-                            review
-                        </p>
-                    </div>
+                    )}
                 </div>
             </div>
         </article>
