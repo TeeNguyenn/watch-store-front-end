@@ -10,6 +10,7 @@ import Register from '../pages/Register';
 import Login from '../pages/Login';
 import Detail from '../pages/Detail';
 import ActiveAccount from '../pages/ActiveAccount';
+import Checkout from '../pages/Checkout';
 
 const publicRoutes: Array<any> = [
     {
@@ -51,6 +52,11 @@ const publicRoutes: Array<any> = [
     {
         path: config.routes.accountStatus,
         component: ActiveAccount,
+    },
+    {
+        path: config.routes.checkout,
+        component: Checkout,
+        layout: null,
     },
 ];
 const privateRoutes: Array<any> = [];

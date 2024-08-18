@@ -10,11 +10,18 @@ interface CheckboxProps {
     label: string;
     quantity?: string;
     checked?: boolean;
+    className?: string;
 }
 
-const Checkbox = ({ name, label, quantity, checked }: CheckboxProps) => {
+const Checkbox = ({
+    name,
+    label,
+    quantity,
+    checked,
+    className,
+}: CheckboxProps) => {
     return (
-        <div className={cx('container')}>
+        <div className={cx('container', className)}>
             <input
                 type="checkbox"
                 id={name}
