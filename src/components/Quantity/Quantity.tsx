@@ -71,6 +71,7 @@ const Quantity = ({
                 value={quantityInputValue}
                 onChange={handleInputQuantity}
                 onBlur={handleOnBlur}
+                style={{ height: heightBtn }}
             />
             <Button
                 style={{ width: widthBtn, height: heightBtn }}

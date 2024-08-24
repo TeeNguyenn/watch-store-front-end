@@ -16,6 +16,7 @@
     --font-family: 'Rubik', sans-serif;
     --transition-config: all 0.3s linear;
     --s-container-width: 1280px;
+    --sidebar-width: 400px;
 }
 
 @media (max-width: 1280px) {
@@ -425,6 +426,16 @@ body .tippy-box.card-popup-product-icon {
     padding: 0 10px;
 }
 
+// Custom slick slider - feature
+.feature-slider .slick-list {
+    cursor: grab;
+    margin: 0 -10px;
+}
+
+.feature-slider .slick-slide {
+    padding: 0 10px;
+}
+
 // Custom slick slider - News
 .news-slide .slick-list {
     cursor: grab;
@@ -465,6 +476,54 @@ body .tippy-box.card-popup-product-icon {
     width: 25px;
 }
 
+// Custom slider - about
+
+.about-slider .slick-slider:last-child {
+    position: absolute;
+    top: 18%;
+    right: 48%;
+    width: 120px !important;
+
+    @include abstracts.screen(lg) {
+        top: 4%;
+        right: 8%;
+    }
+
+    @include abstracts.screen(md) {
+        position: initial;
+        width: 300px !important;
+        margin: 20px auto 0;
+    }
+}
+
+.about-slider .slick-slider:last-child .slick-track {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+
+    @include abstracts.screen(md) {
+        flex-direction: row;
+        justify-content: center;
+    }
+}
+
+.about-slider .slick-slider:last-child .slick-track > div {
+    width: auto !important;
+    margin-right: auto;
+}
+
+.about-slider .slick-slider:last-child .slick-current img {
+    border: 4px solid var(--primary-color);
+}
+
+.about-team .slick-list {
+    margin: 0 -15px;
+
+    @include abstracts.screen(xl) {
+        margin: 0 -10px;
+    }
+}
+
 a {
     text-decoration: none;
 }
@@ -474,8 +533,7 @@ h2,
 h3,
 h4,
 h5,
-h6,
-a {
+h6 {
     font-family: 'Montserrat', sans-serif;
 }
 
@@ -584,6 +642,11 @@ input[type='number']::-webkit-inner-spin-button {
 .line-clamp.line-clamp-5 {
     -webkit-line-clamp: 5;
     line-clamp: 5;
+}
+
+.line-clamp.line-clamp-6 {
+    -webkit-line-clamp: 6;
+    line-clamp: 6;
 }
 
 .sub-heading {

@@ -6,6 +6,7 @@ import styles from './SearchModal.module.scss';
 import { CloseIcon, SearchIcon } from '../../../components/Icons';
 import Button from '../../../components/Button';
 import CardItem from '../CardItem';
+import Search from '../../../components/Search';
 
 const cx = classNames.bind(styles);
 
@@ -81,30 +82,7 @@ const SearchModal = ({ handleCloseSearchModal }: SearchModalProps) => {
                         }
                     ></Button>
                     <h2 className={cx('title')}>What are you looking for ?</h2>
-                    <div className={cx('input-box')}>
-                        <input
-                            ref={refInput}
-                            value={searchValue}
-                            className={cx('input')}
-                            type="text"
-                            placeholder="Search"
-                            onChange={handleChange}
-                        />
-                        {searchValue && (
-                            <Button
-                                className={cx('reset-btn')}
-                                onClick={handleClear}
-                            >
-                                <CloseIcon
-                                    width="1.1rem"
-                                    height="1.1rem"
-                                ></CloseIcon>
-                            </Button>
-                        )}
-                        <Button className={cx('search-btn')}>
-                            <SearchIcon width="2rem" height="2rem"></SearchIcon>
-                        </Button>
-                    </div>
+                    <Search className={cx('input-box')}></Search>
                     <div className={cx('popular')}>
                         <p className={cx('label')}>Popular searches:</p>
                         <Button href="#!" className={cx('btn')}>

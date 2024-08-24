@@ -10,7 +10,7 @@ interface PriceProps {
 
 const Price = ({ className }: PriceProps) => {
     return (
-        <div className={cx('price')}>
+        <div className={cx('price', className)}>
             <div className={cx('price__container')}>
                 <div className={cx('price__regular')}>
                     <span className={cx('price__regular-text')}>$17.8762</span>

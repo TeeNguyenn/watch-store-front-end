@@ -2,6 +2,7 @@ const images = {
     logo: require('./logo.svg').default,
     logoFooter: require('./logo-footer.svg').default,
     check: require('./check.svg').default,
+    shipping: require('./shipping.svg').default,
     noImg: require('./no-image.png'),
     productImg: require('./recommend-product/product-01.webp'),
     cartItem: require('./drawer-cart/cart-item-01.avif'),
@@ -11,6 +12,7 @@ const images = {
     MobileSlider1: require('./slide-show/Mobile_Slider_1.jpg'),
     MobileSlider2: require('./slide-show/Mobile_Slider_2.jpg'),
     MobileSlider3: require('./slide-show/Mobile_Slider_3.jpg'),
+    orderSuccess: require('./order-success.png'),
 };
 
 export default images;

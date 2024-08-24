@@ -72,6 +72,7 @@
 
             @include abstracts.screen(sm) {
                 margin-right: 12px;
+                flex-shrink: 0;
             }
         }
     }

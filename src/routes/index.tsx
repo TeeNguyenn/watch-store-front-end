@@ -11,6 +11,10 @@ import Login from '../pages/Login';
 import Detail from '../pages/Detail';
 import ActiveAccount from '../pages/ActiveAccount';
 import Checkout from '../pages/Checkout';
+import Cart from '../pages/Cart';
+import Wishlist from '../pages/Wishlist';
+import OrderSuccess from '../pages/OrderSuccess';
+import Compare from '../pages/Compare';
 
 const publicRoutes: Array<any> = [
     {
@@ -57,6 +61,22 @@ const publicRoutes: Array<any> = [
         path: config.routes.checkout,
         component: Checkout,
         layout: null,
+    },
+    {
+        path: config.routes.cart,
+        component: Cart,
+    },
+    {
+        path: config.routes.wishlist,
+        component: Wishlist,
+    },
+    {
+        path: config.routes.orderSuccessful,
+        component: OrderSuccess,
+    },
+    {
+        path: config.routes.compare,
+        component: Compare,
     },
 ];
 const privateRoutes: Array<any> = [];

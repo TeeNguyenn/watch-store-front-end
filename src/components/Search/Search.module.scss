@@ -1,0 +1,60 @@
+.input-box {
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    position: relative;
+    transition: box-shadow 0.1s ease;
+}
+
+.input {
+    background-color: transparent;
+    padding: 0 80px 0 30px;
+    height: 60px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    width: 100%;
+    border-radius: 999px;
+    transition: var(--transition-config);
+    outline: none;
+
+    &:focus {
+        border: 1px solid rgba(0, 0, 0, 1);
+    }
+
+    &:not(:focus) ~ .reset-btn {
+        display: none;
+    }
+
+    &:hover ~ .reset-btn {
+        display: block;
+    }
+}
+
+.input-box .search-btn {
+    background-color: transparent;
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    min-width: 0;
+    width: 59px;
+    padding: 0 14px 0 0;
+    transition: var(--transition-config);
+
+    &:hover {
+        color: var(--primary-color);
+    }
+}
+
+.input-box .reset-btn {
+    background-color: transparent;
+    min-width: 0;
+    height: 100%;
+    position: absolute;
+    right: 56px;
+    top: 0;
+    padding: 0 6px;
+
+    &:hover {
+        display: block;
+    }
+}

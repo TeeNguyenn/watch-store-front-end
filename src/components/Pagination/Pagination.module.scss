@@ -1,3 +1,5 @@
+@use '../../styles/abstracts';
+
 .pagination {
     margin-top: 50px;
 
@@ -23,6 +25,11 @@
         &:hover {
             color: var(--white-color);
             background-color: var(--text-color);
+        }
+
+        @include abstracts.screen(md) {
+            width: 30px;
+            height: 30px;
         }
     }
 

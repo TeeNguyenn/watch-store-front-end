@@ -8,7 +8,7 @@ import { BreadcrumbSepIcon } from '../Icons';
 const cx = classNames.bind(styles);
 
 interface BreadcrumbProps {
-    title: string;
+    title?: string;
     links: string[];
 }
 

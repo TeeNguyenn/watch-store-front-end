@@ -1,5 +1,6 @@
 import React from 'react';
 import classNames from 'classnames/bind';
+
 import Button from '../../../components/Button';
 import styles from './Cart.module.scss';
 import { Link } from 'react-router-dom';
@@ -7,10 +8,10 @@ import {
     CloseIcon,
     DiscountIcon,
     GiftIcon,
-    ProgressIcon,
     ShippingIcon,
 } from '../../../components/Icons';
 import CartItem from './CartItem';
+import Progress from '../../../components/Progress';
 
 const cx = classNames.bind(styles);
 
@@ -43,21 +44,7 @@ const Cart = ({ handleCloseCartDrawer }: CartProps) => {
                 <div className={cx('cart-list__cart-items')}>
                     {/* Cart progress */}
                     <div className={cx('cart-list__progress')}>
-                        <p className={cx('progress__title')}>
-                            Congratulations! You've got
-                            <span className={cx('progress__shipping')}>
-                                {' '}
-                                Free Shipping!
-                            </span>
-                        </p>
-                        <div className={cx('progress__bar')}>
-                            <div className={cx('progress__line')}></div>
-                        </div>
-                        <div className={cx('progress__icon-wrapper')}>
-                            <ProgressIcon
-                                className={cx('progress__icon')}
-                            ></ProgressIcon>
-                        </div>
+                        <Progress></Progress>
                     </div>
                     <div className={cx('cart-items__wrapper')}>
                         <div className={cx('cart-items__inner')}>

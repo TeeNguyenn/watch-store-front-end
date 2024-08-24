@@ -24,7 +24,9 @@ const Heading = ({ subHeading, title, desc, className }: HeadingProps) => {
         >
             <h6 className={cx('', { 'sub-heading': true })}>{subHeading}</h6>
             <h2 className={cx('heading__title', { title: true })}>{title}</h2>
-            <p className={cx('heading__desc', { desc: true })}>{desc}</p>
+            {desc && (
+                <p className={cx('heading__desc', { desc: true })}>{desc}</p>
+            )}
         </div>
     );
 };

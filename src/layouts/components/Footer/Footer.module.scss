@@ -3,7 +3,7 @@
 @import '../../../styles/base/keyframe';
 
 .footer {
-    margin-bottom: 30px;
+    margin-bottom: 65px;
     margin-top: 60px;
     background-color: #0d0d0d;
     border-radius: 22px;
@@ -14,7 +14,7 @@
     }
 
     @include abstracts.screen(sm) {
-        margin-top: 30;
+        margin-top: 30px;
     }
 
     &__top {
@@ -247,5 +247,65 @@
         &:hover {
             color: var(--primary-color);
         }
+    }
+}
+
+.mobile-toolbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--background-color);
+    box-shadow: 0 0 10px #1a1a1a26;
+    z-index: 2;
+    width: 100%;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    &__link {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        text-transform: capitalize;
+        align-items: center;
+        color: var(--text-color);
+        padding: 14px 0;
+        border-right: 1px solid rgba($color: #000000, $alpha: 0.2);
+
+        &:hover * {
+            color: var(--primary-color);
+        }
+    }
+
+    &__name {
+        color: var(--text-color);
+        line-height: 1.4rem;
+        font-size: 1.4rem;
+        margin-top: 7px;
+        height: fit-content;
+    }
+
+    &__wrapper {
+        position: relative;
+    }
+
+    &__count {
+        position: absolute;
+        top: -2px;
+        right: -7px;
+
+        background-color: var(--text-color);
+        color: var(--white-color);
+        height: 14px;
+        width: 14px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid;
+
+        font-size: 1rem;
+        line-height: 1.6rem;
+        font-weight: 500;
     }
 }

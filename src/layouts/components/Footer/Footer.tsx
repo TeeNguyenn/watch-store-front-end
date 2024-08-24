@@ -5,8 +5,17 @@ import styles from './Footer.module.scss';
 import { Link } from 'react-router-dom';
 import Image from '../../../components/Image';
 import images from '../../../assets/images';
-import { AddressIcon, MailIcon, PhoneIcon } from '../../../components/Icons';
+import {
+    AddressIcon,
+    MailIcon,
+    MobileHomeIcon,
+    MobileShopIcon,
+    MobileUserIcon,
+    MobileWishlistIcon,
+    PhoneIcon,
+} from '../../../components/Icons';
 import FooterItem from './FooterItem';
+import config from '../../../config';
 
 const cx = classNames.bind(styles);
 
@@ -492,6 +501,52 @@ const Footer = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+            <div
+                className={cx('mobile-toolbar', {
+                    'd-none': true,
+                    'd-md-grid': true,
+                })}
+            >
+                <Link
+                    to={config.routes.home}
+                    className={cx('mobile-toolbar__link', {
+                        'primary-hover': true,
+                    })}
+                >
+                    <MobileHomeIcon></MobileHomeIcon>
+                    <span className={cx('mobile-toolbar__name')}>Home</span>
+                </Link>
+                <Link
+                    to={config.routes.shop}
+                    className={cx('mobile-toolbar__link', {
+                        'primary-hover': true,
+                    })}
+                >
+                    <MobileShopIcon></MobileShopIcon>
+                    <span className={cx('mobile-toolbar__name')}>Shop</span>
+                </Link>
+                <Link
+                    to={config.routes.wishlist}
+                    className={cx('mobile-toolbar__link', {
+                        'primary-hover': true,
+                    })}
+                >
+                    <div className={cx('mobile-toolbar__wrapper')}>
+                        <MobileWishlistIcon></MobileWishlistIcon>
+                        <span className={cx('mobile-toolbar__count')}>0</span>
+                    </div>
+                    <span className={cx('mobile-toolbar__name')}>Wishlist</span>
+                </Link>
+                <Link
+                    to={config.routes.login}
+                    className={cx('mobile-toolbar__link', {
+                        'primary-hover': true,
+                    })}
+                >
+                    <MobileUserIcon></MobileUserIcon>
+                    <span className={cx('mobile-toolbar__name')}>Log In</span>
+                </Link>
             </div>
         </div>
     );

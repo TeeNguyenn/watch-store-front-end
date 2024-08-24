@@ -1,0 +1,385 @@
+@use '../../styles/abstracts';
+
+.cart {
+    width: var(--s-container-width);
+    margin-left: auto;
+    margin-right: auto;
+    padding: 100px 40px;
+
+    @include abstracts.screen(xl) {
+        padding: 50px 40px;
+    }
+
+    @include abstracts.screen(md) {
+        padding: 50px 15px;
+        --grid-gutter-x: 0;
+    }
+
+    @include abstracts.screen(sm) {
+        padding: 25px 0;
+    }
+
+    &__container {
+        @include abstracts.screen(xl) {
+            width: 100%;
+        }
+
+        @include abstracts.screen(sm) {
+            width: auto;
+        }
+    }
+
+    &__progress {
+        & > p {
+            margin-bottom: 36px;
+        }
+    }
+
+    &__title {
+        margin: 60px 0;
+        font-size: 4.2rem;
+        line-height: 5.46rem;
+        font-weight: 700;
+
+        @include abstracts.screen(md) {
+            font-size: 2.8rem;
+            line-height: 3.64rem;
+            text-align: center;
+        }
+    }
+
+    &__list {
+        width: 100%;
+        padding-bottom: 40px;
+        border-bottom: 1px solid rgba($color: #000000, $alpha: 0.08);
+    }
+
+    &__heading {
+        text-transform: capitalize;
+        border-bottom: 1px solid rgba($color: #000000, $alpha: 0.08);
+        padding-bottom: 8px;
+        width: 15%;
+        text-align: center;
+        font-size: 1.8rem;
+        font-weight: 500;
+        line-height: 2.16rem;
+
+        &:first-child {
+            width: 50%;
+            text-align: left;
+
+            @include abstracts.screen(sm) {
+                text-align: center;
+            }
+        }
+
+        &:nth-child(2) {
+            width: 20%;
+        }
+    }
+
+    &__shopping-btn {
+        margin: 20px 0 50px;
+        padding: 0 33px;
+        height: 55px;
+
+        &:hover {
+            background-color: var(--text-color);
+        }
+    }
+
+    &__note-text {
+        font-weight: 500;
+        line-height: 2.88rem;
+        margin-bottom: 26px;
+        display: block;
+    }
+
+    &__note-area {
+        border-radius: 18px;
+        border: 1px solid rgba($color: #000000, $alpha: 0.2);
+        min-height: 200px;
+        padding: 30px 34px;
+        width: 100%;
+        resize: vertical;
+        background-color: transparent;
+        letter-spacing: 0.4px;
+        line-height: 2.4rem;
+        outline: none;
+        transform: var(--transition-config);
+
+        &::placeholder {
+            font-size: 1.6rem;
+            line-height: 2.4rem;
+            font-family: var(--font-family);
+        }
+
+        &:focus {
+            border-color: var(--text-color);
+        }
+    }
+
+    &__estimate {
+        background-color: var(--white-color);
+        padding: 40px 30px;
+        border-radius: 18px;
+        position: sticky;
+        top: 30px;
+        height: fit-content;
+
+        @include abstracts.screen(md) {
+            margin-top: 50px;
+        }
+    }
+
+    &__row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+    }
+
+    &__total-text {
+        font-size: 1.6rem;
+        line-height: 2.6rem;
+    }
+
+    &__total {
+        font-size: 2.4rem;
+        line-height: 2.85rem;
+        font-weight: 600;
+    }
+
+    &__price {
+        font-size: 2.4rem;
+        line-height: 3.15rem;
+        font-weight: 600;
+    }
+
+    &__checkout-btn {
+        margin-top: 30px;
+        width: 100%;
+        height: 53px;
+        transition: var(--transition-config);
+
+        &:hover {
+            background-color: var(--text-color);
+        }
+    }
+
+    &__mobile-actions {
+        margin-top: 16px;
+        align-items: center;
+        gap: 15px;
+
+        > div {
+            width: 122px;
+        }
+    }
+
+    &__feature {
+        padding: 0 40px 76px;
+
+        @include abstracts.screen(xl) {
+            padding: 0 40px 38px;
+        }
+
+        @include abstracts.screen(md) {
+            padding: 0 15px 38px;
+        }
+
+        @include abstracts.screen(sm) {
+            padding: 0 0 19px;
+        }
+    }
+}
+
+.cart-item {
+    & > td {
+        padding-top: 40px;
+    }
+
+    &__product {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding-right: 18px;
+
+        @include abstracts.screen(lg) {
+            padding-right: 0;
+        }
+
+        @include abstracts.screen(sm) {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+
+    &__media {
+        width: 117px;
+        height: 131px;
+        display: block;
+
+        @include abstracts.screen(lg) {
+            width: 150px;
+            height: 200px;
+        }
+
+        @include abstracts.screen(sm) {
+            width: 300px;
+            height: 300px;
+        }
+    }
+
+    &__img {
+        height: 100%;
+        width: 100%;
+        border-radius: 22px;
+    }
+
+    &__body {
+        flex: 1;
+
+        @include abstracts.screen(sm) {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+
+    &__label {
+        font-size: 1.2rem;
+        line-height: 1.44rem;
+        font-weight: 500;
+        color: var(--caption-color);
+        text-transform: uppercase;
+    }
+
+    &__link {
+        display: block;
+        font-size: 2rem;
+        line-height: 2.6rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-top: 8px;
+    }
+
+    &__options {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 8px;
+    }
+
+    &__option {
+        position: relative;
+        margin-right: 15px;
+        line-height: 2.4rem;
+
+        &::after {
+            content: '/';
+            position: absolute;
+            right: -12px;
+        }
+    }
+
+    &__price {
+        text-align: center;
+    }
+
+    &__price-text {
+        @include abstracts.screen(xl) {
+            margin-top: 8px;
+            line-height: 2.4rem;
+        }
+    }
+
+    &__total {
+        font-weight: 500;
+        position: relative;
+        text-align: center;
+
+        & > svg {
+            position: absolute;
+            right: -10px;
+            top: 54%;
+            cursor: pointer;
+        }
+    }
+}
+
+// Cart is empty
+.cart-empty {
+    padding: 100px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    position: relative;
+
+    @include abstracts.screen(xl) {
+        padding: 50px 0;
+    }
+
+    @include abstracts.screen(sm) {
+        padding: 25px 0;
+    }
+
+    &__title {
+        margin: 0 0 30px;
+        font-size: 4.2rem;
+        text-align: center;
+
+        @include abstracts.screen(lg) {
+            margin: 0 0 20px;
+            font-size: 2.8rem;
+            line-height: 3.64rem;
+        }
+    }
+
+    &__continue-btn {
+        background-color: var(--primary-color);
+        color: var(--white-color);
+        border: none;
+        padding: 18px 26px;
+        font-weight: 700;
+        transition: var(--transition-config);
+
+        &:hover {
+            background-color: var(--text-color);
+        }
+    }
+
+    &__label {
+        margin: 55px 0 5px;
+        font-size: 4.2rem;
+        font-weight: 700;
+        line-height: 5.46rem;
+
+        @include abstracts.screen(lg) {
+            font-size: 2.8rem;
+            line-height: 3.64rem;
+        }
+    }
+
+    &__text {
+        margin: 8px 0 16px;
+
+        @include abstracts.screen(lg) {
+            font-size: 1.5rem;
+            line-height: 2.7rem;
+        }
+    }
+
+    &__login {
+        color: var(--text-color);
+        text-decoration: underline;
+        transition: var(--transition-config);
+        font-weight: 500;
+
+        &:hover {
+            color: var(--primary-color);
+        }
+    }
+}

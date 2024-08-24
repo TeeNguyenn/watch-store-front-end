@@ -6,13 +6,20 @@ import Heading from '../../pages/Home/components/Heading';
 import styles from './ContactForm.module.scss';
 
 const cx = classNames.bind(styles);
-const ContactForm = () => {
+
+interface ContactFormProps {
+    desc?: string;
+    className?: string;
+}
+
+const ContactForm = ({ desc, className }: ContactFormProps) => {
     return (
-        <div>
+        <div className={className}>
             <Heading
                 subHeading="CONTACT US"
                 title="Get In Touch"
                 className={cx('contact-form__heading')}
+                desc={desc}
             ></Heading>
             <form action="" method="post">
                 <div className={cx('contact-form__group')}>

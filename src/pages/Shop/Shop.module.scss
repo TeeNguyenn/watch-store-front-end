@@ -10,6 +10,10 @@
         @include abstracts.screen(xl) {
             --grid-gutter-x: 30px;
         }
+
+        @include abstracts.screen(lg) {
+            --grid-gutter-x: 0;
+        }
     }
 }
 
@@ -27,6 +31,11 @@
 
     @include abstracts.screen(xl) {
         padding-left: 15px;
+    }
+
+    @include abstracts.screen(lg) {
+        --grid-gutter-x: 0;
+        padding-left: 0;
     }
 
     &__top {
