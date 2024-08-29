@@ -14,6 +14,10 @@ const routes = {
     wishlist: '/wishlist',
     orderSuccessful: '/order-successful',
     compare: '/compare',
+    pageNotFound: '/404-not-found',
+    forgotPassword: '/forgot-password',
+    profile: '/customer/profile',
+    orderDetails: '/customer/order-details',
 };
 
 export default routes;

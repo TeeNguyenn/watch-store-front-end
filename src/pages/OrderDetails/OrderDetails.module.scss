@@ -1,0 +1,541 @@
+@use '../../styles/abstracts';
+
+.order-details {
+    padding: 32px 0 64px;
+
+    &__title {
+        font-size: 3.2rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        @include abstracts.screen(lg) {
+            font-size: 3rem;
+        }
+
+        @include abstracts.screen(md) {
+            font-size: 2.8rem;
+        }
+
+        @include abstracts.screen(sm) {
+            font-size: 2.6rem;
+        }
+    }
+
+    &__top {
+        margin-bottom: 48px;
+    }
+}
+
+.products {
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+
+    &__container {
+        overflow-x: auto;
+
+        &::-webkit-scrollbar {
+            height: 5px;
+        }
+        &::-webkit-scrollbar-thumb {
+            height: 5px;
+            background-color: rgba($color: #000000, $alpha: 0);
+            transition: var(--transition-config);
+        }
+        &::-webkit-scrollbar-track {
+            background-color: rgba($color: #000000, $alpha: 0);
+            transition: var(--transition-config);
+        }
+
+        &:hover::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.5019607843);
+        }
+
+        &:hover::-webkit-scrollbar-track {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+    }
+
+    &__table {
+        width: 100%;
+        border-collapse: collapse;
+
+        & th {
+            padding: 10px 8px;
+            text-transform: uppercase;
+            line-height: 1;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+
+            &:first-child {
+                padding: 10px 8px 10px 0;
+            }
+
+            &:last-child {
+                padding: 10px 0 10px 24px;
+            }
+
+            &:nth-child(5),
+            &:nth-child(6),
+            &:nth-child(7),
+            &:nth-child(8) {
+                text-align: right;
+            }
+
+            &:not(:last-child):after {
+                content: url(../../assets/images/orders/sort.svg);
+                margin-left: 4px;
+            }
+
+            &:first-child::after {
+                display: none;
+            }
+
+            @include abstracts.screen(sm) {
+                font-size: 1.5rem;
+                line-height: 2.7rem;
+            }
+        }
+
+        & td {
+            padding: 16px 8px;
+            line-height: 2.88rem;
+            border-bottom: 1px solid var(--border-color);
+
+            @include abstracts.screen(sm) {
+                font-size: 1.5rem;
+                line-height: 2.7rem;
+            }
+        }
+    }
+
+    &__media {
+        padding: 8px 8px 8px 0 !important;
+    }
+
+    &__img-wrapper {
+        width: 80px;
+        height: 80px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        overflow: hidden;
+
+        @include abstracts.screen(sm) {
+            width: 70px;
+            height: 70px;
+        }
+    }
+
+    &__img {
+        width: 100%;
+        height: 100%;
+    }
+
+    &__product {
+        padding: 16px 70px 16px 8px !important;
+
+        @include abstracts.screen(sm) {
+            padding: 16px 30px 16px 8px !important;
+        }
+    }
+
+    &__link {
+        color: var(--primary-second-color);
+        transition: var(--transition-config);
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    &__price,
+    &__quantity,
+    &__total {
+        text-align: right;
+    }
+
+    &__color {
+        white-space: nowrap;
+    }
+
+    &__total {
+        padding: 16px 0 16px 8px !important;
+        font-weight: 500;
+    }
+
+    &__bottom {
+        padding: 16px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        line-height: 2rem;
+    }
+
+    &__subtotal {
+        font-size: 1.8rem;
+        line-height: normal;
+
+        @include abstracts.screen(sm) {
+            font-size: 1.6rem;
+        }
+    }
+
+    &__subtotal-price {
+        font-weight: 600;
+        font-size: 1.8rem;
+
+        @include abstracts.screen(sm) {
+            font-size: 1.6rem;
+        }
+    }
+}
+
+.order {
+    &__info {
+        margin-top: 24px;
+
+        @include abstracts.screen(xl) {
+            padding: 24px;
+            background-color: var(--white-color);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        @include abstracts.screen(sm) {
+            padding: 18px;
+        }
+    }
+
+    &__info-title {
+        font-size: 2.5rem;
+        line-height: 1;
+        font-weight: 700;
+        margin-bottom: 24px;
+
+        @include abstracts.screen(lg) {
+            font-size: 2.3rem;
+        }
+
+        @include abstracts.screen(sm) {
+            font-size: 2.1rem;
+        }
+    }
+
+    &__info-row {
+        display: flex;
+        margin-bottom: 10px;
+    }
+
+    &__info-label,
+    &__info-value {
+        font-size: 1.6rem;
+        line-height: 2.88rem;
+
+        @include abstracts.screen(sm) {
+            font-size: 1.5rem;
+            line-height: 2, 7rem;
+        }
+    }
+
+    &__info-label {
+        width: 30%;
+        color: rgb(51, 51, 51);
+        font-weight: 700;
+    }
+
+    &__info-value {
+        flex: 1;
+
+        @include abstracts.screen(sm) {
+            text-align: right;
+            margin-left: 10px;
+            font-weight: 400;
+        }
+    }
+}
+
+.summary {
+    padding: 24px;
+    background-color: var(--white-color);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+
+    @include abstracts.screen(xl) {
+        margin-top: 24px;
+    }
+
+    @include abstracts.screen(sm) {
+        padding: 18px;
+    }
+
+    &__title {
+        margin-bottom: 24px;
+        font-size: 2.5rem;
+        line-height: 1;
+        font-weight: 700;
+
+        @include abstracts.screen(lg) {
+            font-size: 2.3rem;
+        }
+
+        @include abstracts.screen(sm) {
+            font-size: 2.1rem;
+        }
+    }
+
+    &__row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+    &__label,
+    &__subtotal,
+    &__shipping-cost {
+        font-size: 1.8rem;
+        line-height: normal;
+
+        @include abstracts.screen(sm) {
+            font-size: 1.6rem;
+        }
+    }
+
+    &__discount {
+        line-height: 2.88rem;
+        color: rgb(236, 31, 0);
+    }
+
+    &__bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 24px;
+        border-top: 1px dashed var(--border-color);
+    }
+
+    &__label-total,
+    &__total {
+        font-size: 2.2rem;
+        font-weight: 700;
+        line-height: normal;
+
+        @include abstracts.screen(lg) {
+            font-size: 2rem;
+        }
+
+        @include abstracts.screen(sm) {
+            font-size: 1.8rem;
+        }
+    }
+}
+
+.timeline {
+    margin-top: 24px;
+    padding: 24px;
+    background-color: var(--white-color);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+
+    @include abstracts.screen(sm) {
+        padding: 18px;
+    }
+
+    &__heading {
+        font-size: 2.5rem;
+        line-height: 1;
+        font-weight: 700;
+        margin-bottom: 24px;
+
+        @include abstracts.screen(lg) {
+            font-size: 2.3rem;
+        }
+
+        @include abstracts.screen(sm) {
+            font-size: 2.1rem;
+        }
+    }
+
+    &__item {
+        & > div > div:first-child {
+            @include abstracts.screen(xl) {
+                width: auto !important;
+            }
+
+            @include abstracts.screen(sm) {
+                width: 100% !important;
+            }
+        }
+        & > div > div:last-child {
+            @include abstracts.screen(xl) {
+                flex: 1 !important;
+            }
+
+            @include abstracts.screen(sm) {
+                flex: 1 0 !important;
+            }
+        }
+    }
+
+    &__item:not(:last-child) {
+        margin-bottom: 40px;
+
+        @include abstracts.screen(xl) {
+            margin-bottom: 32px;
+        }
+
+        @include abstracts.screen(sm) {
+            margin-bottom: 40px;
+        }
+    }
+
+    &__row {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+
+        @include abstracts.screen(xl) {
+            flex-direction: row;
+            justify-content: flex-start;
+            gap: 24px;
+        }
+
+        @include abstracts.screen(sm) {
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 0;
+        }
+    }
+
+    &__date {
+        font-size: 1.2rem;
+        line-height: 1rem;
+        color: var(--text-second-color);
+
+        @include abstracts.screen(xl) {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.8rem;
+            align-items: flex-end;
+            min-width: 114px;
+
+            //Nếu timeline không có 2 tháng khác nhau bỏ min-width
+        }
+
+        @include abstracts.screen(sm) {
+            flex-direction: row;
+            align-items: center;
+            font-size: 1rem;
+            min-width: none;
+        }
+    }
+
+    &__separator {
+        position: relative;
+        margin-right: 16px;
+
+        @include abstracts.screen(xl) {
+            margin-right: 0;
+        }
+
+        @include abstracts.screen(sm) {
+            margin-right: 16px;
+        }
+    }
+
+    &__icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        color: var(--white-color);
+
+        // success
+        &.success {
+            background-color: rgb(37, 176, 3);
+        }
+
+        //ready
+        &.ready {
+            background-color: rgb(229, 120, 11);
+        }
+
+        //pending
+        &.pending {
+            background-color: rgb(159, 166, 188);
+        }
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__line {
+        height: 120px;
+
+        @include abstracts.screen(xl) {
+            height: 100px;
+        }
+
+        @include abstracts.screen(sm) {
+            height: 120px;
+        }
+
+        position: absolute;
+        left: 11px;
+        top: 24px;
+
+        // success
+        &.success {
+            border-right: 1px solid rgb(37, 176, 3);
+        }
+
+        //ready
+        &.ready {
+            border-right: 1px solid rgb(229, 120, 11);
+        }
+
+        //pending
+        &.pending {
+            border-right: 1px dashed rgb(203, 208, 221);
+        }
+    }
+
+    &__content {
+        padding-left: 40px;
+
+        @include abstracts.screen(xl) {
+            padding-left: 16px;
+        }
+
+        @include abstracts.screen(sm) {
+            padding-left: 40px;
+        }
+    }
+
+    &__label {
+        font-size: 2rem;
+        line-height: 1;
+        margin-bottom: 4px;
+
+        @include abstracts.screen(sm) {
+            font-size: 1.8rem;
+        }
+    }
+
+    &__desc {
+        font-size: 1.4rem;
+        line-height: 2.4rem;
+        color: var(--text-second-color);
+        min-height: 48px;
+
+        @include abstracts.screen(sm) {
+            font-size: 1.2rem;
+            line-height: 1.5;
+        }
+    }
+}

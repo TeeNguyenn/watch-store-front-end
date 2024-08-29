@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import classNames from 'classnames/bind';
 
+import Button from '../../../components/Button';
 import styles from './Footer.module.scss';
 import { Link } from 'react-router-dom';
 import Image from '../../../components/Image';
@@ -16,6 +17,7 @@ import {
 } from '../../../components/Icons';
 import FooterItem from './FooterItem';
 import config from '../../../config';
+import ProfileDrawer from '../../../components/ProfileDrawer';
 
 const cx = classNames.bind(styles);
 
@@ -122,6 +124,20 @@ const Footer = () => {
             ],
         },
     ];
+
+    const currentUser = true;
+
+    const [showMobileMenu, setShowMobileMenu] = useState(false);
+
+    const handleShowMobileMenu = () => {
+        setShowMobileMenu(false);
+    };
+
+    if (showMobileMenu) {
+        document.body.classList.add('hide-scroll');
+    } else {
+        document.body.classList.remove('hide-scroll');
+    }
 
     return (
         <div className={cx('', { 'container-spacing': true })}>
@@ -538,16 +554,36 @@ const Footer = () => {
                     </div>
                     <span className={cx('mobile-toolbar__name')}>Wishlist</span>
                 </Link>
-                <Link
-                    to={config.routes.login}
-                    className={cx('mobile-toolbar__link', {
-                        'primary-hover': true,
-                    })}
-                >
-                    <MobileUserIcon></MobileUserIcon>
-                    <span className={cx('mobile-toolbar__name')}>Log In</span>
-                </Link>
+                {currentUser ? (
+                    <div
+                        className={cx('mobile-toolbar__link', {
+                            'primary-hover': true,
+                        })}
+                        onClick={() => setShowMobileMenu(true)}
+                    >
+                        <MobileUserIcon></MobileUserIcon>
+                        <span className={cx('mobile-toolbar__name')}>
+                            Account
+                        </span>
+                    </div>
+                ) : (
+                    <Link
+                        to={config.routes.login}
+                        className={cx('mobile-toolbar__link', {
+                            'primary-hover': true,
+                        })}
+                    >
+                        <MobileUserIcon></MobileUserIcon>
+                        <span className={cx('mobile-toolbar__name')}>
+                            Log In
+                        </span>
+                    </Link>
+                )}
             </div>
+            <ProfileDrawer
+                isShow={showMobileMenu}
+                handleShowMobileMenu={handleShowMobileMenu}
+            ></ProfileDrawer>
         </div>
     );
 };

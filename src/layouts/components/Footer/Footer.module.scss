@@ -3,7 +3,7 @@
 @import '../../../styles/base/keyframe';
 
 .footer {
-    margin-bottom: 65px;
+    margin-bottom: 30px;
     margin-top: 60px;
     background-color: #0d0d0d;
     border-radius: 22px;
@@ -11,6 +11,7 @@
 
     @include abstracts.screen(md) {
         margin-top: 45px;
+        margin-bottom: 65px;
     }
 
     @include abstracts.screen(sm) {

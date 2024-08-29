@@ -3,18 +3,25 @@ import classNames from 'classnames/bind';
 
 import styles from './Pagination.module.scss';
 import Button from '../Button';
-import { PagingLeftArrowIcon, PrevIcon, RightArrowIcon } from '../Icons';
+import {
+    PagingLeftArrowIcon,
+    PrevIcon,
+    RightArrowIcon,
+    RightIcon,
+} from '../Icons';
 import PrevArrow from '../../layouts/components/SlideShow/PrevArrow';
 
 const cx = classNames.bind(styles);
 
 interface PaginationProps {
+    modifier?: boolean;
     currentPage: number;
     totalPage: number;
     pagination(presentPage: number): any;
 }
 
 const Pagination = ({
+    modifier,
     currentPage,
     totalPage,
     pagination,
@@ -57,16 +64,29 @@ const Pagination = ({
     }
 
     return (
-        <nav className={cx('pagination')}>
-            <ul className={cx('pagination__list')}>
+        <nav
+            className={cx('pagination', {
+                modifier,
+            })}
+        >
+            <ul
+                className={cx('pagination__list', {
+                    modifier,
+                })}
+            >
                 <li>
                     <Button
                         className={cx('pagination__prev', {
                             hide: currentPage === 1,
+                            modifier,
                         })}
                         onClick={() => pagination(currentPage - 1)}
                     >
-                        <PagingLeftArrowIcon></PagingLeftArrowIcon>
+                        {modifier ? (
+                            <RightIcon width="1rem" height="1.4rem"></RightIcon>
+                        ) : (
+                            <PagingLeftArrowIcon></PagingLeftArrowIcon>
+                        )}
                     </Button>
                 </li>
                 {pageList.map((page, index) => (
@@ -74,6 +94,7 @@ const Pagination = ({
                         <Button
                             className={cx('pagination__page', {
                                 active: page === currentPage,
+                                modifier,
                             })}
                             onClick={() => pagination(page)}
                         >
@@ -85,10 +106,15 @@ const Pagination = ({
                     <Button
                         className={cx('pagination__next', {
                             hide: currentPage === totalPage,
+                            modifier,
                         })}
                         onClick={() => pagination(currentPage + 1)}
                     >
-                        <PagingLeftArrowIcon></PagingLeftArrowIcon>
+                        {modifier ? (
+                            <RightIcon width="1rem" height="1.4rem"></RightIcon>
+                        ) : (
+                            <PagingLeftArrowIcon></PagingLeftArrowIcon>
+                        )}
                     </Button>
                 </li>
             </ul>

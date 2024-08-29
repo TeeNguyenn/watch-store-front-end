@@ -15,6 +15,10 @@ import Cart from '../pages/Cart';
 import Wishlist from '../pages/Wishlist';
 import OrderSuccess from '../pages/OrderSuccess';
 import Compare from '../pages/Compare';
+import PageNotFound from '../pages/PageNotFound';
+import ForgotPassword from '../pages/ForgotPassword';
+import Profile from '../pages/Profile';
+import OrderDetails from '../pages/OrderDetails';
 
 const publicRoutes: Array<any> = [
     {
@@ -77,6 +81,22 @@ const publicRoutes: Array<any> = [
     {
         path: config.routes.compare,
         component: Compare,
+    },
+    {
+        path: config.routes.pageNotFound,
+        component: PageNotFound,
+    },
+    {
+        path: config.routes.forgotPassword,
+        component: ForgotPassword,
+    },
+    {
+        path: config.routes.profile,
+        component: Profile,
+    },
+    {
+        path: config.routes.orderDetails,
+        component: OrderDetails,
     },
 ];
 const privateRoutes: Array<any> = [];

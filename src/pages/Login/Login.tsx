@@ -7,17 +7,18 @@ import Button from '../../components/Button';
 import styles from './Login.module.scss';
 import { CheckIcon, ErrorIcon } from '../../components/Icons';
 import { Link } from 'react-router-dom';
+import config from '../../config';
 
 const cx = classNames.bind(styles);
 
 const Login = () => {
     const links = [
         {
-            to: '/recover',
+            to: config.routes.forgotPassword,
             name: 'Forgot your password?',
         },
         {
-            to: '/register',
+            to: config.routes.register,
             name: 'Sign Up',
         },
     ];

@@ -81,6 +81,89 @@ export const ErrorIcon = ({ width, height, className }: ErrorIconProps) => (
     </svg>
 );
 
+interface ErrorLabelIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const ErrorLabelIcon = ({
+    width,
+    height,
+    className,
+}: ErrorLabelIconProps) => (
+    <svg
+        width="12"
+        height="12"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+    >
+        <g>
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </g>
+    </svg>
+);
+
+interface ProcessingLabelIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const ProcessingLabelIcon = ({
+    width,
+    height,
+    className,
+}: ProcessingLabelIconProps) => (
+    <svg
+        width="12"
+        height="12"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+    >
+        <g>
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+        </g>
+    </svg>
+);
+
+interface RightIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const RightIcon = ({ width, height, className }: RightIconProps) => (
+    <svg
+        className={className}
+        width={width || '0.8rem'}
+        height={height || '1.2rem'}
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="angle-right"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 320 512"
+    >
+        <path
+            fill="currentColor"
+            d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"
+        ></path>
+    </svg>
+);
+
 interface AddressIconProps {
     width?: string;
     height?: string;
@@ -509,6 +592,163 @@ export const SubMenuIcon = ({
     </svg>
 );
 
+interface DashboardIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const DashboardIcon = ({
+    width,
+    height,
+    className,
+}: DashboardIconProps) => (
+    <svg
+        className={className}
+        width={width || '1.6rem'}
+        height={height || '1.6rem'}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+    >
+        <g>
+            <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+            <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+        </g>
+    </svg>
+);
+
+interface LockIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const LockIcon = ({ width, height, className }: LockIconProps) => (
+    <svg
+        className={className}
+        width={width || '1.6rem'}
+        height={height || '1.6rem'}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+    >
+        <g>
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </g>
+    </svg>
+);
+
+interface LogoutIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const LogoutIcon = ({ width, height, className }: LogoutIconProps) => (
+    <svg
+        className={className}
+        width={width || '1.6rem'}
+        height={height || '1.6rem'}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+    >
+        <g>
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+        </g>
+    </svg>
+);
+
+interface ResetIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const ResetIcon = ({ width, height, className }: ResetIconProps) => (
+    <svg
+        className={className}
+        width={width || '1.28rem'}
+        height={height || '1.28rem'}
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="key"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 512 512"
+    >
+        <path
+            fill="currentColor"
+            d="M336 352c97.2 0 176-78.8 176-176S433.2 0 336 0S160 78.8 160 176c0 18.7 2.9 36.8 8.3 53.7L7 391c-4.5 4.5-7 10.6-7 17v80c0 13.3 10.7 24 24 24h80c13.3 0 24-10.7 24-24V448h40c13.3 0 24-10.7 24-24V384h40c6.4 0 12.5-2.5 17-7l33.3-33.3c16.9 5.4 35 8.3 53.7 8.3zM376 96a40 40 0 1 1 0 80 40 40 0 1 1 0-80z"
+        ></path>
+    </svg>
+);
+
+interface SettingIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const SettingIcon = ({ width, height, className }: SettingIconProps) => (
+    <svg
+        className={className}
+        width={width || '1.6rem'}
+        height={height || '1.6rem'}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+    >
+        <g>
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </g>
+    </svg>
+);
+
+interface HelpIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const HelpIcon = ({ width, height, className }: HelpIconProps) => (
+    <svg
+        className={className}
+        width={width || '1.6rem'}
+        height={height || '1.6rem'}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+    >
+        <g>
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </g>
+    </svg>
+);
+
 interface MobileUserIconProps {
     width?: string;
     height?: string;
@@ -704,6 +944,33 @@ export const CheckIcon = ({ width, height, className }: CheckIconProps) => (
         fill="currentColor"
     >
         <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z" />
+    </svg>
+);
+
+interface CheckNoCircleIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const CheckNoCircleIcon = ({
+    width,
+    height,
+    className,
+}: CheckNoCircleIconProps) => (
+    <svg
+        width="12"
+        height="12"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+    >
+        <g>
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </g>
     </svg>
 );
 

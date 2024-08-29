@@ -9,8 +9,14 @@ import images from '../../../assets/images';
 import {
     CartIcon,
     CloseIcon,
+    DashboardIcon,
+    HelpIcon,
+    LockIcon,
+    LogoutIcon,
+    MobileUserIcon,
     RightArrowIcon,
     SearchIcon,
+    SettingIcon,
     SubMenuIcon,
     UpArrowIcon,
     UserIcon,
@@ -22,6 +28,7 @@ import CartWrapper from '../Cart/CartWrapper';
 import LoginModal from '../LoginModal';
 import SlideShow from '../SlideShow';
 import Button from '../../../components/Button';
+import MobileSubMenu from '../../../components/MobileSubMenu';
 
 const cx = classNames.bind(styles);
 
@@ -33,12 +40,14 @@ const Header = () => {
     const [showScrollToTop, setShowScrollToTop] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [showMobileSubMenu, setShowMobileSubMenu] = useState(false);
+    const [showDropdownProfile, setShowDropdownProfile] = useState(false);
+    const [isProfileDrawer, setIsProfileDrawer] = useState(false);
 
     const location = useLocation();
     const pathName = location.pathname;
 
     // fake user status
-    const currentUser = false;
+    const currentUser = true;
 
     useEffect(() => {
         if (pathName === '/') {
@@ -87,9 +96,22 @@ const Header = () => {
         setShowLoginModal(false);
     };
 
-    const handleMobileSubMenu = () => {
-        setShowMobileMenu(false);
-        setShowMobileSubMenu(false);
+    const handleMobileSubMenu = (isCloseMobileSubMenu: boolean) => {
+        if (isCloseMobileSubMenu) {
+            setShowMobileSubMenu(false);
+        } else {
+            setShowMobileMenu(false);
+            setShowMobileSubMenu(false);
+        }
+    };
+
+    const handleShowSubMenu = (isProfile: boolean) => {
+        if (isProfile) {
+            setIsProfileDrawer(true);
+        } else {
+            setIsProfileDrawer(false);
+        }
+        setShowMobileSubMenu(true);
     };
 
     return (
@@ -120,7 +142,7 @@ const Header = () => {
                                 className={cx('menu-drawer__overlay', {
                                     show: showMobileMenu,
                                 })}
-                                onClick={handleMobileSubMenu}
+                                onClick={() => handleMobileSubMenu(false)}
                             ></span>
                             <div
                                 className={cx('menu-drawer__inner', {
@@ -179,9 +201,7 @@ const Header = () => {
                                     </NavLink>
                                     <div
                                         className={cx('menu-drawer__nav-item')}
-                                        onClick={() =>
-                                            setShowMobileSubMenu(true)
-                                        }
+                                        onClick={() => handleShowSubMenu(false)}
                                     >
                                         <span>Pages</span>
                                         <RightArrowIcon></RightArrowIcon>
@@ -192,7 +212,6 @@ const Header = () => {
                                 >
                                     {currentUser ? (
                                         <Button
-                                            to={'#!'}
                                             leftIcon={
                                                 <UserIcon
                                                     width="2rem"
@@ -207,7 +226,7 @@ const Header = () => {
                                                 }
                                             )}
                                             onClick={() =>
-                                                setShowMobileMenu(false)
+                                                handleShowSubMenu(true)
                                             }
                                         >
                                             Account
@@ -417,74 +436,54 @@ const Header = () => {
                                 </div>
                             </div>
                             {/* Mobile sub menu */}
-                            <div
-                                className={cx('menu-drawer__content', {
-                                    show: showMobileSubMenu,
-                                })}
-                            >
-                                <div className={cx('mobile-sub-menu')}>
-                                    <div
-                                        className={cx(
-                                            'mobile-sub-menu__header',
-                                            {
-                                                active: showMobileSubMenu,
-                                            }
-                                        )}
-                                        onClick={() =>
-                                            setShowMobileSubMenu(false)
-                                        }
-                                    >
-                                        <RightArrowIcon
-                                            className={cx(
-                                                'mobile-sub-menu__icon'
-                                            )}
-                                        ></RightArrowIcon>
-                                        <span>Pages</span>
-                                    </div>
-                                    <nav
-                                        className={cx(
-                                            'mobile-sub-menu__navbar'
-                                        )}
-                                    >
-                                        <NavLink
-                                            to={config.routes.blog}
-                                            className={(nav) =>
-                                                cx(
-                                                    'mobile-sub-menu__nav-item',
-                                                    { active: nav.isActive }
-                                                )
-                                            }
-                                            onClick={handleMobileSubMenu}
-                                        >
-                                            Blog
-                                        </NavLink>
-                                        <NavLink
-                                            to={config.routes.faq}
-                                            className={(nav) =>
-                                                cx(
-                                                    'mobile-sub-menu__nav-item',
-                                                    { active: nav.isActive }
-                                                )
-                                            }
-                                            onClick={handleMobileSubMenu}
-                                        >
-                                            Faq
-                                        </NavLink>
-                                        <NavLink
-                                            to={config.routes.contact}
-                                            className={(nav) =>
-                                                cx(
-                                                    'mobile-sub-menu__nav-item',
-                                                    { active: nav.isActive }
-                                                )
-                                            }
-                                            onClick={handleMobileSubMenu}
-                                        >
-                                            Contact
-                                        </NavLink>
-                                    </nav>
-                                </div>
-                            </div>
+                            <MobileSubMenu
+                                isShow={showMobileSubMenu}
+                                title={isProfileDrawer ? 'My Account' : 'Pages'}
+                                navList={
+                                    isProfileDrawer
+                                        ? [
+                                              {
+                                                  to: '/profile',
+                                                  name: 'Profile',
+                                              },
+                                              {
+                                                  to: '/dashboard',
+                                                  name: 'Dashboard',
+                                              },
+                                              {
+                                                  to: '/posts-activity',
+                                                  name: 'Posts & Activity',
+                                              },
+                                              {
+                                                  to: '/setting-privacy',
+                                                  name: 'Settings & Privacy ',
+                                              },
+                                              {
+                                                  to: '/help-center',
+                                                  name: 'Help Center',
+                                              },
+                                              {
+                                                  to: '/logout',
+                                                  name: 'Log out',
+                                              },
+                                          ]
+                                        : [
+                                              {
+                                                  to: config.routes.blog,
+                                                  name: 'Blog',
+                                              },
+                                              {
+                                                  to: config.routes.faq,
+                                                  name: 'Faq',
+                                              },
+                                              {
+                                                  to: config.routes.contact,
+                                                  name: 'Contact',
+                                              },
+                                          ]
+                                }
+                                handleMobileSubMenu={handleMobileSubMenu}
+                            ></MobileSubMenu>
                         </div>
                     </div>
 
@@ -603,15 +602,168 @@ const Header = () => {
                             ></CartIcon>
                             <span className={cx('quantity')}>1</span>
                         </div>
-                        <span
-                            className={cx('icon', { 'd-xl-none': true })}
-                            onClick={() => setShowLoginModal(true)}
+                        {/* Profile */}
+                        <Tippy
+                            visible={showDropdownProfile}
+                            interactive
+                            delay={[0, 300]}
+                            offset={[15, 20]}
+                            placement="bottom-end"
+                            trigger="click"
+                            onClickOutside={() => setShowDropdownProfile(false)}
+                            render={(attrs) => (
+                                <div className={cx('dropdown-profile')}>
+                                    <div
+                                        className={cx('dropdown-profile__top')}
+                                    >
+                                        <div
+                                            className={cx(
+                                                'dropdown-profile__avatar-wrapper'
+                                            )}
+                                        >
+                                            <Image
+                                                src={images.shipping}
+                                                alt="avatar"
+                                                className={cx(
+                                                    'dropdown-profile__avatar'
+                                                )}
+                                            ></Image>
+                                        </div>
+                                        <h6
+                                            className={cx(
+                                                'dropdown-profile__name'
+                                            )}
+                                        >
+                                            Tee Leonel
+                                        </h6>
+                                    </div>
+                                    <div
+                                        className={cx('dropdown-profile__menu')}
+                                    >
+                                        <Link
+                                            to={config.routes.profile}
+                                            className={cx(
+                                                'dropdown-profile__group'
+                                            )}
+                                            onClick={() =>
+                                                setShowDropdownProfile(false)
+                                            }
+                                        >
+                                            <MobileUserIcon></MobileUserIcon>
+                                            <span
+                                                className={cx(
+                                                    'dropdown-profile__text'
+                                                )}
+                                            >
+                                                Profile
+                                            </span>
+                                        </Link>
+                                        <Link
+                                            to={'#!'}
+                                            className={cx(
+                                                'dropdown-profile__group',
+                                                { 'd-none': true }
+                                            )}
+                                            onClick={() =>
+                                                setShowDropdownProfile(false)
+                                            }
+                                        >
+                                            <DashboardIcon></DashboardIcon>
+                                            <span
+                                                className={cx(
+                                                    'dropdown-profile__text'
+                                                )}
+                                            >
+                                                Dashboard
+                                            </span>
+                                        </Link>
+                                        <Link
+                                            to={'#!'}
+                                            className={cx(
+                                                'dropdown-profile__group'
+                                            )}
+                                            onClick={() =>
+                                                setShowDropdownProfile(false)
+                                            }
+                                        >
+                                            <LockIcon></LockIcon>
+                                            <span
+                                                className={cx(
+                                                    'dropdown-profile__text'
+                                                )}
+                                            >
+                                                Posts & Activity
+                                            </span>
+                                        </Link>
+                                        <Link
+                                            to={'#!'}
+                                            className={cx(
+                                                'dropdown-profile__group'
+                                            )}
+                                            onClick={() =>
+                                                setShowDropdownProfile(false)
+                                            }
+                                        >
+                                            <SettingIcon></SettingIcon>
+                                            <span
+                                                className={cx(
+                                                    'dropdown-profile__text'
+                                                )}
+                                            >
+                                                Settings & Privacy
+                                            </span>
+                                        </Link>
+                                        <Link
+                                            to={'#!'}
+                                            className={cx(
+                                                'dropdown-profile__group'
+                                            )}
+                                            onClick={() =>
+                                                setShowDropdownProfile(false)
+                                            }
+                                        >
+                                            <HelpIcon></HelpIcon>
+                                            <span
+                                                className={cx(
+                                                    'dropdown-profile__text'
+                                                )}
+                                            >
+                                                Help Center
+                                            </span>
+                                        </Link>
+                                    </div>
+                                    <Button
+                                        to="#!"
+                                        leftIcon={<LogoutIcon></LogoutIcon>}
+                                        className={cx(
+                                            'dropdown-profile__logout-btn'
+                                        )}
+                                        onClick={() =>
+                                            setShowDropdownProfile(false)
+                                        }
+                                    >
+                                        Log out
+                                    </Button>
+                                </div>
+                            )}
                         >
-                            <UserIcon
-                                width={'2.6rem'}
-                                height={'2.6rem'}
-                            ></UserIcon>
-                        </span>
+                            <span
+                                className={cx('icon', { 'd-xl-none': true })}
+                                onClick={
+                                    currentUser
+                                        ? () =>
+                                              setShowDropdownProfile(
+                                                  !showDropdownProfile
+                                              )
+                                        : () => setShowLoginModal(true)
+                                }
+                            >
+                                <UserIcon
+                                    width={'2.6rem'}
+                                    height={'2.6rem'}
+                                ></UserIcon>
+                            </span>
+                        </Tippy>
                     </div>
                 </header>
 

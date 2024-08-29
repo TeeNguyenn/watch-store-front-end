@@ -1,0 +1,196 @@
+@use '../../styles/abstracts';
+
+.wishlist {
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+
+    &__container {
+        overflow-x: auto;
+
+        &::-webkit-scrollbar {
+            height: 5px;
+        }
+        &::-webkit-scrollbar-thumb {
+            height: 5px;
+            background-color: rgba(0, 0, 0, 0.5019607843);
+        }
+        &::-webkit-scrollbar-track {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+    }
+
+    &__table {
+        width: 100%;
+        border-collapse: collapse;
+
+        & th {
+            padding: 10px 8px;
+            text-transform: uppercase;
+            line-height: 1;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+
+            &:first-child {
+                padding: 10px 8px 10px 0;
+            }
+
+            &:nth-child(5),
+            &:nth-child(6) {
+                text-align: right;
+            }
+
+            &:not(:last-child):after {
+                content: url(../../assets/images/orders/sort.svg);
+                margin-left: 4px;
+            }
+
+            &:first-child::after {
+                display: none;
+            }
+
+            @include abstracts.screen(sm) {
+                font-size: 1.5rem;
+                line-height: 2.7rem;
+            }
+        }
+
+        & td {
+            padding: 16px 8px;
+            line-height: 2.88rem;
+            border-bottom: 1px solid var(--border-color);
+
+            @include abstracts.screen(sm) {
+                font-size: 1.5rem;
+                line-height: 2.7rem;
+            }
+        }
+    }
+
+    &__item-hide {
+        display: none;
+
+        &.show {
+            display: table-row;
+        }
+    }
+
+    &__media {
+        padding: 0 8px 0 0 !important;
+    }
+
+    &__img-wrapper {
+        width: 60px;
+        height: 60px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    &__img {
+        width: 100%;
+        height: 100%;
+    }
+
+    &__product {
+        padding: 16px 70px 16px 8px !important;
+    }
+
+    &__link {
+        color: var(--primary-second-color);
+        transition: var(--transition-config);
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    &__price,
+    &__options {
+        text-align: right;
+    }
+
+    &__color {
+        white-space: nowrap;
+    }
+
+    &__size {
+        color: var(--text-second-color);
+    }
+
+    &__options {
+        padding: 16px 0 16px 8px !important;
+    }
+
+    &__option-wrapper {
+        white-space: nowrap;
+    }
+
+    &__trash-can {
+        padding: 8px 16px;
+
+        &:hover {
+            color: var(--primary-color);
+        }
+    }
+
+    &__add-cart {
+        padding: 4px 18px;
+        border-radius: 6px;
+        font-size: 1.5rem;
+        line-height: 2.7rem;
+        font-weight: 500;
+        background-color: var(--primary-color);
+        color: var(--white-color);
+
+        & > svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        &:hover {
+            background-color: var(--primary-second-color);
+        }
+
+        @include abstracts.screen(sm) {
+            font-size: 1.4rem;
+            line-height: 2.6rem;
+            padding: 2px 12px;
+        }
+    }
+
+    &__bottom {
+        padding: 4px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    &__view {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    &__view-desc {
+        line-height: 2.88rem;
+    }
+
+    &__view-btn {
+        padding: 0;
+        font-weight: 400;
+        line-height: 2.88rem;
+        color: var(--primary-second-color);
+
+        &:hover {
+            text-decoration: underline;
+        }
+
+        @include abstracts.screen(sm) {
+            font-size: 1.5rem;
+            line-height: 2.7rem;
+        }
+    }
+}

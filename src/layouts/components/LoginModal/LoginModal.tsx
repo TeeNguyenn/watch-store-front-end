@@ -8,6 +8,7 @@ import styles from './LoginModal.module.scss';
 import { CheckIcon, CloseIcon, ErrorIcon } from '../../../components/Icons';
 import AccountForm from '../../../components/AccountForm';
 import { Link } from 'react-router-dom';
+import config from '../../../config';
 
 const cx = classNames.bind(styles);
 
@@ -18,11 +19,11 @@ interface LoginModalProps {
 const LoginModal = ({ handleCloseLoginModal }: LoginModalProps) => {
     const links = [
         {
-            to: '/recover',
+            to: config.routes.forgotPassword,
             name: 'Forgot your password?',
         },
         {
-            to: '/register',
+            to: config.routes.register,
             name: 'Sign Up',
         },
     ];

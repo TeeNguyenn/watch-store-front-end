@@ -20,6 +20,10 @@ interface ButtonProps {
     rounded?: boolean;
     small?: boolean;
     large?: boolean;
+    label?: boolean;
+    success?: boolean;
+    cancel?: boolean;
+    fail?: boolean;
     children?: JSX.Element | string;
     className?: string;
     style?: any;
@@ -44,6 +48,10 @@ const Button = forwardRef(
             rounded = false,
             small = false,
             large = false,
+            label = false,
+            success = false,
+            cancel = false,
+            fail = false,
             children,
             className,
             style,
@@ -91,6 +99,10 @@ const Button = forwardRef(
             rounded,
             small,
             large,
+            label,
+            success,
+            cancel,
+            fail,
         });
 
         return (
