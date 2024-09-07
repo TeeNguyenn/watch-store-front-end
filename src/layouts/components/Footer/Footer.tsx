@@ -519,9 +519,11 @@ const Footer = () => {
                 </div>
             </div>
             <div
+                id="mobile-toolbar-footer"
                 className={cx('mobile-toolbar', {
                     'd-none': true,
                     'd-md-grid': true,
+                    'mobile-toolbar-footer': true,
                 })}
             >
                 <Link

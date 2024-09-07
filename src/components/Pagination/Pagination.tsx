@@ -3,17 +3,12 @@ import classNames from 'classnames/bind';
 
 import styles from './Pagination.module.scss';
 import Button from '../Button';
-import {
-    PagingLeftArrowIcon,
-    PrevIcon,
-    RightArrowIcon,
-    RightIcon,
-} from '../Icons';
-import PrevArrow from '../../layouts/components/SlideShow/PrevArrow';
+import { PagingLeftArrowIcon, RightIcon } from '../Icons';
 
 const cx = classNames.bind(styles);
 
 interface PaginationProps {
+    hide?: boolean;
     modifier?: boolean;
     currentPage: number;
     totalPage: number;
@@ -21,6 +16,7 @@ interface PaginationProps {
 }
 
 const Pagination = ({
+    hide,
     modifier,
     currentPage,
     totalPage,
@@ -67,6 +63,7 @@ const Pagination = ({
         <nav
             className={cx('pagination', {
                 modifier,
+                'd-none': hide,
             })}
         >
             <ul

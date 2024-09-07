@@ -31,11 +31,13 @@ export const imageMagnifier = (selector: string, percentage: number) => {
         // Event Mouse Enter
         imgWrapperElement?.addEventListener('mouseenter', () => {
             imgElement!.style.width = percentage + '%';
+            imgElement!.style.height = percentage + '%';
         });
 
         // Event Mouse Leave
         imgWrapperElement?.addEventListener('mouseleave', () => {
             imgElement!.style.width = '100%';
+            imgElement!.style.height = '100%';
             imgElement!.style.top = '0';
             imgElement!.style.left = '0';
         });
@@ -79,7 +81,7 @@ export const imageMagnifier = (selector: string, percentage: number) => {
             imgElement!.style.left = `-${left}px`;
         });
 
-        // Change height of the image wrapper
+        // // Change height of the image wrapper
         function changeHeight() {
             imgWrapperElement!.style.height =
                 imgWrapperElement?.clientWidth + 'px';
@@ -87,7 +89,20 @@ export const imageMagnifier = (selector: string, percentage: number) => {
 
         changeHeight();
 
-        // changeHeight
+        // // changeHeight
         window.addEventListener('resize', changeHeight);
     });
 };
+
+export function formatPrice(amount: number) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+    }).format(amount);
+}
+
+export function splitArrayAtIndex(arr: any[], index: number) {
+    const firstPart = arr.slice(0, index);
+    const secondPart = arr.slice(index);
+    return [firstPart, secondPart];
+}

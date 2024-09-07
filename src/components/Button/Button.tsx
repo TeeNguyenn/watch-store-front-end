@@ -30,6 +30,8 @@ interface ButtonProps {
     leftIcon?: boolean | JSX.Element;
     rightIcon?: boolean | JSX.Element;
     onClick?: () => void;
+    onMouseEnter?: () => void;
+    onMouseLeave?: () => void;
 }
 
 const Button = forwardRef(
@@ -58,6 +60,8 @@ const Button = forwardRef(
             leftIcon = false,
             rightIcon = false,
             onClick,
+            onMouseEnter,
+            onMouseLeave,
             ...passProps
         }: ButtonProps,
         ref: React.Ref<HTMLButtonElement>
@@ -69,6 +73,8 @@ const Button = forwardRef(
         }
         const props: propsObject = {
             onClick,
+            onMouseEnter,
+            onMouseLeave,
             ...passProps,
         };
 

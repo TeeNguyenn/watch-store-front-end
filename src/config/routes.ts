@@ -7,7 +7,7 @@ const routes = {
     contact: '/contact',
     register: '/register',
     login: '/login',
-    detail: '/products/:id',
+    detail: '/products/:productId',
     accountStatus: '/account-status',
     checkout: '/checkout',
     cart: '/cart',

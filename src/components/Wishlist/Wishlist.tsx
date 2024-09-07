@@ -229,13 +229,13 @@ const Wishlist = () => {
                     >
                         1 to 6 items of 15
                     </p>
-                    <Button
+                    {/* <Button
                         className={cx('wishlist__view-btn')}
                         rightIcon={<RightIcon></RightIcon>}
                         onClick={() => setViewAll(!viewAll)}
                     >
                         {viewAll ? 'View less' : 'View all'}
-                    </Button>
+                    </Button> */}
                 </div>
                 <div className={cx('wishlist__paging')}>
                     <Pagination

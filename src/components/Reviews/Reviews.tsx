@@ -282,13 +282,13 @@ const Reviews = () => {
                     >
                         1 to 6 items of 15
                     </p>
-                    <Button
+                    {/* <Button
                         className={cx('review__view-btn')}
                         rightIcon={<RightIcon></RightIcon>}
                         onClick={() => setViewAll(!viewAll)}
                     >
                         {viewAll ? 'View less' : 'View all'}
-                    </Button>
+                    </Button> */}
                 </div>
                 <div className={cx('review__paging')}>
                     <Pagination

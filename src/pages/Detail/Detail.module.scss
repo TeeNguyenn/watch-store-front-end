@@ -1,12 +1,17 @@
 @use '../../styles/abstracts';
 
 .product-detail {
-    &__row {
+    &__container {
+        width: var(--s-container-width);
+        margin-left: auto;
+        margin-right: auto;
         padding: 35px 0 20px;
 
         @include abstracts.screen(md) {
             padding: 26px 0 15px;
         }
+    }
+    &__row {
     }
 
     &__media {
@@ -37,9 +42,9 @@
     }
 
     &__media-wrapper {
-        padding-left: 80px;
+        padding-left: 40px;
         position: sticky;
-        top: 30px;
+        top: 0;
         height: fit-content;
 
         @include abstracts.screen(lg) {
@@ -56,6 +61,11 @@
         overflow: hidden;
         cursor: zoom-in;
         position: relative;
+        background-color: var(--white-color);
+
+        & > div {
+            position: absolute;
+        }
     }
 
     &__img {
@@ -63,22 +73,34 @@
         position: absolute;
         transition: var(--transition-config);
         max-width: initial;
-        height: auto !important;
+        // height: auto !important;
+        // height: 100%;
     }
 
     &__img,
     &__slide {
         width: 100%;
         height: 100%;
+        object-fit: contain;
     }
 
     &__slide-wrapper {
         padding: 0 5px;
+        position: relative;
+        padding-top: 100%;
+        height: 0;
+        background-color: var(--white-color);
+        border-radius: 8px;
     }
 
     &__slide {
         border-radius: 8px;
+
         cursor: pointer;
+        position: absolute;
+        top: 0;
+        left: 0;
+        mix-blend-mode: multiply;
 
         &:hover {
             border: 1px solid;
@@ -175,12 +197,17 @@
         width: 48px;
         height: 48px;
         border-radius: 50%;
-        border: 1px solid;
+        border: 1px solid var(--primary-color);
         overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: var(--white-color);
+        transition: var(--transition-config);
+
+        &.active,
+        &:hover {
+            border-color: var(--text-color);
+        }
     }
 
     &__color-img {
@@ -188,6 +215,7 @@
         width: 40px;
         height: 40px;
         user-select: none;
+        mix-blend-mode: multiply;
     }
 
     &__size-list,

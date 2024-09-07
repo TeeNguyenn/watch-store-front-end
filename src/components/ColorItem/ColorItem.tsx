@@ -5,19 +5,38 @@ import styles from './ColorItem.module.scss';
 const cx = classNames.bind(styles);
 
 interface ColorItemProps {
-    color: string;
+    width?: string;
+    height?: string;
+    red: number;
+    green: number;
+    blue: number;
+    alpha?: number;
+    active?: boolean;
+    onClick?: () => void;
 }
 
-const ColorItem = ({ color }: ColorItemProps) => {
+const ColorItem = ({
+    width = '24px',
+    height = '24px',
+    red,
+    green,
+    blue,
+    alpha = 1,
+    active,
+    onClick,
+}: ColorItemProps) => {
     return (
         <div
-            className={cx('color-item')}
+            className={cx('color-item', {
+                active,
+            })}
             style={{
-                width: '24px',
-                height: '24px',
+                width: width,
+                height: height,
                 borderRadius: '50%',
-                backgroundColor: color,
+                backgroundColor: `rgba(${red}, ${green}, ${blue}, ${alpha})`,
             }}
+            onClick={onClick}
         ></div>
     );
 };

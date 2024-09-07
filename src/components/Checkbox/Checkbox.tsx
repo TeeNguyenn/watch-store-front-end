@@ -11,6 +11,7 @@ interface CheckboxProps {
     quantity?: string;
     checked?: boolean;
     className?: string;
+    onClick?: () => void;
 }
 
 const Checkbox = ({
@@ -19,6 +20,7 @@ const Checkbox = ({
     quantity,
     checked,
     className,
+    onClick,
 }: CheckboxProps) => {
     return (
         <div className={cx('container', className)}>
@@ -28,6 +30,7 @@ const Checkbox = ({
                 className={cx('checkbox')}
                 hidden
                 checked={checked}
+                onClick={onClick}
             />
             <label htmlFor={name} className={cx('label')}>
                 {label}

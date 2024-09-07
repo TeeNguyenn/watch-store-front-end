@@ -57,256 +57,339 @@ const OrderDetails = () => {
                         <span>#349</span>
                     </h2>
                 </div>
-                <div className="row">
+                <div className="row g-0">
                     <div className="col col-8 col-xl-12">
-                        <div className={cx('products')}>
-                            <div className={cx('products__container')}>
-                                <table className={cx('products__table')}>
-                                    <thead>
-                                        <tr>
-                                            <th
-                                                className={cx(
-                                                    'products__heading'
-                                                )}
-                                            ></th>
-                                            <th
-                                                className={cx(
-                                                    'products__heading'
-                                                )}
-                                                style={{
-                                                    minWidth: '300px',
-                                                }}
-                                            >
-                                                products
-                                            </th>
-                                            <th
-                                                className={cx(
-                                                    'products__heading'
-                                                )}
-                                                style={{
-                                                    width: '10%',
-                                                    minWidth: '160px',
-                                                }}
-                                            >
-                                                color
-                                            </th>
+                        <div className={cx('order-details__left')}>
+                            <div className={cx('products')}>
+                                <div className={cx('products__container')}>
+                                    <table className={cx('products__table')}>
+                                        <thead>
+                                            <tr>
+                                                <th
+                                                    className={cx(
+                                                        'products__heading'
+                                                    )}
+                                                    style={{
+                                                        width: '9%',
+                                                        minWidth: '70px',
+                                                    }}
+                                                ></th>
+                                                <th
+                                                    className={cx(
+                                                        'products__heading'
+                                                    )}
+                                                    style={{
+                                                        minWidth: '300px',
+                                                        width: '34%',
+                                                    }}
+                                                >
+                                                    products
+                                                </th>
+                                                <th
+                                                    className={cx(
+                                                        'products__heading'
+                                                    )}
+                                                    style={{
+                                                        width: '17%',
+                                                        minWidth: '160px',
+                                                    }}
+                                                >
+                                                    color
+                                                </th>
 
-                                            <th
-                                                className={cx(
-                                                    'products__heading'
-                                                )}
-                                                style={{
-                                                    width: '10%',
-                                                    minWidth: '80px',
-                                                }}
-                                            >
-                                                size
-                                            </th>
+                                                <th
+                                                    className={cx(
+                                                        'products__heading'
+                                                    )}
+                                                    style={{
+                                                        width: '10%',
+                                                        minWidth: '80px',
+                                                    }}
+                                                >
+                                                    size
+                                                </th>
 
-                                            <th
-                                                className={cx(
-                                                    'products__heading'
-                                                )}
-                                                style={{ width: '10%' }}
-                                            >
-                                                price
-                                            </th>
-                                            <th
-                                                className={cx(
-                                                    'products__heading'
-                                                )}
-                                                style={{
-                                                    width: '10%',
-                                                    minWidth: '110px',
-                                                }}
-                                            >
-                                                quantity
-                                            </th>
-                                            <th
-                                                className={cx(
-                                                    'products__heading'
-                                                )}
-                                                style={{ width: '10%' }}
-                                            >
-                                                total
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {productsList.map(
-                                            (productsItem, index) => (
-                                                <tr key={index}>
-                                                    <td
-                                                        className={cx(
-                                                            'products__media'
-                                                        )}
-                                                    >
-                                                        <div
+                                                <th
+                                                    className={cx(
+                                                        'products__heading'
+                                                    )}
+                                                    style={{
+                                                        width: '10%',
+                                                        minWidth: '80px',
+                                                    }}
+                                                >
+                                                    price
+                                                </th>
+                                                <th
+                                                    className={cx(
+                                                        'products__heading'
+                                                    )}
+                                                    style={{
+                                                        width: '12%',
+                                                        minWidth: '110px',
+                                                    }}
+                                                >
+                                                    quantity
+                                                </th>
+                                                <th
+                                                    className={cx(
+                                                        'products__heading'
+                                                    )}
+                                                    style={{
+                                                        width: '8%',
+                                                        minWidth: '60px',
+                                                    }}
+                                                >
+                                                    total
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {productsList.map(
+                                                (productsItem, index) => (
+                                                    <tr key={index}>
+                                                        <td
                                                             className={cx(
-                                                                'products__img-wrapper'
+                                                                'products__media'
                                                             )}
+                                                            style={{
+                                                                width: '9%',
+                                                                minWidth:
+                                                                    '70px',
+                                                            }}
                                                         >
-                                                            <Image
-                                                                src={
-                                                                    images.cartItem
-                                                                }
-                                                                alt="image"
-                                                                loading={'lazy'}
+                                                            <div
                                                                 className={cx(
-                                                                    'products__img'
+                                                                    'products__img-wrapper'
                                                                 )}
-                                                            ></Image>
-                                                        </div>
-                                                    </td>
-                                                    <td
-                                                        className={cx(
-                                                            'products__product'
-                                                        )}
-                                                    >
-                                                        <Link
-                                                            to={'#!'}
+                                                            >
+                                                                <Image
+                                                                    src={
+                                                                        images.cartItem
+                                                                    }
+                                                                    alt="image"
+                                                                    loading={
+                                                                        'lazy'
+                                                                    }
+                                                                    className={cx(
+                                                                        'products__img'
+                                                                    )}
+                                                                ></Image>
+                                                            </div>
+                                                        </td>
+                                                        <td
                                                             className={cx(
-                                                                'products__link',
-                                                                {
-                                                                    'line-clamp':
-                                                                        true,
-                                                                }
+                                                                'products__product'
                                                             )}
+                                                            style={{
+                                                                minWidth:
+                                                                    '300px',
+                                                                width: '34%',
+                                                            }}
                                                         >
-                                                            Fitbit Sense
-                                                            Advanced Smartwatch
-                                                            with Tools Fitbit
-                                                            Sense Advanced
-                                                            Smartwatch with
-                                                            Tools Fitbit Sense
-                                                            Advanced Smartwatch
-                                                            with Tools
-                                                        </Link>
-                                                    </td>
-                                                    <td
-                                                        className={cx(
-                                                            'products__color'
-                                                        )}
-                                                    >
-                                                        <p
+                                                            <Link
+                                                                to={'#!'}
+                                                                className={cx(
+                                                                    'products__link',
+                                                                    {
+                                                                        'line-clamp':
+                                                                            true,
+                                                                    }
+                                                                )}
+                                                            >
+                                                                Fitbit Sense
+                                                                Advanced
+                                                                Smartwatch with
+                                                                Tools Fitbit
+                                                                Sense Advanced
+                                                                Smartwatch with
+                                                                Tools Fitbit
+                                                                Sense Advanced
+                                                                Smartwatch with
+                                                                Tools
+                                                            </Link>
+                                                        </td>
+                                                        <td
                                                             className={cx(
-                                                                'products__color-text'
+                                                                'products__color'
                                                             )}
+                                                            style={{
+                                                                width: '17%',
+                                                                minWidth:
+                                                                    '160px',
+                                                            }}
                                                         >
-                                                            Pure matte black
-                                                        </p>
-                                                    </td>
-                                                    <td
-                                                        className={cx(
-                                                            'products__size'
-                                                        )}
-                                                    >
-                                                        <p
+                                                            <p
+                                                                className={cx(
+                                                                    'products__color-text'
+                                                                )}
+                                                            >
+                                                                Pure matte black
+                                                            </p>
+                                                        </td>
+                                                        <td
                                                             className={cx(
-                                                                'size-text'
+                                                                'products__size'
                                                             )}
+                                                            style={{
+                                                                width: '10%',
+                                                                minWidth:
+                                                                    '80px',
+                                                            }}
                                                         >
-                                                            Regular
-                                                        </p>
-                                                    </td>
-
-                                                    <td
-                                                        className={cx(
-                                                            'products__price'
-                                                        )}
-                                                    >
-                                                        $1,699
-                                                    </td>
-                                                    <td
-                                                        className={cx(
-                                                            'products__quantity'
-                                                        )}
-                                                    >
-                                                        1
-                                                    </td>
-                                                    <td
-                                                        className={cx(
-                                                            'products__total'
-                                                        )}
-                                                    >
-                                                        $1,699
-                                                    </td>
-                                                </tr>
-                                            )
+                                                            <p
+                                                                className={cx(
+                                                                    'size-text'
+                                                                )}
+                                                            >
+                                                                Regular
+                                                            </p>
+                                                        </td>
+                                                        <td
+                                                            className={cx(
+                                                                'products__price'
+                                                            )}
+                                                            style={{
+                                                                width: '10%',
+                                                                minWidth:
+                                                                    '80px',
+                                                            }}
+                                                        >
+                                                            $1,699
+                                                        </td>
+                                                        <td
+                                                            className={cx(
+                                                                'products__quantity'
+                                                            )}
+                                                            style={{
+                                                                width: '12%',
+                                                                minWidth:
+                                                                    '110px',
+                                                            }}
+                                                        >
+                                                            1
+                                                        </td>
+                                                        <td
+                                                            className={cx(
+                                                                'products__total'
+                                                            )}
+                                                            style={{
+                                                                width: '8%',
+                                                                minWidth:
+                                                                    '60px',
+                                                            }}
+                                                        >
+                                                            $1,699
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className={cx('products__bottom')}>
+                                    <p className={cx('products__subtotal')}>
+                                        Items subtotal :
+                                    </p>
+                                    <p
+                                        className={cx(
+                                            'products__subtotal-price'
                                         )}
-                                    </tbody>
-                                </table>
+                                    >
+                                        $7,686
+                                    </p>
+                                </div>
                             </div>
-                            <div className={cx('products__bottom')}>
-                                <p className={cx('products__subtotal')}>
-                                    Items subtotal :
-                                </p>
-                                <p className={cx('products__subtotal-price')}>
-                                    $7,686
-                                </p>
-                            </div>
-                        </div>
-                        {/* Order details */}
-                        <div className={cx('order__info')}>
-                            <h3 className={cx('order__info-title')}>
-                                Order Details
-                            </h3>
-                            <div className={cx('order__buyer-info')}>
-                                <div className={cx('order__info-row')}>
-                                    <div className={cx('order__info-label')}>
-                                        Order ID:
+                            {/* Order details */}
+                            <div className={cx('order__info')}>
+                                <h3 className={cx('order__info-title')}>
+                                    Order Details
+                                </h3>
+                                <div className={cx('order__buyer-info')}>
+                                    <div className={cx('order__info-row')}>
+                                        <div
+                                            className={cx('order__info-label')}
+                                        >
+                                            Order ID:
+                                        </div>
+                                        <div
+                                            className={cx('order__info-value')}
+                                        >
+                                            DH3995
+                                        </div>
                                     </div>
-                                    <div className={cx('order__info-value')}>
-                                        DH3995
+                                    <div className={cx('order__info-row')}>
+                                        <div
+                                            className={cx('order__info-label')}
+                                        >
+                                            Date:
+                                        </div>
+                                        <div
+                                            className={cx('order__info-value')}
+                                        >
+                                            August 20, 2024
+                                        </div>
                                     </div>
-                                </div>
-                                <div className={cx('order__info-row')}>
-                                    <div className={cx('order__info-label')}>
-                                        Date:
+                                    <div className={cx('order__info-row')}>
+                                        <div
+                                            className={cx('order__info-label')}
+                                        >
+                                            Consignee:
+                                        </div>
+                                        <div
+                                            className={cx('order__info-value')}
+                                        >
+                                            Tee
+                                        </div>
                                     </div>
-                                    <div className={cx('order__info-value')}>
-                                        August 20, 2024
+                                    <div className={cx('order__info-row')}>
+                                        <div
+                                            className={cx('order__info-label')}
+                                        >
+                                            Phone:
+                                        </div>
+                                        <div
+                                            className={cx('order__info-value')}
+                                        >
+                                            0334897632
+                                        </div>
                                     </div>
-                                </div>
-                                <div className={cx('order__info-row')}>
-                                    <div className={cx('order__info-label')}>
-                                        Consignee:
+                                    <div className={cx('order__info-row')}>
+                                        <div
+                                            className={cx('order__info-label')}
+                                        >
+                                            Email:
+                                        </div>
+                                        <div
+                                            className={cx('order__info-value')}
+                                        >
+                                            Tee@gmail.com
+                                        </div>
                                     </div>
-                                    <div className={cx('order__info-value')}>
-                                        Tee
+                                    <div className={cx('order__info-row')}>
+                                        <div
+                                            className={cx('order__info-label')}
+                                        >
+                                            Payment method:
+                                        </div>
+                                        <div
+                                            className={cx('order__info-value')}
+                                        >
+                                            Cash on Delivery
+                                        </div>
                                     </div>
-                                </div>
-                                <div className={cx('order__info-row')}>
-                                    <div className={cx('order__info-label')}>
-                                        Phone:
-                                    </div>
-                                    <div className={cx('order__info-value')}>
-                                        0334897632
-                                    </div>
-                                </div>
-                                <div className={cx('order__info-row')}>
-                                    <div className={cx('order__info-label')}>
-                                        Email:
-                                    </div>
-                                    <div className={cx('order__info-value')}>
-                                        Tee@gmail.com
-                                    </div>
-                                </div>
-                                <div className={cx('order__info-row')}>
-                                    <div className={cx('order__info-label')}>
-                                        Payment method:
-                                    </div>
-                                    <div className={cx('order__info-value')}>
-                                        Cash on Delivery
-                                    </div>
-                                </div>
-                                <div className={cx('order__info-row')}>
-                                    <div className={cx('order__info-label')}>
-                                        Shipping address:
-                                    </div>
-                                    <div className={cx('order__info-value')}>
-                                        0334897632, Thị trấn Văn Điển, Huyện
-                                        Thanh Trì, Hà Nội
+                                    <div className={cx('order__info-row')}>
+                                        <div
+                                            className={cx('order__info-label')}
+                                        >
+                                            Shipping address:
+                                        </div>
+                                        <div
+                                            className={cx('order__info-value')}
+                                        >
+                                            0334897632, Thị trấn Văn Điển, Huyện
+                                            Thanh Trì, Hà Nội
+                                        </div>
                                     </div>
                                 </div>
                             </div>

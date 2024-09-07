@@ -35,9 +35,27 @@ const Card = ({ soldOut, className }: CardProps) => {
                     </Button>
                 </h3>
                 <div className={cx('card__color-options')}>
-                    <ColorItem color="#7989b8"></ColorItem>
-                    <ColorItem color="#54ad68"></ColorItem>
-                    <ColorItem color="#b0e1e7"></ColorItem>
+                    {/* <ColorItem color="#7989b8"></ColorItem>
+                    <ColorItem color="rgb(2, 2, 2)"></ColorItem>
+                    <ColorItem color="#b0e1e7"></ColorItem> */}
+                    <ColorItem
+                        red={2}
+                        green={2}
+                        blue={2}
+                        // alpha={colorItem.alpha}
+                    ></ColorItem>
+                    <ColorItem
+                        red={2}
+                        green={2}
+                        blue={2}
+                        // alpha={colorItem.alpha}
+                    ></ColorItem>
+                    <ColorItem
+                        red={2}
+                        green={2}
+                        blue={2}
+                        // alpha={colorItem.alpha}
+                    ></ColorItem>
                 </div>
                 <p className={cx('card__price')}>$14.3369</p>
             </div>

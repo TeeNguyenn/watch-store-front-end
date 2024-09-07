@@ -101,11 +101,11 @@ const Blog = () => {
                                                     >
                                                         Bluetooth Calling Watch
                                                     </p>
-                                                    <Price
+                                                    {/* <Price
                                                         className={cx(
                                                             'search-result__price'
                                                         )}
-                                                    ></Price>
+                                                    ></Price> */}
                                                 </div>
                                             </Link>
                                         ))}
@@ -316,11 +316,11 @@ const Blog = () => {
                                             {' '}
                                             Bluetooth Calling Watch
                                         </Link>
-                                        <Price
+                                        {/* <Price
                                             className={cx(
                                                 'blog-sidebar__latest-price'
                                             )}
-                                        ></Price>
+                                        ></Price> */}
                                     </div>
                                 </div>
                                 <div
@@ -355,11 +355,11 @@ const Blog = () => {
                                             {' '}
                                             Bluetooth Calling Watch
                                         </Link>
-                                        <Price
+                                        {/* <Price
                                             className={cx(
                                                 'blog-sidebar__latest-price'
                                             )}
-                                        ></Price>
+                                        ></Price> */}
                                     </div>
                                 </div>
                             </div>

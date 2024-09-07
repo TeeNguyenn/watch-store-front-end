@@ -23,11 +23,8 @@ const Home = () => {
                 <Specification></Specification>
                 <Companion></Companion>
                 <Abilities></Abilities>
-            </div>
-            <div className={cx('', { 'container-spacing': true })}>
                 <HomeProduct></HomeProduct>
-            </div>
-            <div className={cx('container-s', { 'container-spacing': true })}>
+
                 <Testimonial></Testimonial>
                 <News></News>
                 <Contact></Contact>

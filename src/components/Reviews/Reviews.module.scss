@@ -6,17 +6,6 @@
 
     &__container {
         overflow-x: auto;
-
-        &::-webkit-scrollbar {
-            height: 5px;
-        }
-        &::-webkit-scrollbar-thumb {
-            height: 5px;
-            background-color: rgba(0, 0, 0, 0.5019607843);
-        }
-        &::-webkit-scrollbar-track {
-            background-color: rgba(0, 0, 0, 0.2);
-        }
     }
 
     &__table {
