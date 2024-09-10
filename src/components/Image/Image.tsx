@@ -44,7 +44,7 @@ const Image = forwardRef(
             <img
                 ref={ref}
                 className={classNames(styles.wrapper, className)}
-                src={fallback || src}
+                src={fallback || src || images.noProductImg}
                 alt={alt}
                 loading={loading}
                 {...props}

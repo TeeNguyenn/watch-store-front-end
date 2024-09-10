@@ -19,6 +19,7 @@ import PageNotFound from '../pages/PageNotFound';
 import ForgotPassword from '../pages/ForgotPassword';
 import Profile from '../pages/Profile';
 import OrderDetails from '../pages/OrderDetails';
+import SearchResult from '../pages/SearchResult';
 
 const publicRoutes: Array<any> = [
     {
@@ -97,6 +98,10 @@ const publicRoutes: Array<any> = [
     {
         path: config.routes.orderDetails,
         component: OrderDetails,
+    },
+    {
+        path: config.routes.searchResult,
+        component: SearchResult,
     },
 ];
 const privateRoutes: Array<any> = [];

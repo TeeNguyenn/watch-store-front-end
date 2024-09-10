@@ -288,9 +288,10 @@ const Shop = () => {
                             className={cx('product__top')}
                             style={{
                                 marginBottom:
-                                    categoryFilter.ids.length > 0 ||
-                                    colorFilter.ids.length > 0 ||
-                                    materialFilter.ids.length > 0
+                                    isLgScreen &&
+                                    (categoryFilter.ids.length > 0 ||
+                                        colorFilter.ids.length > 0 ||
+                                        materialFilter.ids.length > 0)
                                         ? '0px'
                                         : '60px',
                             }}
@@ -306,18 +307,20 @@ const Shop = () => {
                             </div>
 
                             {/* Mobile menu */}
-                            <MobileFilter
-                                currentMobileFilter={currentMobileFilter}
-                                categoryFilter={categoryFilter}
-                                categoryList={categoryList}
-                                colorFilter={colorFilter}
-                                colorList={colorList}
-                                materialFilter={materialFilter}
-                                materialList={materialList}
-                                handleFilterCategory={handleFilterCategory}
-                                handleFilterColor={handleFilterColor}
-                                handleFilterMaterial={handleFilterMaterial}
-                            ></MobileFilter>
+                            {isLgScreen && (
+                                <MobileFilter
+                                    currentMobileFilter={currentMobileFilter}
+                                    categoryFilter={categoryFilter}
+                                    categoryList={categoryList}
+                                    colorFilter={colorFilter}
+                                    colorList={colorList}
+                                    materialFilter={materialFilter}
+                                    materialList={materialList}
+                                    handleFilterCategory={handleFilterCategory}
+                                    handleFilterColor={handleFilterColor}
+                                    handleFilterMaterial={handleFilterMaterial}
+                                ></MobileFilter>
+                            )}
 
                             <div className={cx('product__show-options')}>
                                 <div
@@ -688,17 +691,19 @@ const Shop = () => {
                         </div>
 
                         {/* Mobile menu - filter list */}
-                        <MobileFilterList
-                            categoryFilter={categoryFilter}
-                            categoryList={categoryList}
-                            colorFilter={colorFilter}
-                            colorList={colorList}
-                            materialFilter={materialFilter}
-                            materialList={materialList}
-                            handleFilterCategory={handleFilterCategory}
-                            handleFilterColor={handleFilterColor}
-                            handleFilterMaterial={handleFilterMaterial}
-                        ></MobileFilterList>
+                        {isLgScreen && (
+                            <MobileFilterList
+                                categoryFilter={categoryFilter}
+                                categoryList={categoryList}
+                                colorFilter={colorFilter}
+                                colorList={colorList}
+                                materialFilter={materialFilter}
+                                materialList={materialList}
+                                handleFilterCategory={handleFilterCategory}
+                                handleFilterColor={handleFilterColor}
+                                handleFilterMaterial={handleFilterMaterial}
+                            ></MobileFilterList>
+                        )}
 
                         <div className={cx('product__inner')}>
                             <div

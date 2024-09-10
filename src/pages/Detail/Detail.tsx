@@ -29,6 +29,9 @@ import * as feedbackServices from '../../services/feedbackServices';
 import FeedbackModel from '../../models/FeedbackModel';
 import PreLoader from '../../components/PreLoader';
 import ProductImageModel from '../../models/ProductImageModel';
+import ScreenSizeModel from '../../models/ScreenSizeModel';
+import MaterialModel from '../../models/MaterialModel';
+import VariantModel from '../../models/VariantModel';
 
 const cx = classNames.bind(styles);
 
@@ -69,14 +72,18 @@ const Detail = () => {
     const [activeColor, setActiveColor] = useState<number | undefined>();
     const [tempColor, setTempColor] = useState<number | undefined>();
 
-    // const [activeSize, setActiveSize] = useState<number | undefined>();
-    // const [tempSize, setTempSize] = useState<number | undefined>();
+    const [activeSize, setActiveSize] = useState<number | undefined>();
+    const [tempSize, setTempSize] = useState<number | undefined>();
 
-    // const [activeMaterial, setActiveMaterial] = useState<number | undefined>();
-    // const [tempMaterial, setTempMaterial] = useState<number | undefined>();
+    const [activeMaterial, setActiveMaterial] = useState<number | undefined>();
+    const [tempMaterial, setTempMaterial] = useState<number | undefined>();
 
     const [imageList, setImageList] = useState<ProductImageModel[] | any>([]);
     const [productList, setProductList] = useState<any[]>([]);
+    const [sizeList, setSizeList] = useState<VariantModel[] | undefined>([]);
+    const [materialList, setMaterialList] = useState<
+        VariantModel[] | undefined
+    >([]);
 
     // Get productId from url
     const { productId } = useParams();
@@ -120,10 +127,63 @@ const Detail = () => {
 
             setProductDetail(responseData);
             setActiveColor(responseData?.colors.at(0)?.colorId);
-            // setActiveSize(responseData.variants?.at(0)?.screenSize.sizeId);
-            // setActiveMaterial(
-            //     responseData.variants?.at(0)?.material.materialId
-            // );
+
+            const Arr: VariantModel[] | undefined =
+                responseData?.variants?.filter(
+                    (variant) =>
+                        variant.color.colorId ===
+                        responseData?.colors.at(0)?.colorId
+                );
+
+            const result: VariantModel[] | undefined = [];
+
+            Arr?.forEach((sizeItem) => {
+                let count = 0;
+                for (let index = 0; index < result.length; index++) {
+                    if (
+                        sizeItem.screenSize.sizeId ===
+                        result[index].screenSize.sizeId
+                    ) {
+                        count++;
+                        break;
+                    }
+                }
+                if (count === 0) {
+                    result.push(sizeItem);
+                }
+            });
+
+            const sortResult = result.sort(
+                (a: any, b: any) => a.screenSize.sizeId - b.screenSize.sizeId
+            );
+            setSizeList(sortResult);
+            setActiveSize(sortResult?.at(0)?.screenSize.sizeId);
+
+            const output: VariantModel[] | undefined = [];
+
+            Arr?.forEach((materialItem) => {
+                let count = 0;
+                for (let index = 0; index < output.length; index++) {
+                    if (
+                        materialItem.material.materialId ===
+                        output[index].material.materialId
+                    ) {
+                        count++;
+                        break;
+                    }
+                }
+                if (count === 0) {
+                    output.push(materialItem);
+                }
+            });
+
+            const sortOutput = output.sort(
+                (a: any, b: any) =>
+                    a.material.materialId - b.material.materialId
+            );
+            setMaterialList(sortOutput);
+            setActiveMaterial(sortOutput?.at(0)?.material.materialId);
+
             setImageList(
                 responseData?.productImages.filter(
                     (item) =>
@@ -152,6 +212,60 @@ const Detail = () => {
         );
         setImageList(newArr);
         setActiveColor(colorId);
+
+        const Arr: VariantModel[] | undefined = productDetail?.variants?.filter(
+            (variant) => variant.color.colorId === colorId
+        );
+
+        const result: VariantModel[] | undefined = [];
+
+        Arr?.forEach((sizeItem) => {
+            let count = 0;
+            for (let index = 0; index < result.length; index++) {
+                if (
+                    sizeItem.screenSize.sizeId ===
+                    result[index].screenSize.sizeId
+                ) {
+                    count++;
+                    break;
+                }
+            }
+            if (count === 0) {
+                result.push(sizeItem);
+            }
+        });
+
+        const sortResult = result.sort(
+            (a: any, b: any) => a.screenSize.sizeId - b.screenSize.sizeId
+        );
+
+        setSizeList(sortResult);
+        setActiveSize(sortResult.at(0)?.screenSize.sizeId);
+
+        const output: VariantModel[] | undefined = [];
+
+        Arr?.forEach((materialItem) => {
+            let count = 0;
+            for (let index = 0; index < output.length; index++) {
+                if (
+                    materialItem.material.materialId ===
+                    output[index].material.materialId
+                ) {
+                    count++;
+                    break;
+                }
+            }
+            if (count === 0) {
+                output.push(materialItem);
+            }
+        });
+
+        const sortOutput = output.sort(
+            (a: any, b: any) => a.material.materialId - b.material.materialId
+        );
+
+        setMaterialList(sortOutput);
+        setActiveMaterial(sortOutput.at(0)?.material.materialId);
     };
 
     if (loading) {
@@ -407,27 +521,21 @@ const Detail = () => {
                                                 'product-detail__color-label'
                                             )}
                                         >
-                                            {/* {tempSize
-                                                ? productDetail?.variants?.map(
+                                            {tempSize
+                                                ? sizeList?.map(
                                                       (item) =>
                                                           item.screenSize
                                                               .sizeId ===
                                                               tempSize &&
                                                           `${item.screenSize.size} inches`
                                                   )
-                                                : productDetail?.variants?.map(
+                                                : sizeList?.map(
                                                       (item) =>
                                                           item.screenSize
                                                               .sizeId ===
                                                               activeSize &&
                                                           `${item.screenSize.size} inches`
-                                                  )} */}
-                                            {productDetail?.variants?.map(
-                                                (item) =>
-                                                    item.color.colorId ===
-                                                        activeColor &&
-                                                    `${item.screenSize.size} inches`
-                                            )}
+                                                  )}
                                         </p>
                                     </div>
                                     <div
@@ -435,41 +543,35 @@ const Detail = () => {
                                             'product-detail__size-list'
                                         )}
                                     >
-                                        {productDetail?.variants?.map(
-                                            (item) =>
-                                                item.color.colorId ===
-                                                    activeColor && (
-                                                    <Button
-                                                        rounded
-                                                        className={cx(
-                                                            'product-detail__option-btn',
-                                                            {
-                                                                active:
-                                                                    item.color
-                                                                        .colorId ===
-                                                                    activeColor,
-                                                            }
-                                                        )}
-                                                        // onClick={() =>
-                                                        //     setActiveSize(
-                                                        //         item.screenSize
-                                                        //             .sizeId
-                                                        //     )
-                                                        // }
-                                                        // onMouseEnter={() =>
-                                                        //     setActiveSize(
-                                                        //         item.screenSize
-                                                        //             .sizeId
-                                                        //     )
-                                                        // }
-                                                        // onMouseLeave={() =>
-                                                        //     setActiveSize(undefined)
-                                                        // }
-                                                    >
-                                                        {`${item.screenSize.size} Inches`}
-                                                    </Button>
-                                                )
-                                        )}
+                                        {sizeList?.map((item) => (
+                                            <Button
+                                                rounded
+                                                className={cx(
+                                                    'product-detail__option-btn',
+                                                    {
+                                                        active:
+                                                            item.screenSize
+                                                                .sizeId ===
+                                                            activeSize,
+                                                    }
+                                                )}
+                                                onClick={() =>
+                                                    setActiveSize(
+                                                        item.screenSize.sizeId
+                                                    )
+                                                }
+                                                onMouseEnter={() =>
+                                                    setTempSize(
+                                                        item.screenSize.sizeId
+                                                    )
+                                                }
+                                                onMouseLeave={() =>
+                                                    setTempSize(undefined)
+                                                }
+                                            >
+                                                {`${item.screenSize.size} Inches`}
+                                            </Button>
+                                        ))}
                                     </div>
                                 </div>
                                 {/* Material */}
@@ -489,12 +591,21 @@ const Detail = () => {
                                                 'product-detail__color-label'
                                             )}
                                         >
-                                            {productDetail?.variants?.map(
-                                                (item) =>
-                                                    item.color.colorId ===
-                                                        activeColor &&
-                                                    `${item.material.name}`
-                                            )}
+                                            {tempMaterial
+                                                ? materialList?.map(
+                                                      (item) =>
+                                                          item.material
+                                                              .materialId ===
+                                                              tempMaterial &&
+                                                          `${item.material.name}`
+                                                  )
+                                                : materialList?.map(
+                                                      (item) =>
+                                                          item.material
+                                                              .materialId ===
+                                                              activeMaterial &&
+                                                          `${item.material.name}`
+                                                  )}
                                         </p>
                                     </div>
                                     <div
@@ -502,26 +613,35 @@ const Detail = () => {
                                             'product-detail__material-list'
                                         )}
                                     >
-                                        {productDetail?.variants?.map(
-                                            (item) =>
-                                                item.color.colorId ===
-                                                    activeColor && (
-                                                    <Button
-                                                        rounded
-                                                        className={cx(
-                                                            'product-detail__option-btn',
-                                                            {
-                                                                active:
-                                                                    item.color
-                                                                        .colorId ===
-                                                                    activeColor,
-                                                            }
-                                                        )}
-                                                    >
-                                                        {item.material.name}
-                                                    </Button>
-                                                )
-                                        )}
+                                        {materialList?.map((item) => (
+                                            <Button
+                                                rounded
+                                                className={cx(
+                                                    'product-detail__option-btn',
+                                                    {
+                                                        active:
+                                                            item.material
+                                                                .materialId ===
+                                                            activeMaterial,
+                                                    }
+                                                )}
+                                                onClick={() =>
+                                                    setActiveMaterial(
+                                                        item.material.materialId
+                                                    )
+                                                }
+                                                onMouseEnter={() =>
+                                                    setTempMaterial(
+                                                        item.material.materialId
+                                                    )
+                                                }
+                                                onMouseLeave={() =>
+                                                    setTempMaterial(undefined)
+                                                }
+                                            >
+                                                {`${item.material.name}`}
+                                            </Button>
+                                        ))}
                                     </div>
                                 </div>
                                 {/* Buttons */}

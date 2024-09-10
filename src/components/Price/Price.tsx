@@ -30,7 +30,7 @@ const Price = ({ className, price = 0, discount = 0 }: PriceProps) => {
             >
                 <p className={cx('price__old')}>{formatPrice(price)}</p>
             </div>
-            {discount && (
+            {discount !== 0 && (
                 <Badge
                     className={cx('price__discount')}
                     title={`SAVE ${parseInt(discount + '')}%`}

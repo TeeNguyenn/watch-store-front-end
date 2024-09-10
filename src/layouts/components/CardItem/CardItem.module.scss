@@ -24,12 +24,19 @@
         overflow: hidden;
         border-radius: 22px;
         position: relative;
+        width: 100%;
+        height: 0;
+        padding-top: 100%;
+        background-color: var(--white-color);
     }
     &__img {
         border-radius: 22px;
-        width: 100%;
         transition: transform 0.5s ease, opacity 0.5s ease;
-        mix-blend-mode: multiply;
+        object-fit: contain;
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
     }
 
     &__body {
@@ -63,11 +70,15 @@
     }
 
     &__price {
-        margin-top: 5px;
-        font-weight: 500;
+        margin: 5px 0 0 !important;
+        & * {
+            font-size: 1.6rem !important;
 
-        @include abstracts.screen(sm) {
-            font-size: 1.2rem;
+            font-weight: 500 !important;
+
+            @include abstracts.screen(sm) {
+                font-size: 1.2rem !important;
+            }
         }
     }
 }

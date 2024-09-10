@@ -277,7 +277,7 @@ const Blog = () => {
                             <p className={cx('blog__title')}>Hot Deals</p>
                             <CardItem
                                 className={cx('blog-sidebar__deals-item')}
-                                soldOut
+                                // soldOut
                             ></CardItem>
                         </div>
                         {/* Latest Products */}

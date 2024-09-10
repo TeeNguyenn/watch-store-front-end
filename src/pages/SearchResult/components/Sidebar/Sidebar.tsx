@@ -12,15 +12,12 @@ import Checkbox from '../../../../components/Checkbox';
 import { splitArrayAtIndex } from '../../../../utils/Functions';
 import * as productServices from '../../../../services/productServices';
 import ProductModel from '../../../../models/ProductModel';
-import BestSellerItem from '../BestSellerItem';
 import ColorItem from '../../../../components/ColorItem';
 import { boolean } from 'yup';
 
 const cx = classNames.bind(styles);
 
 interface SidebarProps {
-    noCollection?: boolean;
-    noBestSeller?: boolean;
     collectionId?: string;
     collectionList?: any[];
     categoryFilter: any;
@@ -38,8 +35,6 @@ interface SidebarProps {
 
 const Sidebar = React.memo(
     ({
-        noCollection,
-        noBestSeller,
         collectionId,
         collectionList,
         categoryFilter,
@@ -53,14 +48,11 @@ const Sidebar = React.memo(
         handleFilterColor = () => {},
         handleFilterMaterial = () => {},
     }: SidebarProps) => {
-        const [activeFilterPanel, setActiveFilterPanel] =
-            useState(collectionId);
+        useState(collectionId);
         const [showMore, setShowMore] = useState(0);
         const [showOptionFilter, setShowOptionFilter] = useState<number[]>([]);
 
         // api
-
-        const [bestSeller, setBestSeller] = useState<ProductModel[]>([]);
 
         // Show / hide filter options
         const [categoryShow, categoryHide] = splitArrayAtIndex(
@@ -68,35 +60,6 @@ const Sidebar = React.memo(
             10
         );
         const [colorShow, colorHide] = splitArrayAtIndex(colorList, 10);
-
-        useEffect(() => {
-            const fetchApi = async () => {
-                const bestSellerData =
-                    await productServices.get3ProductBestSeller();
-
-                setBestSeller(bestSellerData.result);
-            };
-
-            fetchApi();
-        }, []);
-
-        const settings = {
-            dots: false,
-            infinite: false,
-            speed: 500,
-            slidesToShow: 1,
-            slidesToScroll: 1,
-            arrows: true,
-        };
-
-        const handleFilterPanel = (activeNumber: string) => {
-            if (activeNumber === activeFilterPanel) {
-                handleFilterCollection?.('');
-                return;
-            }
-
-            handleFilterCollection?.(activeNumber + '');
-        };
 
         const handleShowMore = (num: number) => {
             if (num === showMore) {
@@ -142,86 +105,6 @@ const Sidebar = React.memo(
 
         return (
             <aside className={cx('sidebar', { 'sidebar-card-slider': true })}>
-                <div className={cx('filter-panel', { 'd-none': noCollection })}>
-                    <h5 className={cx('sidebar__title', 'filter-panel__title')}>
-                        Collection
-                    </h5>
-                    <div className={cx('filter-panel__content')}>
-                        <ul className={cx('filter-panel__list')}>
-                            {collectionList?.map((item) => (
-                                <li
-                                    key={item.collectionId}
-                                    className={cx('filter-panel__item', {
-                                        active:
-                                            activeFilterPanel ===
-                                            item.collectionId + '',
-                                    })}
-                                    onClick={() =>
-                                        handleFilterPanel(
-                                            item.collectionId + ''
-                                        )
-                                    }
-                                >
-                                    <div
-                                        className={cx(
-                                            'filter-panel__item-wrapper'
-                                        )}
-                                    >
-                                        <div
-                                            className={cx(
-                                                'filter-panel__item-link'
-                                            )}
-                                        >
-                                            {item.name}
-                                        </div>
-                                        <span
-                                            className={cx('filter-panel__icon')}
-                                        >
-                                            {activeFilterPanel ===
-                                            item.collectionId + ''
-                                                ? '-'
-                                                : '+'}
-                                        </span>
-                                    </div>
-
-                                    {/* Sub-list */}
-                                    {/* <div
-                                    className={cx('filter-panel__sub-list-inner', {
-                                        show: showSubFilterPanel === item.collectionId,
-                                    })}
-                                >
-                                    <div>
-                                        <ul
-                                            className={cx('filter-panel__sub-list')}
-                                        >
-                                            <li>
-                                                <Link
-                                                    to={'#!'}
-                                                    className={cx(
-                                                        'filter-panel__sub-item'
-                                                    )}
-                                                >
-                                                    Unisex Smartwatch
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link
-                                                    to={'#!'}
-                                                    className={cx(
-                                                        'filter-panel__sub-item'
-                                                    )}
-                                                >
-                                                    Prime Pro Smartwatch
-                                                </Link>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div> */}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
                 <div className={cx('filter')}>
                     <div className={cx('filter__top')}>
                         <div className={cx('filter__wrapper')}>
@@ -599,16 +482,6 @@ const Sidebar = React.memo(
                                 ></Checkbox>
                             ))}
                         </div>
-                    </div>
-                </div>
-                <div className={cx('best-seller', { 'd-none': noBestSeller })}>
-                    <h5 className={cx('best-seller__header')}>Best Sellers</h5>
-                    <div className="slider-container">
-                        <Slider {...settings}>
-                            {bestSeller.map((item, index) => (
-                                <BestSellerItem item={item}></BestSellerItem>
-                            ))}
-                        </Slider>
                     </div>
                 </div>
             </aside>

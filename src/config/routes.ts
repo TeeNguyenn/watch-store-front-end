@@ -18,6 +18,7 @@ const routes = {
     forgotPassword: '/forgot-password',
     profile: '/customer/profile',
     orderDetails: '/customer/order-details',
+    searchResult: '/search',
 };
 
 export default routes;

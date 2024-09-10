@@ -38,9 +38,9 @@
     }
 
     &__discount {
-        position: relative;
-        inset: 0;
-        padding: 6px 12px;
-        text-transform: uppercase;
+        position: relative !important;
+        inset: 0 !important ;
+        padding: 6px 12px !important;
+        text-transform: uppercase !important;
     }
 }

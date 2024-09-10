@@ -23,20 +23,42 @@ export const getProduct = async (path: string): Promise<ResultInterface> => {
 
             const variants = responseData[key].variants;
 
-            const colors: ColorModel[] = [];
+            const colorList: ColorModel[] | undefined = [];
 
-            for (const key in variants) {
+            variants?.forEach((variant: any) => {
+                let count = 0;
+                for (let index = 0; index < colorList.length; index++) {
+                    if (
+                        variant.color.id ===
+                        colorList[index].colorId
+                    ) {
+                        count++;
+                        break;
+                    }
+                }
+                if (count === 0) {
+                    colorList.push({
+                        colorId: variant.color.id,
+                        name: variant.color.name,
+                        red: variant.color.red,
+                        green: variant.color.green,
+                        blue: variant.color.blue,
+                        alpha: variant.color.alpha,
+                        totalProduct: variant.color.total_products,
+                    });
+                }
+            });
 
-                colors.push({
-                    colorId: variants[key].color.id,
-                    name: variants[key].color.name,
-                    red: variants[key].color.red,
-                    green: variants[key].color.green,
-                    blue: variants[key].color.blue,
-                    alpha: variants[key].color.alpha,
-                    totalProduct: variants[key].color.total_products,
-                })
-            }
+            const productImages: ProductImageModel[] = [];
+
+            responseData[key].product_images.forEach((productImage: any) => productImages.push({
+                productImageId: productImage.id,
+                productId: productImage.product_id,
+                imageName: productImage.image_name,
+                imageUrl: productImage.image_url,
+                isMainImage: productImage.is_main_image,
+                colorId: productImage.color_id,
+            }))
 
 
             result.push({
@@ -49,8 +71,10 @@ export const getProduct = async (path: string): Promise<ResultInterface> => {
                 averageRate: responseData[key].average_rate,
                 quantityStock: responseData[key].quantity_stock,
                 category: responseData[key].category,
-                colors: colors,
-                productImages: responseData[key].product_images,
+                colors: colorList.sort(
+                    (a: any, b: any) => a.colorId - b.colorId
+                ),
+                productImages: productImages,
             })
         }
 
@@ -65,9 +89,9 @@ export const getProduct = async (path: string): Promise<ResultInterface> => {
     }
 };
 
-export const getAllProduct = async (currentPage: number, limit: number = 12, collectionId?: string, categoryId?: string, colorId?: string, materialId?: string): Promise<ResultInterface> => {
+export const getAllProduct = async (currentPage: number, limit: number = 12, collectionId?: string, categoryId?: string, colorId?: string, materialId?: string, keyword?: string): Promise<ResultInterface> => {
 
-    const path = `products?page=${currentPage}&limit=${limit}&collection-ids=${collectionId || ''}&category-ids=${categoryId || ''}&color-ids=${colorId || ''}&material-ids=${materialId || ''}`;
+    const path = `products?page=${currentPage}&limit=${limit}&collection-ids=${collectionId || ''}&category-ids=${categoryId || ''}&color-ids=${colorId || ''}&material-ids=${materialId || ''}&keyword=${keyword || ''}`;
     return getProduct(path);
 };
 
@@ -85,17 +109,31 @@ export const getProductById = async (productId: number): Promise<ProductModel> =
 
         const variants: any[] = responseData.variants;
 
-        const colors: ColorModel[] = [];
+        const colorList: ColorModel[] | undefined = [];
 
-        variants.forEach(variant => colors.push({
-            colorId: variant.color.id,
-            name: variant.color.name,
-            red: variant.color.red,
-            green: variant.color.green,
-            blue: variant.color.blue,
-            alpha: variant.color.alpha,
-            totalProduct: variant.color.total_products,
-        }))
+        variants?.forEach((variant) => {
+            let count = 0;
+            for (let index = 0; index < colorList.length; index++) {
+                if (
+                    variant.color.id ===
+                    colorList[index].colorId
+                ) {
+                    count++;
+                    break;
+                }
+            }
+            if (count === 0) {
+                colorList.push({
+                    colorId: variant.color.id,
+                    name: variant.color.name,
+                    red: variant.color.red,
+                    green: variant.color.green,
+                    blue: variant.color.blue,
+                    alpha: variant.color.alpha,
+                    totalProduct: variant.color.total_products,
+                });
+            }
+        });
 
         const productImages: ProductImageModel[] = [];
 
@@ -130,6 +168,7 @@ export const getProductById = async (productId: number): Promise<ProductModel> =
             quantity: variant.quantity,
         }))
 
+
         return {
             productId: responseData.id,
             title: responseData.title,
@@ -140,7 +179,9 @@ export const getProductById = async (productId: number): Promise<ProductModel> =
             averageRate: responseData.average_rate,
             quantityStock: responseData.quantity_stock,
             category: responseData.category,
-            colors: colors,
+            colors: colorList.sort(
+                (a: any, b: any) => a.colorId - b.colorId
+            ),
             productImages: productImages,
             variants: variantList,
 
