@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames/bind';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -7,8 +7,10 @@ import Button from '../../../components/Button';
 import styles from './LoginModal.module.scss';
 import { CheckIcon, CloseIcon, ErrorIcon } from '../../../components/Icons';
 import AccountForm from '../../../components/AccountForm';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import config from '../../../config';
+import * as authServices from '../../../services/authServices';
+import PreLoader from '../../../components/PreLoader';
 
 const cx = classNames.bind(styles);
 
@@ -17,6 +19,10 @@ interface LoginModalProps {
 }
 
 const LoginModal = ({ handleCloseLoginModal }: LoginModalProps) => {
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
+
     const links = [
         {
             to: config.routes.forgotPassword,
@@ -46,10 +52,39 @@ const LoginModal = ({ handleCloseLoginModal }: LoginModalProps) => {
                 ),
         }),
         onSubmit: (values) => {
-            //call api
-            console.log(values);
+            const fetchApi = async () => {
+                setLoading(true);
+                const res = await authServices.login({
+                    email: values.email,
+                    password: values.password,
+                });
+                if (!res.token) {
+                    setError(true);
+                    setLoading(false);
+                    return;
+                }
+                navigate('/');
+                localStorage.removeItem('wishlist');
+                handleCloseLoginModal();
+                setLoading(false);
+            };
+            fetchApi();
         },
     });
+
+    const handleChangeEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setError(false);
+        formik.handleChange(e);
+    };
+
+    const handleChangePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setError(false);
+        formik.handleChange(e);
+    };
+
+    if (loading) {
+        return <PreLoader show></PreLoader>;
+    }
 
     return (
         <div className={cx('login-modal')}>
@@ -91,7 +126,7 @@ const LoginModal = ({ handleCloseLoginModal }: LoginModalProps) => {
                             id="email"
                             placeholder={'Email'}
                             className={cx('form__input')}
-                            onChange={formik.handleChange}
+                            onChange={handleChangeEmail}
                             onBlur={formik.handleBlur}
                         />
                         {formik.errors.email && formik.touched.email && (
@@ -122,7 +157,7 @@ const LoginModal = ({ handleCloseLoginModal }: LoginModalProps) => {
                             id="password"
                             placeholder={'Password'}
                             className={cx('form__input')}
-                            onChange={formik.handleChange}
+                            onChange={handleChangePassword}
                             onBlur={formik.handleBlur}
                         />
                         {formik.errors.password && formik.touched.password && (
@@ -133,6 +168,17 @@ const LoginModal = ({ handleCloseLoginModal }: LoginModalProps) => {
                                 ></ErrorIcon>
                                 <span className={cx('form__error-title')}>
                                     {formik.errors.password}
+                                </span>
+                            </div>
+                        )}
+                        {error && (
+                            <div className={cx('form__error')}>
+                                <ErrorIcon
+                                    width="1.5rem"
+                                    height="1.5rem"
+                                ></ErrorIcon>
+                                <span className={cx('form__error-title')}>
+                                    Wrong email or password. Please try again.
                                 </span>
                             </div>
                         )}

@@ -12,10 +12,15 @@ import {
     faStar as starFill,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import FeedbackModel from '../../../../models/FeedbackModel';
 
 const cx = classNames.bind(styles);
 
-const Review = () => {
+interface ReviewProps {
+    feedbackList?: FeedbackModel[];
+}
+
+const Review = ({ feedbackList }: ReviewProps) => {
     const [sortBy, setSortBy] = useState('Most Recent');
     const [visible, setVisible] = useState(false);
     const [showReviewForm, setShowReviewForm] = useState(false);
@@ -325,7 +330,6 @@ const Review = () => {
                     interactive
                     delay={[0, 300]}
                     placement="bottom-start"
-                    trigger="click"
                     onClickOutside={() => setVisible(false)}
                     render={(attrs) => (
                         <div className={cx('sort__options')}>
@@ -497,45 +501,29 @@ const Review = () => {
                 </Tippy>
             </div>
             <div className={cx('review__body')}>
-                <div className={cx('review__item')}>
-                    <div className={cx('review__top')}>
-                        <div className={cx('review__row-rating')}>
+                {feedbackList?.map((item, index) => (
+                    <div key={item.feedbackId} className={cx('review__item')}>
+                        <div className={cx('review__profile-wrapper')}>
+                            <Image
+                                src={images.testimonialImg01}
+                                className={cx('review__profile-img')}
+                            ></Image>
+                        </div>
+                        <div className={cx('review__top')}>
+                            <p className={cx('review__author')}>Tee</p>
                             <div className={cx('review__stars')}>
-                                {renderRating(5)}
+                                {renderRating(item.rate || 0)}
                             </div>
                             <div className={cx('review__timestamp')}>
                                 05/21/2024
                             </div>
-                        </div>
-                        <div className={cx('review__row-profile')}>
-                            <div className={cx('review__profile-wrapper')}>
-                                <Image
-                                    src={images.testimonialImg01}
-                                    className={cx('review__profile-img')}
-                                ></Image>
-                            </div>
-                            <div className={cx('review__author-wrapper')}>
-                                <p className={cx('review__author')}>Tee</p>
+
+                            <div className={cx('review__content')}>
+                                <p>{item.comment}</p>
                             </div>
                         </div>
                     </div>
-                    <div className={cx('review__content')}>
-                        <p>
-                            <strong>
-                                Consequat nisl vel pretium lectus quam id
-                            </strong>
-                        </p>
-                        <p>
-                            Risus viverra adipiscing at in tellus. Morbi blandit
-                            cursus risus at ultrices mi tempus imperdiet nulla.
-                            Leo duis ut diam quam nulla porttitor. Penatibus et
-                            magnis dis parturient. Eu consequat ac felis donec
-                            et. Porta lorem mollis aliquam ut porttitor leo a
-                            diam sollicitudin. Nunc sed augue lacus viverra
-                            vitae congue eu.
-                        </p>
-                    </div>
-                </div>
+                ))}
             </div>
         </div>
     );

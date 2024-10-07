@@ -37,6 +37,7 @@ const MobileSubMenu = ({
                 <nav className={cx('mobile-sub-menu__navbar')}>
                     {navList?.map((navItem, index) => (
                         <NavLink
+                            key={index}
                             to={navItem.to}
                             className={(nav) =>
                                 cx('mobile-sub-menu__nav-item', {

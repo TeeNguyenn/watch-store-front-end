@@ -10,6 +10,9 @@ import aboutImages from '../../assets/images/about';
 import cartImages from '../../assets/images/cart';
 import Feature from '../../components/Feature';
 import Faq from '../../components/Faq';
+import QuickBuy from '../../components/QuickBuy';
+import { CloseIcon } from '../../components/Icons';
+import config from '../../config';
 
 const cx = classNames.bind(styles);
 

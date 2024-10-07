@@ -1,7 +1,10 @@
 import CategoryModel from "./CategoryModel";
+import CollectionModel from "./CollectionModel";
 import ColorModel from "./ColorModel";
 import FeedbackModel from "./FeedbackModel";
+import MaterialModel from "./MaterialModel";
 import ProductImageModel from "./ProductImageModel";
+import ScreenSizeModel from "./ScreenSizeModel";
 import VariantModel from "./VariantModel";
 
 class ProductModel {
@@ -15,8 +18,11 @@ class ProductModel {
     quantityStock: number;
     category: CategoryModel;
     colors: ColorModel[];
+    materials?: MaterialModel[];
+    screenSizes?: ScreenSizeModel[];
     productImages: ProductImageModel[];
     variants?: VariantModel[];
+    collections?: CollectionModel[];
     // feedbacks: FeedbackModel[];
 
 
@@ -31,8 +37,12 @@ class ProductModel {
         quantityStock: number,
         category: CategoryModel,
         colors: ColorModel[],
+        materials: MaterialModel[],
+        screenSizes: ScreenSizeModel[],
         productImages: ProductImageModel[],
         variants: VariantModel[],
+        collections: CollectionModel[],
+
 
         // feedbacks: FeedbackModel[],
     ) {
@@ -46,8 +56,11 @@ class ProductModel {
         this.quantityStock = quantityStock;
         this.category = category;
         this.colors = colors;
+        this.screenSizes = screenSizes;
+        this.materials = materials;
         this.productImages = productImages;
         this.variants = variants;
+        this.collections = collections;
         // this.feedbacks = feedbacks;
     }
 

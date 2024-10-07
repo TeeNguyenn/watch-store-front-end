@@ -18,5 +18,23 @@ export const get = async (path: string, options = {}) => {
     return response.data;
 }
 
+// custom post method of instance axios
+export const post = async (path: string, data: any, options = {}) => {
+    const response = await request.post(path, data, options);
+    return response.data;
+};
+
+// custom delete method of instance axios
+export const del = async (path: string, options = {}) => {
+    const response = await request.delete(path, options);
+    return response.data;
+};
+
+// custom put method of instance axios
+export const put = async (path: string, data: any, options = {}) => {
+    const response = await request.put(path, data, options);
+    return response.data;
+};
+
 
 export default request;

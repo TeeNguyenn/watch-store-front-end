@@ -106,3 +106,78 @@ export function splitArrayAtIndex(arr: any[], index: number) {
     const secondPart = arr.slice(index);
     return [firstPart, secondPart];
 }
+
+export function getCurrentDate(orderDate: number) {
+    const today = new Date(orderDate);
+
+    const day = today.getDate();
+    const year = today.getFullYear();
+
+    // Mảng chứa tên các tháng bằng tiếng Anh
+    const months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+    ];
+
+    const month = months[today.getMonth()]; // Lấy tên tháng từ mảng
+
+    return `${month} ${day}, ${year}`;
+}
+
+export function getCurrentDateWithHour(
+    orderDate: number,
+    isHasYear: boolean = false
+) {
+    const today = new Date(orderDate);
+
+    const day = today.getDate();
+    const year = today.getFullYear();
+
+    // Mảng chứa tên các tháng bằng tiếng Anh
+    const months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+    ];
+
+    const month = months[today.getMonth()]; // Lấy tên tháng từ mảng
+
+    // Lấy giờ, phút và giây
+    let hours = today.getHours();
+    const minutes = today.getMinutes();
+
+    // Xác định AM hoặc PM
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+
+    // Chuyển đổi giờ sang định dạng 12 giờ
+    hours = hours % 12;
+    hours = hours ? hours : 12; // Giờ 0 sẽ chuyển thành 12
+
+    // Format lại phút cho đủ 2 chữ số
+    const minutesFormatted = minutes < 10 ? `0${minutes}` : minutes;
+
+    if (isHasYear) {
+        return `${month} ${day}, ${year} ${hours}:${minutesFormatted} ${ampm}`;
+    }
+
+    return `${month} ${day}, ${hours}:${minutesFormatted} ${ampm}`;
+}

@@ -8,12 +8,13 @@ import Badge from '../Badge';
 const cx = classNames.bind(styles);
 
 interface PriceProps {
+    noBadge?: boolean;
     className?: string;
     price?: number;
     discount?: number;
 }
 
-const Price = ({ className, price = 0, discount = 0 }: PriceProps) => {
+const Price = ({ className, noBadge, price = 0, discount = 0 }: PriceProps) => {
     return (
         <div className={cx('price__container', className)}>
             <div className={cx('price__regular-wrapper')}>
@@ -30,7 +31,7 @@ const Price = ({ className, price = 0, discount = 0 }: PriceProps) => {
             >
                 <p className={cx('price__old')}>{formatPrice(price)}</p>
             </div>
-            {discount !== 0 && (
+            {discount !== 0 && !noBadge && (
                 <Badge
                     className={cx('price__discount')}
                     title={`SAVE ${parseInt(discount + '')}%`}

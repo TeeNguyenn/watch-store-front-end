@@ -64,8 +64,8 @@ export const ErrorIcon = ({ width, height, className }: ErrorIconProps) => (
             cx="6.5"
             cy="6.5"
             r="5.5"
-            fill="#EB001B"
-            stroke="#EB001B"
+            fill="currentColor"
+            stroke="currentColor"
             strokeWidth="0.7"
         ></circle>
         <path
@@ -75,7 +75,7 @@ export const ErrorIcon = ({ width, height, className }: ErrorIconProps) => (
         <path
             d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z"
             fill="white"
-            stroke="#EB001B"
+            stroke="currentColor"
             strokeWidth="0.7"
         ></path>
     </svg>
@@ -359,8 +359,8 @@ export const ZoomInIcon = ({
         className={className}
         width={width || '2.4rem'}
         height={height || '2.4rem'}
-        clip-rule="evenodd"
-        fill-rule="evenodd"
+        clipRule="evenodd"
+        fillRule="evenodd"
         strokeLinejoin="round"
         stroke-miterlimit="2"
         viewBox="0 0 24 24"
@@ -368,7 +368,7 @@ export const ZoomInIcon = ({
     >
         <path
             d="m15.97 17.031c-2.479 1.238-3.384 1.985-5.461 1.985-4.697 0-8.509-3.812-8.509-8.508s3.812-8.508 8.509-8.508c4.695 0 8.508 3.812 8.508 8.508 0 2.078-.747 3.984-1.985 5.461l4.749 4.75c.146.146.219.338.219.531 0 .587-.537.75-.75.75-.192 0-.384-.073-.531-.22zm-5.461-13.53c-3.868 0-7.007 3.14-7.007 7.007s3.139 7.007 7.007 7.007c3.866 0 7.007-3.14 7.007-7.007s-3.141-7.007-7.007-7.007zm-.744 6.26h-2.5c-.414 0-.75.336-.75.75s.336.75.75.75h2.5v2.5c0 .414.336.75.75.75s.75-.336.75-.75v-2.5h2.5c.414 0 .75-.336.75-.75s-.336-.75-.75-.75h-2.5v-2.5c0-.414-.336-.75-.75-.75s-.75.336-.75.75z"
-            fill-rule="nonzero"
+            fillRule="nonzero"
         />
     </svg>
 );
@@ -1013,7 +1013,7 @@ export const PagingLeftArrowIcon = ({
         fill="currentColor"
     >
         <defs>
-            <clipPath id="clip-path">
+            <clipPath id="clipPath">
                 <rect
                     id="Rectangle_22"
                     width="10.511"
@@ -1054,8 +1054,8 @@ export const RightArrowIcon = ({
         xmlns="http://www.w3.org/2000/svg"
     >
         <path
-            fill-rule="evenodd"
-            clip-rule="evenodd"
+            fillRule="evenodd"
+            clipRule="evenodd"
             d="M8.537.808a.5.5 0 01.817-.162l4 4a.5.5 0 010 .708l-4 4a.5.5 0 11-.708-.708L11.793 5.5H1a.5.5 0 010-1h10.793L8.646 1.354a.5.5 0 01-.109-.546z"
             fill="currentColor"
         ></path>
@@ -1998,9 +1998,15 @@ interface HeartIconProps {
     width?: string;
     height?: string;
     className?: string;
+    onClick?: () => void;
 }
 
-export const HeartIcon = ({ width, height, className }: HeartIconProps) => (
+export const HeartIcon = ({
+    width,
+    height,
+    className,
+    onClick,
+}: HeartIconProps) => (
     <svg
         className={className}
         width={width || '1.8rem'}
@@ -2008,6 +2014,7 @@ export const HeartIcon = ({ width, height, className }: HeartIconProps) => (
         viewBox="0 0 18 17"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        onClick={onClick}
     >
         <path
             d="M1.04297 5.85212C0.723013 3.5431 2.21909 1.26351 4.55949 1.02232C6.32517 0.839949 7.88938 1.79297 8.59743 3.23427C8.7663 3.57841 9.23437 3.57841 9.40323 3.23427C10.1113 1.79297 11.6755 0.839949 13.4412 1.02232C15.7816 1.26351 17.2747 3.5431 16.9577 5.85212C16.2141 11.2378 9.00033 16 9.00033 16C9.00033 16 1.78656 11.2378 1.04297 5.85212Z"
@@ -2034,6 +2041,7 @@ export const ActiveHeartIcon = ({
         className={className}
         width={width || '1.8rem'}
         height={height || '1.8rem'}
+        fill="currentColor"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 512 512"
     >
@@ -2190,8 +2198,37 @@ export const AddToCartIcon = ({
     </svg>
 );
 
-interface ProgressIconProps {
+interface CompareFillIconProps {
     width?: string;
     height?: string;
     className?: string;
 }
+
+export const CompareFillIcon = ({
+    width,
+    height,
+    className,
+}: CompareFillIconProps) => (
+    <svg
+        className={className}
+        width={width || '1.8rem'}
+        height={height || '1.8rem'}
+        fill="currentcolor"
+        version="1.1"
+        id="Layer_1"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlnsXlink="http://www.w3.org/1999/xlink"
+        x="0px"
+        y="0px"
+        viewBox="0 0 18 18"
+        xmlSpace="preserve"
+    >
+        <path
+            d="M9,17.5c-1.2,0-2.3-0.2-3.3-0.7c-1-0.4-1.9-1.1-2.7-1.8s-1.4-1.7-1.8-2.7S0.5,10.2,0.5,9s0.2-2.3,0.7-3.3S2.2,3.8,3,3
+	s1.7-1.4,2.7-1.8S7.8,0.5,9,0.5c0.9,0,1.8,0.1,2.6,0.4c0.8,0.3,1.6,0.6,2.3,1.1l-1.2,1.3c-0.5-0.3-1.1-0.6-1.7-0.8
+	C10.3,2.3,9.7,2.2,9,2.2c-1.9,0-3.5,0.7-4.8,2s-2,2.9-2,4.8s0.7,3.5,2,4.8s2.9,2,4.8,2s3.5-0.7,4.8-2s2-2.9,2-4.8c0-0.3,0-0.5,0-0.8
+	c0-0.3-0.1-0.5-0.1-0.7L17,6.1c0.2,0.5,0.3,0.9,0.4,1.4c0.1,0.5,0.1,1,0.1,1.5c0,1.2-0.2,2.3-0.7,3.3c-0.4,1-1.1,1.9-1.8,2.7
+	s-1.7,1.4-2.7,1.8C11.3,17.3,10.2,17.5,9,17.5z M7.8,12.9L4.2,9.3l1.2-1.2l2.4,2.4L16.3,2l1.2,1.2L7.8,12.9z"
+        />
+    </svg>
+);

@@ -403,7 +403,6 @@ const SearchResult = () => {
                                     delay={[0, 300]}
                                     offset={[5, 5]}
                                     placement="bottom-end"
-                                    trigger="click"
                                     onClickOutside={() => setVisible(false)}
                                     render={(attrs) => (
                                         <div className={cx('sort__options')}>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './OrderSuccess.module.scss';
 import { OrderSuccessIcon } from '../../components/Icons';
@@ -6,9 +6,107 @@ import Image from '../../components/Image';
 import images from '../../assets/images';
 import Button from '../../components/Button';
 import config from '../../config';
+import * as orderServices from '../../services/orderServices';
+import { formatPrice, getCurrentDate } from '../../utils/Functions';
+import * as productServices from '../../services/productServices';
+import ProductModel from '../../models/ProductModel';
+import * as cartItemServices from '../../services/cartItemServices';
+import PreLoader from '../../components/PreLoader';
+import { useNavigate } from 'react-router-dom';
+import PageNotFound from '../PageNotFound';
+
 const cx = classNames.bind(styles);
 
 const OrderSuccess = () => {
+    const products = JSON.parse(localStorage.getItem('products') + '');
+
+    const [orderDetail, setOrderDetail] = useState<any>({});
+    const currentUser = localStorage.getItem('user_id');
+    const [loading, setLoading] = useState(true);
+    const [total, setTotal] = useState(0);
+    const [productList, setProductList] = useState<ProductModel[]>([]);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (currentUser && products.length > 0) {
+            window.scrollTo(0, 0);
+
+            let result: ProductModel[] = [];
+            const fetchApi = async (cartItem: any) => {
+                const res = await productServices.getProductById(
+                    cartItem.product_id
+                );
+
+                result.push(res);
+
+                const resData = cartItemServices.deleteCartItem({
+                    userId: Number.parseInt(currentUser),
+                    productId: cartItem?.product_id,
+                    colorId: cartItem?.color_id,
+                    screenSizeId: cartItem?.screen_size_id,
+                    materialId: cartItem?.material_id,
+                });
+
+                if (result.length === products.length) {
+                    setProductList(result);
+                    let totalTemp = 0;
+                    result.forEach((productItem, index) => {
+                        if (productItem.discount) {
+                            totalTemp =
+                                totalTemp +
+                                products.at(index).quantity *
+                                    productItem.price *
+                                    (1 - productItem.discount / 100);
+                        } else {
+                            totalTemp =
+                                products.at(index).quantity * productItem.price;
+                        }
+                    });
+                    setTotal(totalTemp);
+                    window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
+
+                    setLoading(false);
+
+                    setTimeout(() => {
+                        localStorage.setItem('products', JSON.stringify([]));
+                        localStorage.setItem('orderId', JSON.stringify(''));
+                        // navigate(config.routes.shop);
+                    }, 5000);
+                }
+            };
+            products.forEach((item: any, index: number) => {
+                setTimeout(() => {
+                    fetchApi(item);
+                }, index * 500);
+            });
+        }
+    }, [currentUser]);
+
+    useEffect(() => {
+        if (products.length > 0) {
+            const fetchApi = async () => {
+                const orderId = localStorage.getItem('orderId');
+                const res = await orderServices.getOrderByOrderId(orderId + '');
+
+                setOrderDetail(res);
+            };
+
+            fetchApi();
+        }
+    }, []);
+
+    if (
+        products.length === 0 ||
+        !localStorage.getItem('orderId') ||
+        !products
+    ) {
+        return <PageNotFound></PageNotFound>;
+    }
+
+    if (loading) {
+        return <PreLoader show></PreLoader>;
+    }
+
     return (
         <div className={cx('', { 'container-spacing': true })}>
             <div className={cx('order')}>
@@ -32,7 +130,7 @@ const OrderSuccess = () => {
                                         Order ID:
                                     </div>
                                     <div className={cx('order__info-value')}>
-                                        DH3995
+                                        {`OID${orderDetail.id}`}
                                     </div>
                                 </div>
                                 <div className={cx('order__info-row')}>
@@ -40,7 +138,7 @@ const OrderSuccess = () => {
                                         Date:
                                     </div>
                                     <div className={cx('order__info-value')}>
-                                        August 20, 2024
+                                        {getCurrentDate(orderDetail.order_date)}
                                     </div>
                                 </div>
                                 <div className={cx('order__info-row')}>
@@ -48,7 +146,7 @@ const OrderSuccess = () => {
                                         Consignee:
                                     </div>
                                     <div className={cx('order__info-value')}>
-                                        Tee
+                                        {orderDetail.first_name}
                                     </div>
                                 </div>
                                 <div className={cx('order__info-row')}>
@@ -56,7 +154,7 @@ const OrderSuccess = () => {
                                         Mobile phone number:
                                     </div>
                                     <div className={cx('order__info-value')}>
-                                        0334897632
+                                        {orderDetail.phone_number}
                                     </div>
                                 </div>
                                 <div className={cx('order__info-row')}>
@@ -64,7 +162,7 @@ const OrderSuccess = () => {
                                         Email:
                                     </div>
                                     <div className={cx('order__info-value')}>
-                                        Tee@gmail.com
+                                        {orderDetail.email}
                                     </div>
                                 </div>
                                 <div className={cx('order__info-row')}>
@@ -72,7 +170,7 @@ const OrderSuccess = () => {
                                         Payment method:
                                     </div>
                                     <div className={cx('order__info-value')}>
-                                        Cash on Delivery
+                                        {orderDetail.payment_method_name}
                                     </div>
                                 </div>
                                 <div className={cx('order__info-row')}>
@@ -80,8 +178,7 @@ const OrderSuccess = () => {
                                         Shipping address:
                                     </div>
                                     <div className={cx('order__info-value')}>
-                                        0334897632, Thị trấn Văn Điển, Huyện
-                                        Thanh Trì, Hà Nội
+                                        {orderDetail.shipping_address}
                                     </div>
                                 </div>
                             </div>
@@ -91,85 +188,141 @@ const OrderSuccess = () => {
                                 Product
                             </h3>
                             <div className={cx('order__product-list')}>
-                                <div className={cx('order__product-item')}>
-                                    <div className={cx('order__product-media')}>
-                                        <Image
-                                            src={images.productImg}
-                                            className={cx('order__product-img')}
-                                        ></Image>
-                                        <p
+                                {productList.map((productItem, index) => (
+                                    <div className={cx('order__product-item')}>
+                                        <div
+                                            key={productItem.productId}
                                             className={cx(
-                                                'order__product-quantity'
+                                                'order__product-media'
                                             )}
                                         >
-                                            1
-                                        </p>
-                                    </div>
-                                    <div
-                                        className={cx('order__product-content')}
-                                    >
-                                        <p
+                                            <Image
+                                                src={
+                                                    productItem.productImages
+                                                        .filter(
+                                                            (item) =>
+                                                                item.colorId ===
+                                                                    products.at(
+                                                                        index
+                                                                    )
+                                                                        .color_id &&
+                                                                item.isMainImage
+                                                        )
+                                                        .at(0)?.imageUrl || ''
+                                                }
+                                                className={cx(
+                                                    'order__product-img'
+                                                )}
+                                            ></Image>
+                                            <p
+                                                className={cx(
+                                                    'order__product-quantity'
+                                                )}
+                                            >
+                                                {products.at(index).quantity}
+                                            </p>
+                                        </div>
+                                        <div
                                             className={cx(
-                                                'order__product-name'
+                                                'order__product-content'
                                             )}
                                         >
-                                            Digital Smartwatch
-                                        </p>
-                                        <p
+                                            <p
+                                                className={cx(
+                                                    'order__product-name'
+                                                )}
+                                            >
+                                                {productItem.title}
+                                            </p>
+                                            <p
+                                                className={cx(
+                                                    'order__product-styles'
+                                                )}
+                                            >
+                                                {
+                                                    productItem.colors
+                                                        .filter(
+                                                            (item) =>
+                                                                item.colorId ===
+                                                                products.at(
+                                                                    index
+                                                                ).color_id
+                                                        )
+                                                        .at(0)?.name
+                                                }{' '}
+                                                /{' '}
+                                                {productItem?.screenSizes
+                                                    ?.filter(
+                                                        (item) =>
+                                                            item.sizeId ===
+                                                            products.at(index)
+                                                                .screen_size_id
+                                                    )
+                                                    .at(0)?.size +
+                                                    ' Inches'}{' '}
+                                                /{' '}
+                                                {
+                                                    productItem?.materials
+                                                        ?.filter(
+                                                            (item) =>
+                                                                item.materialId ===
+                                                                products.at(
+                                                                    index
+                                                                ).material_id
+                                                        )
+                                                        .at(0)?.name
+                                                }
+                                            </p>
+                                        </div>
+                                        <div
                                             className={cx(
-                                                'order__product-styles'
+                                                'order__product-price'
                                             )}
                                         >
-                                            Dusty Grey / 1.5 Inches / Leather
-                                        </p>
+                                            {productItem.discount
+                                                ? formatPrice(
+                                                      products.at(index)
+                                                          .quantity *
+                                                          productItem.price *
+                                                          (1 -
+                                                              productItem.discount /
+                                                                  100)
+                                                  )
+                                                : formatPrice(
+                                                      products.at(index)
+                                                          .quantity *
+                                                          productItem.price
+                                                  )}
+                                        </div>
                                     </div>
-                                    <div className={cx('order__product-price')}>
-                                        $1000
-                                    </div>
-                                </div>
-                                <div className={cx('order__product-item')}>
-                                    <div className={cx('order__product-media')}>
-                                        <Image
-                                            src={images.productImg}
-                                            className={cx('order__product-img')}
-                                        ></Image>
-                                        <p
-                                            className={cx(
-                                                'order__product-quantity'
-                                            )}
-                                        >
-                                            1
-                                        </p>
-                                    </div>
-                                    <div
-                                        className={cx('order__product-content')}
-                                    >
-                                        <p
-                                            className={cx(
-                                                'order__product-name'
-                                            )}
-                                        >
-                                            Digital Smartwatch
-                                        </p>
-                                        <p
-                                            className={cx(
-                                                'order__product-styles'
-                                            )}
-                                        >
-                                            Dusty Grey / 1.5 Inches / Leather
-                                        </p>
-                                    </div>
-                                    <div className={cx('order__product-price')}>
-                                        $1000
-                                    </div>
-                                </div>
+                                ))}
+                            </div>
+                            <div className={cx('order__subtotal')}>
+                                <h3 className={cx('order__subtotal-label')}>
+                                    Subtotal
+                                </h3>
+                                <p className={cx('order__subtotal-price')}>
+                                    {formatPrice(total)}
+                                </p>
+                            </div>
+                            <div className={cx('order__shipping')}>
+                                <h3 className={cx('order__shipping-label')}>
+                                    Shipping
+                                </h3>
+                                <p className={cx('order__shipping-price')}>
+                                    {formatPrice(
+                                        orderDetail.shipping_cost / 1000
+                                    )}
+                                </p>
                             </div>
                             <div className={cx('order__total')}>
                                 <h3 className={cx('order__total-label')}>
                                     Total
                                 </h3>
                                 <p className={cx('order__total-price')}>
-                                    $17.86
+                                    {formatPrice(
+                                        total + orderDetail.shipping_cost / 1000
+                                    )}
                                 </p>
                             </div>
                         </div>

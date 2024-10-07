@@ -7,6 +7,7 @@ const icons = {
     meal: require('./meal.webp'),
     schedule: require('./schedule.webp'),
     swim: require('./swim.webp'),
+    shipping: require('./shipping-icon.png'),
 };
 
 export default icons;

@@ -13,6 +13,7 @@
         text-align: center;
         overflow: hidden;
         height: 100%;
+        transition: var(--transition-config);
 
         &.horizontal {
             align-items: center;
@@ -43,7 +44,15 @@
     &__inner:hover &__product-icons {
         opacity: 1;
         visibility: visible;
-        transform: translateY(0);
+        bottom: 20px;
+    }
+
+    &__inner.wishlist:hover {
+        transform: translateY(-2px);
+    }
+
+    &__inner.wishlist:hover &__thumbnail {
+        transform: scale(1);
     }
 
     &__media {
@@ -71,6 +80,26 @@
         transition: var(--transition-config);
         // mix-blend-mode: multiply;
         object-fit: contain;
+    }
+
+    &__close-btn {
+        width: 39px;
+        height: 39px;
+        padding: 0;
+        border-radius: 50%;
+        border: 1px solid;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+
+        &:hover {
+            color: var(--primary-color);
+        }
+
+        @include abstracts.screen(md) {
+            width: 30px;
+            height: 30px;
+        }
     }
 
     &__content {

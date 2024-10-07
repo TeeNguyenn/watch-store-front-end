@@ -2,7 +2,17 @@
 @import '../../../../styles/base/keyframe';
 
 .review {
-    padding: 16px 0;
+    padding: 16px 0 0;
+
+    &__item {
+        display: flex;
+        gap: 10px;
+        padding: 16px 0;
+
+        &:not(:last-child) {
+            border-bottom: 1px solid rgba(51, 153, 153, 0.1);
+        }
+    }
 
     &__title {
         margin-bottom: 12px;
@@ -120,7 +130,6 @@
     }
 
     &__body {
-        padding: 16px 0;
         border-top: 1px solid rgba(51, 153, 153, 0.1);
     }
 
@@ -134,15 +143,16 @@
     &__stars {
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 1px;
         color: var(--primary-color);
-        font-size: 1.5rem;
+        font-size: 1.2rem;
     }
 
     &__timestamp {
         font-size: 1.28rem;
         line-height: 1.4;
         color: #7b7b7b;
+        margin: 4px 0 15px;
     }
 
     &__row-profile {
@@ -152,9 +162,11 @@
     }
 
     &__profile-wrapper {
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
         background-color: rgba(224, 224, 224, 0.5);
+        flex-shrink: 0;
+        border-radius: 50%;
     }
 
     &__profile-img {
@@ -163,7 +175,9 @@
     }
 
     &__author {
-        line-height: 1.4;
+        font-size: 1.4rem;
+        line-height: 2.7rem;
+        margin: 0 !important;
     }
 
     &__content {

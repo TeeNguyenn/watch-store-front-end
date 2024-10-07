@@ -201,7 +201,7 @@ const HomeProduct = () => {
                                         )}
                                     </Slider>
                                 </div>
-                                <div className={cx('product-detail__actions')}>
+                                {/* <div className={cx('product-detail__actions')}>
                                     <ul
                                         className={cx(
                                             'product-detail__actions-list'
@@ -226,7 +226,7 @@ const HomeProduct = () => {
                                             </Button>
                                         </li>
                                     </ul>
-                                </div>
+                                </div> */}
                             </div>
                         </section>
                     </div>

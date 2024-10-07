@@ -89,6 +89,7 @@ const Pagination = ({
                 {pageList.map((page, index) => (
                     <li>
                         <Button
+                            key={index}
                             className={cx('pagination__page', {
                                 active: page === currentPage,
                                 modifier,

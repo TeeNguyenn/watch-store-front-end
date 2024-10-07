@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import Tippy from '@tippyjs/react/headless';
 
 import styles from './Header.module.scss';
@@ -29,6 +29,11 @@ import LoginModal from '../LoginModal';
 import SlideShow from '../SlideShow';
 import Button from '../../../components/Button';
 import MobileSubMenu from '../../../components/MobileSubMenu';
+import * as userServices from '../../../services/userServices';
+import UserModel from '../../../models/UserModel';
+import { CartContext } from '../../../contexts/CartContext';
+import * as cartItemServices from '../../../services/cartItemServices';
+import PreLoader from '../../../components/PreLoader';
 
 const cx = classNames.bind(styles);
 
@@ -42,12 +47,19 @@ const Header = () => {
     const [showMobileSubMenu, setShowMobileSubMenu] = useState(false);
     const [showDropdownProfile, setShowDropdownProfile] = useState(false);
     const [isProfileDrawer, setIsProfileDrawer] = useState(false);
-
+    const [userDetail, setUserDetail] = useState<UserModel>();
+    const [loading, setLoading] = useState(false);
     const location = useLocation();
     const pathName = location.pathname;
+    const context = useContext(CartContext);
+    const navigate = useNavigate();
 
-    // fake user status
-    const currentUser = true;
+    const [cartList, setCartList] = useState<any[]>(
+        JSON.parse(localStorage.getItem('cart_list') + '') || []
+    );
+
+    // User status
+    const currentUser = localStorage.getItem('user_id');
 
     useEffect(() => {
         if (pathName === '/') {
@@ -56,6 +68,65 @@ const Header = () => {
             setIsSlideShow(false);
         }
     }, [pathName]);
+
+    useEffect(() => {
+        const handleStorageChange = () => {
+            if (!currentUser) {
+                // setCartList(
+                //     JSON.parse(localStorage.getItem('cart_list') + '') || []
+                // );
+            } else {
+                const fetchApi = async () => {
+                    const res = await cartItemServices.getCartItemByUserId();
+                    setCartList(res.reverse());
+                };
+                // fetchApi();
+                setTimeout(fetchApi, 1000); //delay for post cart item run before
+            }
+        };
+
+        // Lắng nghe sự kiện "storage" từ các tab khác
+        window.addEventListener('storage', handleStorageChange);
+
+        // Lắng nghe sự kiện tùy chỉnh "storageChanged" trong cùng tab
+        window.addEventListener('storageChanged', handleStorageChange);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('storageChanged', handleStorageChange);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (currentUser) {
+            // const cartList =
+            //     JSON.parse(localStorage.getItem('cart_list') + '') || [];
+
+            // const fetchApi = async (cartItem: any) => {
+            //     const res = await cartItemServices.postCartItem(cartItem);
+            // };
+            // cartList.forEach((item: any) => {
+            //     fetchApi(item);
+            // });
+            localStorage.removeItem('cart_list');
+
+            const fetchApi2 = async () => {
+                const res = await cartItemServices.getCartItemByUserId();
+                setCartList(res.reverse());
+            };
+            fetchApi2();
+        }
+    }, [currentUser]);
+
+    useEffect(() => {
+        if (currentUser) {
+            const fetchApi = async () => {
+                const res = await userServices.getUserDetail();
+                setUserDetail(res);
+            };
+            fetchApi();
+        }
+    }, [currentUser]);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -69,6 +140,8 @@ const Header = () => {
         window.addEventListener('scroll', handleScroll);
     }, []);
 
+    // api
+
     const handleSearch = () => {
         setShowSearchModal(!showSearchModal);
     };
@@ -79,13 +152,15 @@ const Header = () => {
 
     const handleCloseCartDrawer = () => {
         setShowCartDrawer(false);
+        context?.handleCart();
     };
 
     if (
         showSearchModal ||
         showCartDrawer ||
         showMobileMenu ||
-        showMobileSubMenu
+        showMobileSubMenu ||
+        context?.cart
     ) {
         document.body.classList.add('hide-scroll');
     } else {
@@ -94,6 +169,21 @@ const Header = () => {
 
     const handleCloseLoginModal = () => {
         setShowLoginModal(false);
+    };
+
+    const handleLogout = () => {
+        setShowDropdownProfile(false);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user_id');
+        localStorage.removeItem('refresh_token');
+        setCartList([]);
+
+        if (pathName === '/') {
+            navigate(0); //reload
+        } else {
+            navigate(config.routes.home);
+            navigate(0); //reload
+        }
     };
 
     const handleMobileSubMenu = (isCloseMobileSubMenu: boolean) => {
@@ -113,6 +203,10 @@ const Header = () => {
         }
         setShowMobileSubMenu(true);
     };
+
+    if (loading) {
+        return <PreLoader show></PreLoader>;
+    }
 
     return (
         <div className={cx('', { 'container-spacing': true })}>
@@ -593,14 +687,24 @@ const Header = () => {
                         </span>
                         <div
                             className={cx('icon')}
-                            onClick={() => setShowCartDrawer(true)}
+                            onClick={() => {
+                                setShowCartDrawer(true);
+                                context?.handleCart();
+                                return;
+                            }}
                         >
                             <CartIcon
                                 width={'2.6rem'}
                                 height={'2.6rem'}
                                 className={cx('actions__icon')}
                             ></CartIcon>
-                            <span className={cx('quantity')}>1</span>
+                            <span
+                                className={cx('quantity', {
+                                    'd-none': cartList.length === 0,
+                                })}
+                            >
+                                {cartList.length}
+                            </span>
                         </div>
                         {/* Profile */}
                         <Tippy
@@ -609,7 +713,6 @@ const Header = () => {
                             delay={[0, 300]}
                             offset={[15, 20]}
                             placement="bottom-end"
-                            trigger="click"
                             onClickOutside={() => setShowDropdownProfile(false)}
                             render={(attrs) => (
                                 <div className={cx('dropdown-profile')}>
@@ -622,7 +725,7 @@ const Header = () => {
                                             )}
                                         >
                                             <Image
-                                                src={images.shipping}
+                                                src={images.defaultAvatar}
                                                 alt="avatar"
                                                 className={cx(
                                                     'dropdown-profile__avatar'
@@ -634,7 +737,10 @@ const Header = () => {
                                                 'dropdown-profile__name'
                                             )}
                                         >
-                                            Tee Leonel
+                                            {userDetail?.lastName +
+                                                ', ' +
+                                                userDetail?.firstName +
+                                                ''}
                                         </h6>
                                     </div>
                                     <div
@@ -733,14 +839,12 @@ const Header = () => {
                                         </Link>
                                     </div>
                                     <Button
-                                        to="#!"
+                                        to="/"
                                         leftIcon={<LogoutIcon></LogoutIcon>}
                                         className={cx(
                                             'dropdown-profile__logout-btn'
                                         )}
-                                        onClick={() =>
-                                            setShowDropdownProfile(false)
-                                        }
+                                        onClick={handleLogout}
                                     >
                                         Log out
                                     </Button>
@@ -776,7 +880,7 @@ const Header = () => {
                 )}
 
                 <CartWrapper
-                    show={showCartDrawer}
+                    show={showCartDrawer || context?.cart}
                     handleCloseCartDrawer={handleCloseCartDrawer}
                 >
                     <Cart handleCloseCartDrawer={handleCloseCartDrawer}></Cart>

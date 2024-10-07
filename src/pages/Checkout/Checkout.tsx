@@ -1,31 +1,120 @@
 import React, { useEffect, useRef, useState } from 'react';
 import classNames from 'classnames/bind';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
+import Tippy from '@tippyjs/react/headless';
 
 import Button from '../../components/Button';
 import styles from './Checkout.module.scss';
 import config from '../../config';
 import Image from '../../components/Image';
 import images from '../../assets/images';
-import { CartIcon, ErrorIcon } from '../../components/Icons';
+import checkoutImages from '../../assets/images/checkout';
+import {
+    CartIcon,
+    CheckIcon,
+    CheckNoCircleIcon,
+    ErrorIcon,
+} from '../../components/Icons';
 import Checkbox from '../../components/Checkbox';
+import * as cartItemServices from '../../services/cartItemServices';
+import * as productServices from '../../services/productServices';
+import ProductModel from '../../models/ProductModel';
+import PreLoader from '../../components/PreLoader';
+import { formatPrice } from '../../utils/Functions';
+import * as paymentMethodServices from '.././../services/paymentMethodServices';
+import PaymentMethodModel from '../../models/PaymentMethodModel';
+import * as orderServices from '../../services/orderServices';
+import OrderDTO from '../../dtos/OrderDTO';
+import * as shippingMethodServices from '../../services/shippingMethodServices';
+import ShippingMethodModel from '../../models/ShippingMethodModel';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
+import icons from '../../assets/icons';
+import PageNotFound from '../PageNotFound';
 
 const cx = classNames.bind(styles);
 
 const Checkout = () => {
-    const [checkRadio, setCheckRadio] = useState(1);
+    const [checkRadio, setCheckRadio] = useState(2);
     const [provinceList, setProvinceList] = useState<any[]>([]);
     const [districtList, setDistrictList] = useState<any[]>([]);
     const [communeList, setCommuneList] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [total, setTotal] = useState(0);
 
     const refProvinceSelect = React.useRef<HTMLSelectElement>(null);
     const refDistrictSelect = React.useRef<HTMLSelectElement>(null);
+    const currentUser = localStorage.getItem('user_id');
 
-    // fake user status
-    const currentUser = false;
+    const [productList, setProductList] = useState<ProductModel[]>([]);
+    const [paymentMethodList, setPaymentMethodList] = useState<
+        PaymentMethodModel[]
+    >([]);
+    const [shippingMethodList, setShippingMethodList] = useState<
+        ShippingMethodModel[]
+    >([]);
+    const products = JSON.parse(localStorage.getItem('products') + '');
+    const navigate = useNavigate();
+    const [showSelectShippingMethod, setShowSelectShippingMethod] =
+        useState(false);
+    const [activeShippingMethod, setActiveShippingMethod] = useState<any>(1);
+    const [tempShippingMethod, setTempShippingMethod] = useState<any>(1);
+
+    useEffect(() => {
+        if (currentUser && products.length > 0) {
+            setLoading(true);
+            let result: ProductModel[] = [];
+            const fetchApi = async (cartItem: any) => {
+                const res = await productServices.getProductById(
+                    cartItem.product_id
+                );
+
+                result.push(res);
+
+                if (result.length === products.length) {
+                    setProductList(result);
+                    let totalTemp = 0;
+                    result.forEach((productItem, index) => {
+                        if (productItem.discount) {
+                            totalTemp =
+                                totalTemp +
+                                products.at(index).quantity *
+                                    productItem.price *
+                                    (1 - productItem.discount / 100);
+                        } else {
+                            totalTemp =
+                                products.at(index).quantity * productItem.price;
+                        }
+                    });
+                    setTotal(totalTemp);
+
+                    setLoading(false);
+                    return;
+                }
+            };
+            products.forEach((item: any, index: number) => {
+                setTimeout(() => {
+                    fetchApi(item);
+                }, index * 500);
+            });
+        }
+    }, [currentUser]);
+
+    useEffect(() => {
+        const fetchApi = async () => {
+            const res = await paymentMethodServices.getAllPaymentMethod();
+            const resData = await shippingMethodServices.getAllShippingMethod();
+            setPaymentMethodList(res);
+            setShippingMethodList(resData);
+            setActiveShippingMethod(resData.at(0)?.shippingMethodId);
+            setTempShippingMethod(resData.at(0)?.shippingMethodId);
+        };
+
+        fetchApi();
+    }, []);
 
     //call api address
     useEffect(() => {
@@ -79,11 +168,14 @@ const Checkout = () => {
             province_city: '',
             district: '',
             commune: '',
-            payment: 'cod',
+            payment: 'Cash on delivery',
+            apartment: '',
         },
         validationSchema: Yup.object({
             fullName: Yup.string().required('You must fill in this section.'),
-            telephone: Yup.string().required('You must fill in this section.'),
+            telephone: Yup.string()
+                .matches(/^0\d{9}$/, 'Phone number is invalid.')
+                .required('You must fill in this section.'),
             email: Yup.string()
                 .email('Invalid email.')
                 .required('You must fill in this section.'),
@@ -96,15 +188,95 @@ const Checkout = () => {
         }),
         onSubmit: (values) => {
             //call api
-            console.log(values);
+            // console.log(values);
+
+            // Get Province/City name
+            const province: any = provinceList.filter(
+                (item) => item.id === values.province_city
+            );
+            // console.log(province[0].full_name);
+
+            // Get district name
+            const district: any = districtList.filter(
+                (item) => item.id === values.district
+            );
+            // console.log(district[0].full_name);
 
             // Get commune name
-            // const value: any = communeList.filter(
-            //     (item) => item.id === values.commune
-            // );
-            // console.log(value[0].full_name);
+            const commune: any = communeList.filter(
+                (item) => item.id === values.commune
+            );
+            // console.log(commune[0].full_name);
+
+            const paymentMethodId = paymentMethodList.filter(
+                (item) => item.name === values.payment
+            );
+
+            const data: OrderDTO = {
+                user_id: Number.parseInt(currentUser + ''),
+                first_name: values.fullName,
+                last_name: '',
+                email: values.email,
+                phone_number: values.telephone,
+                address: `${values.apartment}, ${commune[0].full_name}, ${district[0].full_name}, ${province[0].full_name}`,
+                note: '',
+                total_money: total,
+                sub_total: total,
+                shipping_method_id: activeShippingMethod,
+                payment_method_id: Number.parseInt(
+                    paymentMethodId.at(0)?.paymentMethodId + ''
+                ),
+                payment_status: false,
+                shipping_address: `${values.apartment}, ${commune[0].full_name}, ${district[0].full_name}, ${province[0].full_name}`,
+                cart_items: products,
+            };
+
+            const fetchApi = async () => {
+                // setLoading(true);
+
+                const res = await orderServices.postOrder(data);
+
+                if (res.message === 'Insert Successfully') {
+                    setTimeout(() => {
+                        navigate(config.routes.orderSuccessful);
+                        localStorage.setItem('orderId', res.data.id);
+                    }, 200);
+                } else {
+                    console.log('Error!');
+                    setLoading(false);
+                }
+            };
+
+            // Checkout for COD
+            if (paymentMethodId.at(0)?.paymentMethodId + '' === '2') {
+                fetchApi();
+            }
         },
     });
+
+    const handleShippingMethod = () => {
+        document.body.classList.add('hide-scroll');
+        setShowSelectShippingMethod(true);
+    };
+
+    const handleCloseShippingMethod = () => {
+        document.body.classList.remove('hide-scroll');
+        setShowSelectShippingMethod(false);
+        setTempShippingMethod(activeShippingMethod);
+    };
+
+    const handleConfirm = () => {
+        document.body.classList.remove('hide-scroll');
+        setShowSelectShippingMethod(false);
+        setActiveShippingMethod(tempShippingMethod);
+    };
+
+    if (products.length === 0) {
+        return <PageNotFound></PageNotFound>;
+    }
+    if (loading) {
+        return <PreLoader show></PreLoader>;
+    }
 
     return (
         <div className={cx('checkout')}>
@@ -120,13 +292,14 @@ const Checkout = () => {
                             className={cx('banner__logo')}
                         ></Image>
                     </Link>
-                    <div
+                    <Link
+                        to={config.routes.cart}
                         className={cx('banner__cart', {
                             'primary-hover': true,
                         })}
                     >
                         <CartIcon width="2.4rem" height="2.4rem"></CartIcon>
-                    </div>
+                    </Link>
                 </div>
             </header>
             <div className={cx('checkout__inner')}>
@@ -244,9 +417,9 @@ const Checkout = () => {
                                                     <input
                                                         value={
                                                             formik.values
-                                                                .telephone
+                                                                .telephone + ''
                                                         }
-                                                        type="number"
+                                                        type="text"
                                                         className={cx(
                                                             'checkout__input'
                                                         )}
@@ -584,6 +757,9 @@ const Checkout = () => {
                                                 )}
                                             >
                                                 <input
+                                                    value={
+                                                        formik.values.apartment
+                                                    }
                                                     type="text"
                                                     className={cx(
                                                         'checkout__input'
@@ -592,6 +768,9 @@ const Checkout = () => {
                                                     name="apartment"
                                                     placeholder="Apartment, suite, etc.
                                                         (optional)"
+                                                    onChange={
+                                                        formik.handleChange
+                                                    }
                                                 />
 
                                                 <span
@@ -607,6 +786,257 @@ const Checkout = () => {
                                                 name={'save'}
                                                 label="Save this information for next time"
                                             ></Checkbox>
+                                        </div>
+                                        {/* Shipping Method */}
+                                        <div>
+                                            <h2
+                                                className={cx(
+                                                    'checkout__title'
+                                                )}
+                                            >
+                                                Shipping method
+                                            </h2>
+                                            <div
+                                                className={cx(
+                                                    'checkout__shipping-group'
+                                                )}
+                                            >
+                                                <div
+                                                    className={cx(
+                                                        'checkout__shipping-img-wrapper'
+                                                    )}
+                                                >
+                                                    <Image
+                                                        src={icons.shipping}
+                                                        className={cx(
+                                                            'checkout__shipping-img'
+                                                        )}
+                                                    ></Image>
+                                                </div>
+                                                <div
+                                                    className={cx(
+                                                        'checkout__shipping-body'
+                                                    )}
+                                                >
+                                                    <div
+                                                        className={cx(
+                                                            'checkout__shipping-top'
+                                                        )}
+                                                    >
+                                                        <p
+                                                            className={cx(
+                                                                'checkout__shipping-name'
+                                                            )}
+                                                        >
+                                                            {shippingMethodList.map(
+                                                                (item) =>
+                                                                    item.shippingMethodId ===
+                                                                        activeShippingMethod &&
+                                                                    item.name
+                                                            )}
+                                                        </p>
+                                                        <Button
+                                                            type="button"
+                                                            className={cx(
+                                                                'checkout__shipping-change-btn'
+                                                            )}
+                                                            onClick={
+                                                                handleShippingMethod
+                                                            }
+                                                        >
+                                                            Change
+                                                        </Button>
+                                                        <p
+                                                            className={cx(
+                                                                'checkout__shipping-cost'
+                                                            )}
+                                                        >
+                                                            {shippingMethodList.map(
+                                                                (item) =>
+                                                                    item.shippingMethodId ===
+                                                                        activeShippingMethod &&
+                                                                    formatPrice(
+                                                                        item.cost
+                                                                            ? item.cost /
+                                                                                  1000
+                                                                            : 3
+                                                                    )
+                                                            )}
+                                                        </p>
+                                                    </div>
+                                                    <p
+                                                        className={cx(
+                                                            'checkout__shipping-desc',
+                                                            {
+                                                                'line-clamp':
+                                                                    true,
+                                                            }
+                                                        )}
+                                                    >
+                                                        {shippingMethodList.map(
+                                                            (item) =>
+                                                                item.shippingMethodId ===
+                                                                    activeShippingMethod &&
+                                                                item.desc
+                                                        )}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* Change shipping method */}
+                                        <div
+                                            className={cx('shipping', {
+                                                active: showSelectShippingMethod,
+                                            })}
+                                        >
+                                            <div
+                                                className={cx(
+                                                    'shipping__overlay'
+                                                )}
+                                                onClick={
+                                                    handleCloseShippingMethod
+                                                }
+                                            ></div>
+                                            <div
+                                                className={cx(
+                                                    'shipping__inner'
+                                                )}
+                                            >
+                                                <div
+                                                    className={cx(
+                                                        'shipping__top'
+                                                    )}
+                                                >
+                                                    <h2
+                                                        className={cx(
+                                                            'checkout__title'
+                                                        )}
+                                                    >
+                                                        Select shipping method
+                                                    </h2>
+                                                    <p
+                                                        className={cx(
+                                                            'shipping__title'
+                                                        )}
+                                                    >
+                                                        SHIPPING CHANNEL LINKED
+                                                        WITH TIMEVO
+                                                    </p>
+                                                    <p
+                                                        className={cx(
+                                                            'shipping__sub-title'
+                                                        )}
+                                                    >
+                                                        You can track your order
+                                                        on the Timevo app when
+                                                        choosing one of the
+                                                        shipping units:
+                                                    </p>
+                                                </div>
+                                                <div
+                                                    className={cx(
+                                                        'shipping__list'
+                                                    )}
+                                                >
+                                                    {shippingMethodList.map(
+                                                        (item) => (
+                                                            <div
+                                                                key={
+                                                                    item.shippingMethodId
+                                                                }
+                                                                className={cx(
+                                                                    'shipping__item',
+                                                                    {
+                                                                        active:
+                                                                            tempShippingMethod ===
+                                                                            item.shippingMethodId,
+                                                                    }
+                                                                )}
+                                                                onClick={() =>
+                                                                    setTempShippingMethod(
+                                                                        item.shippingMethodId
+                                                                    )
+                                                                }
+                                                            >
+                                                                <div
+                                                                    className={cx(
+                                                                        'shipping__content'
+                                                                    )}
+                                                                >
+                                                                    <div
+                                                                        className={cx(
+                                                                            'shipping__row'
+                                                                        )}
+                                                                    >
+                                                                        <p
+                                                                            className={cx(
+                                                                                'shipping__name'
+                                                                            )}
+                                                                        >
+                                                                            {
+                                                                                item.name
+                                                                            }
+                                                                        </p>
+                                                                        <p
+                                                                            className={cx(
+                                                                                'shipping__price'
+                                                                            )}
+                                                                        >
+                                                                            {formatPrice(
+                                                                                item.cost
+                                                                                    ? item.cost /
+                                                                                          1000
+                                                                                    : 3
+                                                                            )}
+                                                                        </p>
+                                                                    </div>
+                                                                    <p
+                                                                        className={cx(
+                                                                            'shipping__desc',
+                                                                            {
+                                                                                'line-clamp':
+                                                                                    true,
+                                                                            }
+                                                                        )}
+                                                                    >
+                                                                        {
+                                                                            item.desc
+                                                                        }
+                                                                    </p>
+                                                                </div>
+                                                                <CheckNoCircleIcon></CheckNoCircleIcon>
+                                                            </div>
+                                                        )
+                                                    )}
+                                                </div>
+                                                <div
+                                                    className={cx(
+                                                        'shipping__bottom'
+                                                    )}
+                                                >
+                                                    <Button
+                                                        type="button"
+                                                        className={cx(
+                                                            'shipping__cancel-btn'
+                                                        )}
+                                                        onClick={
+                                                            handleCloseShippingMethod
+                                                        }
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        primary
+                                                        className={cx(
+                                                            'shipping__confirm-btn'
+                                                        )}
+                                                        onClick={handleConfirm}
+                                                    >
+                                                        Confirm
+                                                    </Button>
+                                                </div>
+                                            </div>
                                         </div>
                                         {/* Payment method */}
                                         <div
@@ -624,84 +1054,75 @@ const Checkout = () => {
                                                     'checkout__payment-list'
                                                 )}
                                             >
-                                                <div
-                                                    className={cx(
-                                                        'checkout__radio-wrapper'
-                                                    )}
-                                                >
-                                                    <input
-                                                        type="radio"
-                                                        name="payment"
-                                                        value="cod"
-                                                        id="cod"
-                                                        checked={
-                                                            checkRadio === 1 &&
-                                                            formik.values
-                                                                .payment ===
-                                                                'cod'
-                                                        }
-                                                        hidden
-                                                        className={cx(
-                                                            'checkout__radio'
-                                                        )}
-                                                        onChange={
-                                                            formik.handleChange
-                                                        }
-                                                        onBlur={
-                                                            formik.handleBlur
-                                                        }
-                                                    />
-                                                    <label
-                                                        htmlFor="cod"
-                                                        className={cx(
-                                                            'checkout__radio-label'
-                                                        )}
-                                                        onClick={() =>
-                                                            setCheckRadio(1)
-                                                        }
-                                                    >
-                                                        Cash on Delivery
-                                                    </label>
-                                                </div>
-                                                <div
-                                                    className={cx(
-                                                        'checkout__radio-wrapper'
-                                                    )}
-                                                >
-                                                    <input
-                                                        type="radio"
-                                                        name="payment"
-                                                        id="vnpay"
-                                                        value="vnpay"
-                                                        hidden
-                                                        checked={
-                                                            checkRadio === 2 &&
-                                                            formik.values
-                                                                .payment ===
-                                                                'vnpay'
-                                                        }
-                                                        className={cx(
-                                                            'checkout__radio'
-                                                        )}
-                                                        onChange={
-                                                            formik.handleChange
-                                                        }
-                                                        onBlur={
-                                                            formik.handleBlur
-                                                        }
-                                                    />
-                                                    <label
-                                                        htmlFor="vnpay"
-                                                        className={cx(
-                                                            'checkout__radio-label'
-                                                        )}
-                                                        onClick={() =>
-                                                            setCheckRadio(2)
-                                                        }
-                                                    >
-                                                        Payment via VNPAY
-                                                    </label>
-                                                </div>
+                                                {paymentMethodList.map(
+                                                    (paymentMethod) => (
+                                                        <div
+                                                            className={cx(
+                                                                'checkout__radio-wrapper'
+                                                            )}
+                                                            key={
+                                                                paymentMethod.paymentMethodId
+                                                            }
+                                                        >
+                                                            <input
+                                                                type="radio"
+                                                                name="payment"
+                                                                id={
+                                                                    paymentMethod.name
+                                                                }
+                                                                value={
+                                                                    paymentMethod.name
+                                                                }
+                                                                hidden
+                                                                checked={
+                                                                    checkRadio ===
+                                                                        paymentMethod.paymentMethodId &&
+                                                                    formik
+                                                                        .values
+                                                                        .payment ===
+                                                                        paymentMethod.name
+                                                                }
+                                                                className={cx(
+                                                                    'checkout__radio'
+                                                                )}
+                                                                onChange={
+                                                                    formik.handleChange
+                                                                }
+                                                                onBlur={
+                                                                    formik.handleBlur
+                                                                }
+                                                            />
+                                                            <label
+                                                                htmlFor={
+                                                                    paymentMethod.name
+                                                                }
+                                                                className={cx(
+                                                                    'checkout__radio-label'
+                                                                )}
+                                                                onClick={() =>
+                                                                    setCheckRadio(
+                                                                        paymentMethod.paymentMethodId
+                                                                    )
+                                                                }
+                                                            >
+                                                                {
+                                                                    paymentMethod.name
+                                                                }
+                                                                {paymentMethod.name ===
+                                                                    'Payment via VNPay' && (
+                                                                    <Image
+                                                                        src={
+                                                                            checkoutImages.vnpay
+                                                                        }
+                                                                        className={cx(
+                                                                            'checkout__radio-img'
+                                                                        )}
+                                                                    ></Image>
+                                                                )}
+                                                            </label>
+                                                        </div>
+                                                    )
+                                                )}
                                             </div>
                                         </div>
 
@@ -751,108 +1172,124 @@ const Checkout = () => {
                                     Order summary
                                 </h2>
                                 <div className={cx('checkout__product-list')}>
-                                    <div
-                                        className={cx('checkout__product-item')}
-                                    >
+                                    {productList.map((productItem, index) => (
                                         <div
+                                            key={productItem.productId}
                                             className={cx(
-                                                'checkout__product-media'
+                                                'checkout__product-item'
                                             )}
                                         >
-                                            <Image
-                                                src={images.productImg}
+                                            <div
                                                 className={cx(
-                                                    'checkout__product-img'
-                                                )}
-                                            ></Image>
-                                            <p
-                                                className={cx(
-                                                    'checkout__product-quantity'
+                                                    'checkout__product-media'
                                                 )}
                                             >
-                                                1
-                                            </p>
-                                        </div>
-                                        <div
-                                            className={cx(
-                                                'checkout__product-content'
-                                            )}
-                                        >
-                                            <p
+                                                <Image
+                                                    src={
+                                                        productItem.productImages
+                                                            .filter(
+                                                                (item) =>
+                                                                    item.colorId ===
+                                                                        products.at(
+                                                                            index
+                                                                        )
+                                                                            .color_id &&
+                                                                    item.isMainImage
+                                                            )
+                                                            .at(0)?.imageUrl ||
+                                                        ''
+                                                    }
+                                                    className={cx(
+                                                        'checkout__product-img'
+                                                    )}
+                                                ></Image>
+                                                <p
+                                                    className={cx(
+                                                        'checkout__product-quantity'
+                                                    )}
+                                                >
+                                                    {
+                                                        products.at(index)
+                                                            .quantity
+                                                    }
+                                                </p>
+                                            </div>
+                                            <div
                                                 className={cx(
-                                                    'checkout__product-name'
+                                                    'checkout__product-content'
                                                 )}
                                             >
-                                                Digital Smartwatch
-                                            </p>
-                                            <p
+                                                <p
+                                                    className={cx(
+                                                        'checkout__product-name'
+                                                    )}
+                                                >
+                                                    {productItem.title}
+                                                </p>
+                                                <p
+                                                    className={cx(
+                                                        'checkout__product-styles'
+                                                    )}
+                                                >
+                                                    {
+                                                        productItem.colors
+                                                            .filter(
+                                                                (item) =>
+                                                                    item.colorId ===
+                                                                    products.at(
+                                                                        index
+                                                                    ).color_id
+                                                            )
+                                                            .at(0)?.name
+                                                    }{' '}
+                                                    /{' '}
+                                                    {productItem?.screenSizes
+                                                        ?.filter(
+                                                            (item) =>
+                                                                item.sizeId ===
+                                                                products.at(
+                                                                    index
+                                                                ).screen_size_id
+                                                        )
+                                                        .at(0)?.size +
+                                                        ' Inches'}{' '}
+                                                    /{' '}
+                                                    {
+                                                        productItem?.materials
+                                                            ?.filter(
+                                                                (item) =>
+                                                                    item.materialId ===
+                                                                    products.at(
+                                                                        index
+                                                                    )
+                                                                        .material_id
+                                                            )
+                                                            .at(0)?.name
+                                                    }
+                                                </p>
+                                            </div>
+                                            <div
                                                 className={cx(
-                                                    'checkout__product-styles'
+                                                    'checkout__product-price'
                                                 )}
                                             >
-                                                Dusty Grey / 1.5 Inches /
-                                                Leather
-                                            </p>
+                                                {productItem.discount
+                                                    ? formatPrice(
+                                                          products.at(index)
+                                                              .quantity *
+                                                              productItem.price *
+                                                              (1 -
+                                                                  productItem.discount /
+                                                                      100)
+                                                      )
+                                                    : formatPrice(
+                                                          products.at(index)
+                                                              .quantity *
+                                                              productItem.price
+                                                      )}
+                                            </div>
                                         </div>
-                                        <div
-                                            className={cx(
-                                                'checkout__product-price'
-                                            )}
-                                        >
-                                            $1000
-                                        </div>
-                                    </div>
-                                    <div
-                                        className={cx('checkout__product-item')}
-                                    >
-                                        <div
-                                            className={cx(
-                                                'checkout__product-media'
-                                            )}
-                                        >
-                                            <Image
-                                                src={images.productImg}
-                                                className={cx(
-                                                    'checkout__product-img'
-                                                )}
-                                            ></Image>
-                                            <p
-                                                className={cx(
-                                                    'checkout__product-quantity'
-                                                )}
-                                            >
-                                                1
-                                            </p>
-                                        </div>
-                                        <div
-                                            className={cx(
-                                                'checkout__product-content'
-                                            )}
-                                        >
-                                            <p
-                                                className={cx(
-                                                    'checkout__product-name'
-                                                )}
-                                            >
-                                                Digital Smartwatch
-                                            </p>
-                                            <p
-                                                className={cx(
-                                                    'checkout__product-styles'
-                                                )}
-                                            >
-                                                Dusty Grey / 1.5 Inches /
-                                                Leather
-                                            </p>
-                                        </div>
-                                        <div
-                                            className={cx(
-                                                'checkout__product-price'
-                                            )}
-                                        >
-                                            $1000
-                                        </div>
-                                    </div>
+                                    ))}
                                 </div>
                                 <div className={cx('checkout__summary')}>
                                     <div
@@ -870,8 +1307,7 @@ const Checkout = () => {
                                                 'checkout__summary-text'
                                             )}
                                         >
-                                            {' '}
-                                            $1000
+                                            {formatPrice(total)}
                                         </span>
                                     </div>
                                     <div
@@ -889,8 +1325,16 @@ const Checkout = () => {
                                                 'checkout__summary-text'
                                             )}
                                         >
-                                            {' '}
-                                            Enter shipping address
+                                            {shippingMethodList.map(
+                                                (item) =>
+                                                    item.shippingMethodId ===
+                                                        activeShippingMethod &&
+                                                    formatPrice(
+                                                        item.cost
+                                                            ? item.cost / 1000
+                                                            : 3
+                                                    )
+                                            )}
                                         </span>
                                     </div>
                                     <div
@@ -908,8 +1352,17 @@ const Checkout = () => {
                                                 'checkout__summary-price'
                                             )}
                                         >
-                                            {' '}
-                                            $1000
+                                            {shippingMethodList.map(
+                                                (item) =>
+                                                    item.shippingMethodId ===
+                                                        activeShippingMethod &&
+                                                    formatPrice(
+                                                        item.cost
+                                                            ? item.cost / 1000 +
+                                                                  total
+                                                            : 3 + total
+                                                    )
+                                            )}
                                         </span>
                                     </div>
                                 </div>

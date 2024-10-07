@@ -296,16 +296,18 @@
     }
 
     &__img-link {
+        background-color: var(--white-color);
+        border-radius: 15px;
+        overflow: hidden;
         @include abstracts.screen(sm) {
             flex-shrink: 0;
         }
     }
 
     &__img {
-        border-radius: 15px;
         max-width: 100%;
         height: 115px;
-        object-fit: cover;
+        object-fit: contain;
         width: 106px;
 
         @include abstracts.screen(sm) {

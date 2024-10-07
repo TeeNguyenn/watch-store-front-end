@@ -1,35 +1,123 @@
 import React, { useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import styles from './OrderDetails.module.scss';
 import Image from '../../components/Image';
 import images from '../../assets/images';
 import { CheckNoCircleIcon } from '../../components/Icons';
+import * as orderDetailServices from '../../services/orderDetailServices';
+import ProductModel from '../../models/ProductModel';
+import * as productServices from '../../services/productServices';
+import { formatPrice, getCurrentDateWithHour } from '../../utils/Functions';
+import PreLoader from '../../components/PreLoader';
+import * as orderServices from '../../services/orderServices';
 
 const cx = classNames.bind(styles);
-
-const productsList = [1, 2, 3, 4, 5, 6];
-
-// Fake order status
-const orderState: string = 'Picked Up';
 
 // Note: Check xem timeline co 2 thang khac nhau khong de loai bo min-width
 
 const OrderDetails = () => {
+    const [orderStatus, setOrderStatus] = useState(1);
+    const currentUser = localStorage.getItem('user_id');
+    const [total, setTotal] = useState(0);
+    const [productList, setProductList] = useState<ProductModel[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [orderProducts, setOrderProducts] = useState<any>([]);
+    const [orderDetail, setOrderDetail] = useState<any>({});
+
+    // Get productId from url
+    const { orderId } = useParams();
+
+    let orderIdNumber = 0;
+    try {
+        orderIdNumber = parseInt(orderId + '');
+        if (Number.isNaN(orderIdNumber)) {
+            orderIdNumber = 0;
+        }
+    } catch (error) {
+        orderIdNumber = 0;
+        console.log('Error:', error);
+    }
+
+    // Get order product detail
+    useEffect(() => {
+        if (currentUser) {
+            const fetchApi = async () => {
+                window.scrollTo(0, 0);
+                const orderProducts =
+                    await orderDetailServices.getOrderDetailByOrderId(
+                        orderIdNumber + ''
+                    );
+                setOrderProducts(orderProducts);
+                let result: ProductModel[] = [];
+                const fetchApi = async (productId: any) => {
+                    const res = await productServices.getProductById(
+                        productId.product_id
+                    );
+
+                    result.push(res);
+
+                    if (result.length === orderProducts.length) {
+                        setProductList(result);
+                        let totalTemp = 0;
+                        result.forEach((productItem, index) => {
+                            if (productItem.discount) {
+                                totalTemp =
+                                    totalTemp +
+                                    orderProducts.at(index).quantity *
+                                        productItem.price *
+                                        (1 - productItem.discount / 100);
+                            } else {
+                                totalTemp =
+                                    orderProducts.at(index).quantity *
+                                    productItem.price;
+                            }
+                        });
+                        setTotal(totalTemp);
+                        window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
+
+                        setLoading(false);
+                    }
+                };
+                orderProducts.forEach((item: any, index: number) => {
+                    setTimeout(() => {
+                        fetchApi(item);
+                    }, index * 500);
+                });
+            };
+
+            fetchApi();
+        }
+    }, []);
+
+    useEffect(() => {
+        if (currentUser) {
+            const fetchApi = async () => {
+                const res = await orderServices.getOrderByOrderId(
+                    orderIdNumber + ''
+                );
+
+                setOrderDetail(res);
+            };
+
+            fetchApi();
+        }
+    }, []);
+
     // Trang thai thanh cong gan nhat
     // ready : initialValue = 0
     // pending: initialValue = -1
-    const [orderStatus, setOrderStatus] = useState(-1);
-
+    // InitialValue = - 1 =>> PENDING
     useEffect(() => {
-        switch (orderState) {
-            case 'Is ready':
-                setOrderStatus(0);
-                break;
-            case 'Order is processing':
-                setOrderStatus(1);
-                break;
+        switch (orderDetail.status) {
+            // case 'Is ready':
+            //     setOrderStatus(0);
+            //     break;
+            // case 'Order is processing':
+            //     setOrderStatus(1);
+            //     break;
+            // InitialValue = 1 =>> PENDING
             case 'Picked Up':
                 setOrderStatus(2);
                 break;
@@ -48,13 +136,16 @@ const OrderDetails = () => {
         }
     }, []);
 
+    if (loading) {
+        return <PreLoader show></PreLoader>;
+    }
+
     return (
         <div className="container-spacing">
             <div className={cx('order-details')}>
                 <div className={cx('order-details__top')}>
                     <h2 className={cx('order-details__title')}>
-                        Order
-                        <span>#349</span>
+                        Order <span>{`#OID${orderIdNumber}`}</span>
                     </h2>
                 </div>
                 <div className="row g-0">
@@ -90,32 +181,19 @@ const OrderDetails = () => {
                                                         'products__heading'
                                                     )}
                                                     style={{
-                                                        width: '17%',
-                                                        minWidth: '160px',
+                                                        width: '22%',
+                                                        minWidth: '180px',
                                                     }}
                                                 >
-                                                    color
+                                                    Variant
                                                 </th>
-
                                                 <th
                                                     className={cx(
                                                         'products__heading'
                                                     )}
                                                     style={{
-                                                        width: '10%',
-                                                        minWidth: '80px',
-                                                    }}
-                                                >
-                                                    size
-                                                </th>
-
-                                                <th
-                                                    className={cx(
-                                                        'products__heading'
-                                                    )}
-                                                    style={{
-                                                        width: '10%',
-                                                        minWidth: '80px',
+                                                        width: '15%',
+                                                        minWidth: '140px',
                                                     }}
                                                 >
                                                     price
@@ -145,8 +223,8 @@ const OrderDetails = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {productsList.map(
-                                                (productsItem, index) => (
+                                            {productList.map(
+                                                (productItem, index) => (
                                                     <tr key={index}>
                                                         <td
                                                             className={cx(
@@ -165,7 +243,23 @@ const OrderDetails = () => {
                                                             >
                                                                 <Image
                                                                     src={
-                                                                        images.cartItem
+                                                                        productItem.productImages
+                                                                            .filter(
+                                                                                (
+                                                                                    item
+                                                                                ) =>
+                                                                                    item.colorId ===
+                                                                                        orderProducts?.at(
+                                                                                            index
+                                                                                        )
+                                                                                            .color_id &&
+                                                                                    item.isMainImage
+                                                                            )
+                                                                            .at(
+                                                                                0
+                                                                            )
+                                                                            ?.imageUrl ||
+                                                                        ''
                                                                     }
                                                                     alt="image"
                                                                     loading={
@@ -188,7 +282,7 @@ const OrderDetails = () => {
                                                             }}
                                                         >
                                                             <Link
-                                                                to={'#!'}
+                                                                to={`/products/${productItem.productId}`}
                                                                 className={cx(
                                                                     'products__link',
                                                                     {
@@ -197,16 +291,9 @@ const OrderDetails = () => {
                                                                     }
                                                                 )}
                                                             >
-                                                                Fitbit Sense
-                                                                Advanced
-                                                                Smartwatch with
-                                                                Tools Fitbit
-                                                                Sense Advanced
-                                                                Smartwatch with
-                                                                Tools Fitbit
-                                                                Sense Advanced
-                                                                Smartwatch with
-                                                                Tools
+                                                                {
+                                                                    productItem.title
+                                                                }
                                                             </Link>
                                                         </td>
                                                         <td
@@ -214,48 +301,89 @@ const OrderDetails = () => {
                                                                 'products__color'
                                                             )}
                                                             style={{
-                                                                width: '17%',
+                                                                width: '22%',
                                                                 minWidth:
-                                                                    '160px',
+                                                                    '180px',
                                                             }}
                                                         >
                                                             <p
                                                                 className={cx(
-                                                                    'products__color-text'
+                                                                    'products__color-text',
+                                                                    {
+                                                                        'line-clamp':
+                                                                            true,
+                                                                    }
                                                                 )}
                                                             >
-                                                                Pure matte black
+                                                                {
+                                                                    productItem.colors
+                                                                        .filter(
+                                                                            (
+                                                                                item
+                                                                            ) =>
+                                                                                item.colorId ===
+                                                                                orderProducts.at(
+                                                                                    index
+                                                                                )
+                                                                                    .color_id
+                                                                        )
+                                                                        .at(0)
+                                                                        ?.name
+                                                                }{' '}
+                                                                /{' '}
+                                                                {productItem?.screenSizes
+                                                                    ?.filter(
+                                                                        (
+                                                                            item
+                                                                        ) =>
+                                                                            item.sizeId ===
+                                                                            orderProducts.at(
+                                                                                index
+                                                                            )
+                                                                                .screen_size_id
+                                                                    )
+                                                                    .at(0)
+                                                                    ?.size +
+                                                                    ' Inches'}{' '}
+                                                                /{' '}
+                                                                {
+                                                                    productItem?.materials
+                                                                        ?.filter(
+                                                                            (
+                                                                                item
+                                                                            ) =>
+                                                                                item.materialId ===
+                                                                                orderProducts.at(
+                                                                                    index
+                                                                                )
+                                                                                    .material_id
+                                                                        )
+                                                                        .at(0)
+                                                                        ?.name
+                                                                }
                                                             </p>
                                                         </td>
-                                                        <td
-                                                            className={cx(
-                                                                'products__size'
-                                                            )}
-                                                            style={{
-                                                                width: '10%',
-                                                                minWidth:
-                                                                    '80px',
-                                                            }}
-                                                        >
-                                                            <p
-                                                                className={cx(
-                                                                    'size-text'
-                                                                )}
-                                                            >
-                                                                Regular
-                                                            </p>
-                                                        </td>
+
                                                         <td
                                                             className={cx(
                                                                 'products__price'
                                                             )}
                                                             style={{
-                                                                width: '10%',
+                                                                width: '15%',
                                                                 minWidth:
-                                                                    '80px',
+                                                                    '140px',
                                                             }}
                                                         >
-                                                            $1,699
+                                                            {productItem.discount
+                                                                ? formatPrice(
+                                                                      productItem.price *
+                                                                          (1 -
+                                                                              productItem.discount /
+                                                                                  100)
+                                                                  )
+                                                                : formatPrice(
+                                                                      productItem.price
+                                                                  )}
                                                         </td>
                                                         <td
                                                             className={cx(
@@ -267,7 +395,11 @@ const OrderDetails = () => {
                                                                     '110px',
                                                             }}
                                                         >
-                                                            1
+                                                            {
+                                                                orderProducts.at(
+                                                                    index
+                                                                ).quantity
+                                                            }
                                                         </td>
                                                         <td
                                                             className={cx(
@@ -279,7 +411,24 @@ const OrderDetails = () => {
                                                                     '60px',
                                                             }}
                                                         >
-                                                            $1,699
+                                                            {productItem.discount
+                                                                ? formatPrice(
+                                                                      orderProducts.at(
+                                                                          index
+                                                                      )
+                                                                          .quantity *
+                                                                          productItem.price *
+                                                                          (1 -
+                                                                              productItem.discount /
+                                                                                  100)
+                                                                  )
+                                                                : formatPrice(
+                                                                      orderProducts.at(
+                                                                          index
+                                                                      )
+                                                                          .quantity *
+                                                                          productItem.price
+                                                                  )}
                                                         </td>
                                                     </tr>
                                                 )
@@ -296,7 +445,7 @@ const OrderDetails = () => {
                                             'products__subtotal-price'
                                         )}
                                     >
-                                        $7,686
+                                        {formatPrice(total)}
                                     </p>
                                 </div>
                             </div>
@@ -315,7 +464,7 @@ const OrderDetails = () => {
                                         <div
                                             className={cx('order__info-value')}
                                         >
-                                            DH3995
+                                            {`OID${orderDetail.id}`}
                                         </div>
                                     </div>
                                     <div className={cx('order__info-row')}>
@@ -327,7 +476,10 @@ const OrderDetails = () => {
                                         <div
                                             className={cx('order__info-value')}
                                         >
-                                            August 20, 2024
+                                            {getCurrentDateWithHour(
+                                                orderDetail.order_date,
+                                                true
+                                            )}
                                         </div>
                                     </div>
                                     <div className={cx('order__info-row')}>
@@ -339,7 +491,7 @@ const OrderDetails = () => {
                                         <div
                                             className={cx('order__info-value')}
                                         >
-                                            Tee
+                                            {orderDetail.first_name}
                                         </div>
                                     </div>
                                     <div className={cx('order__info-row')}>
@@ -351,7 +503,7 @@ const OrderDetails = () => {
                                         <div
                                             className={cx('order__info-value')}
                                         >
-                                            0334897632
+                                            {orderDetail.phone_number}
                                         </div>
                                     </div>
                                     <div className={cx('order__info-row')}>
@@ -363,7 +515,7 @@ const OrderDetails = () => {
                                         <div
                                             className={cx('order__info-value')}
                                         >
-                                            Tee@gmail.com
+                                            {orderDetail.email}
                                         </div>
                                     </div>
                                     <div className={cx('order__info-row')}>
@@ -375,7 +527,7 @@ const OrderDetails = () => {
                                         <div
                                             className={cx('order__info-value')}
                                         >
-                                            Cash on Delivery
+                                            {orderDetail.payment_method_name}
                                         </div>
                                     </div>
                                     <div className={cx('order__info-row')}>
@@ -387,8 +539,7 @@ const OrderDetails = () => {
                                         <div
                                             className={cx('order__info-value')}
                                         >
-                                            0334897632, Thị trấn Văn Điển, Huyện
-                                            Thanh Trì, Hà Nội
+                                            {orderDetail.shipping_address}
                                         </div>
                                     </div>
                                 </div>
@@ -402,27 +553,37 @@ const OrderDetails = () => {
                                 <p className={cx('summary__label')}>
                                     Subtotal :
                                 </p>
-                                <p className={cx('summary__subtotal')}>$665</p>
+                                <p className={cx('summary__subtotal')}>
+                                    {formatPrice(total)}
+                                </p>
                             </div>
                             <div className={cx('summary__row')}>
                                 <p className={cx('summary__label')}>
                                     Discount :
                                 </p>
-                                <p className={cx('summary__discount')}>-$59</p>
+                                <p
+                                    className={cx('summary__discount')}
+                                >{`-${formatPrice(0)}`}</p>
                             </div>
                             <div className={cx('summary__row')}>
                                 <p className={cx('summary__label')}>
                                     Shipping Cost :
                                 </p>
                                 <p className={cx('summary__shipping-cost')}>
-                                    Free shipping
+                                    {formatPrice(
+                                        orderDetail.shipping_cost / 1000
+                                    )}
                                 </p>
                             </div>
                             <div className={cx('summary__bottom')}>
                                 <p className={cx('summary__label-total')}>
                                     Total :
                                 </p>
-                                <p className={cx('summary__total')}>$695.20</p>
+                                <p className={cx('summary__total')}>
+                                    {formatPrice(
+                                        total + orderDetail.shipping_cost / 1000
+                                    )}
+                                </p>
                             </div>
                         </div>
                         <div className={cx('timeline')}>

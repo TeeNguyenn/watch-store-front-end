@@ -5,6 +5,7 @@ import { useMediaQuery } from 'react-responsive';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 
+import Button from '../../../../components/Button';
 import styles from './Card.module.scss';
 import Image from '../../../../components/Image';
 import ColorItem from '../../../../components/ColorItem';
@@ -18,6 +19,10 @@ import * as feedbackServices from '../../../../services/feedbackServices';
 import FeedbackModel from '../../../../models/FeedbackModel';
 import ProductImageModel from '../../../../models/ProductImageModel';
 import * as productImageServices from '../../../.../../../services/productImageServices';
+import { CloseIcon } from '../../../../components/Icons';
+import * as favoriteServices from '../../../../services/favoriteServices';
+import VariantModel from '../../../../models/VariantModel';
+import PreLoader from '../../../../components/PreLoader';
 
 const cx = classNames.bind(styles);
 
@@ -28,6 +33,8 @@ interface CardProps {
     fourProduct?: boolean;
     isReview?: boolean;
     productItem?: ProductModel;
+    handleChangeWishlist?: any;
+    handleShowQuickBuy?: any;
 }
 
 const Card = ({
@@ -37,7 +44,10 @@ const Card = ({
     fourProduct,
     isReview = true,
     productItem,
+    handleChangeWishlist = false,
+    handleShowQuickBuy,
 }: CardProps) => {
+    const currentUser = localStorage.getItem('user_id');
     const isMobileScreen = useMediaQuery({ query: '(max-width: 575.98px)' });
     const [feedbackList, setFeedbackList] = useState<FeedbackModel[]>([]);
     const [mainProductImageList, setMainProductImageList] = useState<
@@ -49,6 +59,64 @@ const Card = ({
     const [activeThumbnail, setActiveThumbnail] = useState(
         productItem?.thumbnail
     );
+    const [loading, setLoading] = useState(false);
+
+    // handle
+    const Arr: VariantModel[] | undefined = productItem?.variants?.filter(
+        (variant) =>
+            variant.color.colorId === productItem?.colors.at(0)?.colorId
+    );
+
+    const result: VariantModel[] | undefined = [];
+
+    Arr?.forEach((sizeItem) => {
+        let count = 0;
+        for (let index = 0; index < result.length; index++) {
+            if (
+                sizeItem.screenSize.sizeId === result[index].screenSize.sizeId
+            ) {
+                count++;
+                break;
+            }
+        }
+        if (count === 0) {
+            result.push(sizeItem);
+        }
+    });
+
+    const sortResult = result.sort(
+        (a: any, b: any) => a.screenSize.sizeId - b.screenSize.sizeId
+    );
+    const screenSizeId = sortResult?.at(0)?.screenSize.sizeId;
+
+    const output: VariantModel[] | undefined = [];
+    let materialIdTemp = 0; //temp because bug
+
+    Arr?.forEach((materialItem) => {
+        let count = 0;
+        for (let index = 0; index < output.length; index++) {
+            if (
+                materialItem.material.materialId ===
+                output[index].material.materialId
+            ) {
+                count++;
+                break;
+            }
+        }
+        if (count === 0) {
+            output.push(materialItem);
+        }
+        if (materialItem.screenSize.sizeId === screenSizeId) {
+            materialIdTemp = materialItem.material.materialId;
+            return;
+        }
+    });
+
+    const sortOutput = output.sort(
+        (a: any, b: any) => a.material.materialId - b.material.materialId
+    );
+
+    const materialId = sortOutput?.at(0)?.material.materialId;
 
     useEffect(() => {
         const fetchApi = async () => {
@@ -61,7 +129,7 @@ const Card = ({
                     productItem!.productId
                 );
 
-            setFeedbackList(feedbackData);
+            // setFeedbackList(feedbackData);
             setMainProductImageList(mainProductImageData);
         };
 
@@ -77,6 +145,35 @@ const Card = ({
         setActiveColor(colorId);
     };
 
+    const handleRemoveWishlistItem = () => {
+        if (!currentUser) {
+            const wishlist: any[] =
+                JSON.parse(localStorage.getItem('wishlist') + '') || [];
+
+            const index = wishlist.findIndex(
+                (item) =>
+                    item.product_id === productItem?.productId &&
+                    item.color_id === productItem?.colors.at(0)?.colorId
+            );
+            if (index !== -1) {
+                wishlist.splice(index, 1);
+            }
+            handleChangeWishlist(wishlist);
+        } else {
+            const fetchApi = async () => {
+                const res = await favoriteServices.deleteFavorite({
+                    userId: Number.parseInt(currentUser),
+                    productId: productItem?.productId,
+                    colorId: productItem?.colors.at(0)?.colorId,
+                    screenSizeId: screenSizeId,
+                    materialId: materialIdTemp,
+                });
+            };
+            fetchApi();
+            window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
+        }
+    };
+
     return (
         <article
             className={cx('card', { col: true, card__horizontal: oneProduct })}
@@ -85,6 +182,7 @@ const Card = ({
                 className={cx('card__inner', {
                     horizontal: oneProduct,
                     row: oneProduct,
+                    wishlist: handleChangeWishlist,
                 })}
             >
                 <div
@@ -93,24 +191,41 @@ const Card = ({
                         'col-4': oneProduct,
                     })}
                 >
-                    <Link
-                        to={`/products/${productItem?.productId}`}
-                        className={cx('card__thumbnail-wrapper')}
-                    >
-                        {productItem?.quantityStock === 0 && (
-                            <Badge title="Sold Out"></Badge>
-                        )}
-                        {productItem?.discount && <Badge title="Sale"></Badge>}
-                        <Image
-                            src={activeThumbnail + ''}
-                            className={cx('card__thumbnail')}
-                            fallback={images.noProductImg}
-                        ></Image>
+                    <div style={{ position: 'relative' }}>
+                        <Link
+                            to={`/products/${productItem?.productId}`}
+                            className={cx('card__thumbnail-wrapper')}
+                        >
+                            {productItem?.quantityStock === 0 && (
+                                <Badge title="Sold Out"></Badge>
+                            )}
+                            {productItem?.discount && (
+                                <Badge title="Sale"></Badge>
+                            )}
+                            <Image
+                                src={activeThumbnail + ''}
+                                className={cx('card__thumbnail')}
+                                fallback={images.noProductImg}
+                            ></Image>
+                        </Link>
                         <ProductIcons
                             mobile={isMobileScreen}
                             className={cx('card__product-icons')}
+                            productItem={productItem}
+                            handleShowQuickBuy={handleShowQuickBuy}
                         ></ProductIcons>
-                    </Link>
+                        {handleChangeWishlist && (
+                            <Button
+                                className={cx('card__close-btn')}
+                                onClick={handleRemoveWishlistItem}
+                            >
+                                <CloseIcon
+                                    width="1.3rem"
+                                    height="1.3rem"
+                                ></CloseIcon>
+                            </Button>
+                        )}
+                    </div>
                 </div>
                 <div
                     className={cx('card__content', {

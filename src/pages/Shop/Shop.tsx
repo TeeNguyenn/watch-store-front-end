@@ -60,6 +60,7 @@ const Shop = () => {
     const [categoryList, setCategoryList] = useState<CategoryModel[]>([]);
     const [colorList, setColorList] = useState<ColorModel[]>([]);
     const [materialList, setMaterialList] = useState<MaterialModel[]>([]);
+    const [showQuickBuy, setShowQuickBuy] = useState(false);
 
     const isXlScreen = useMediaQuery({ query: '(max-width: 1199.98px)' });
     const isLgScreen = useMediaQuery({ query: '(max-width: 991.98px)' });
@@ -241,14 +242,22 @@ const Shop = () => {
         }
     };
 
+    const handleShowQuickBuy = (isShow: boolean) => {
+        setShowQuickBuy(isShow);
+    };
+
     if (loading) {
-        window.scrollTo(0, 0);
+        // window.scrollTo(0, 0);
         return <PreLoader show></PreLoader>;
     }
 
     return (
         <div className={cx('', 'container-spacing')}>
-            <div className={cx('shop')}>
+            <div
+                className={cx('shop', {
+                    'show-quick-buy': showQuickBuy,
+                })}
+            >
                 <Breadcrumb title="Products" links={links}></Breadcrumb>
                 <div className={cx('shop__row', { row: true })}>
                     <div
@@ -385,7 +394,6 @@ const Shop = () => {
                                         delay={[0, 300]}
                                         offset={[5, 5]}
                                         placement="bottom-end"
-                                        trigger="click"
                                         onClickOutside={() => setVisible(false)}
                                         render={(attrs) => (
                                             <div
@@ -731,6 +739,7 @@ const Shop = () => {
                                         threeProduct={showOption === 3}
                                         fourProduct={showOption === 4}
                                         productItem={productItem}
+                                        handleShowQuickBuy={handleShowQuickBuy}
                                     ></Card>
                                 ))}
                             </div>

@@ -1,4 +1,5 @@
 @use '../../styles/abstracts';
+@import '../../styles/base/keyframe';
 
 .cart {
     width: var(--s-container-width);
@@ -48,24 +49,87 @@
         }
     }
 
+    &__table-container {
+        overflow-x: auto;
+    }
+
     &__list {
         width: 100%;
         padding-bottom: 40px;
         border-bottom: 1px solid rgba($color: #000000, $alpha: 0.08);
+
+        & thead {
+            @include abstracts.screen(sm) {
+                width: 100% !important;
+            }
+        }
+
+        & thead tr th:first-child {
+            @include abstracts.screen(sm) {
+                width: 100% !important;
+                min-width: 100% !important;
+                text-align: center;
+            }
+        }
+
+        & tbody {
+            display: block;
+            max-height: 523px;
+            overflow-y: auto;
+            padding-right: 5px;
+
+            &::-webkit-scrollbar {
+                width: 5px;
+                height: 5px;
+            }
+            &::-webkit-scrollbar-thumb {
+                width: 5px;
+                height: 5px;
+                background-color: rgba($color: #000000, $alpha: 0);
+                transition: var(--transition-config);
+                border-radius: 10px;
+            }
+            &::-webkit-scrollbar-track {
+                background-color: rgba($color: #000000, $alpha: 0);
+                transition: var(--transition-config);
+            }
+
+            &:hover::-webkit-scrollbar-thumb {
+                background-color: #00000026;
+            }
+        }
+
+        & thead,
+        & tbody tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+
+            @include abstracts.screen(xl) {
+                width: auto;
+            }
+        }
+
+        // 5px padding tbody
+        & thead {
+            width: calc(100% - 5px);
+
+            @include abstracts.screen(xl) {
+                width: auto;
+            }
+        }
     }
 
     &__heading {
         text-transform: capitalize;
         border-bottom: 1px solid rgba($color: #000000, $alpha: 0.08);
         padding-bottom: 8px;
-        width: 15%;
         text-align: center;
         font-size: 1.8rem;
         font-weight: 500;
         line-height: 2.16rem;
 
         &:first-child {
-            width: 50%;
             text-align: left;
 
             @include abstracts.screen(sm) {
@@ -74,7 +138,15 @@
         }
 
         &:nth-child(2) {
-            width: 20%;
+            text-align: left;
+        }
+    }
+
+    &__row-md {
+        & > div:first-child {
+            @include abstracts.screen(md) {
+                order: 1;
+            }
         }
     }
 
@@ -85,6 +157,16 @@
 
         &:hover {
             background-color: var(--text-color);
+        }
+
+        @include abstracts.screen(md) {
+            margin-top: 0;
+        }
+    }
+
+    &__wrapper {
+        @include abstracts.screen(md) {
+            padding-top: 60px;
         }
     }
 
@@ -98,7 +180,7 @@
     &__note-area {
         border-radius: 18px;
         border: 1px solid rgba($color: #000000, $alpha: 0.2);
-        min-height: 200px;
+        min-height: 160px;
         padding: 30px 34px;
         width: 100%;
         resize: vertical;
@@ -123,9 +205,10 @@
         background-color: var(--white-color);
         padding: 40px 30px;
         border-radius: 18px;
-        position: sticky;
-        top: 30px;
-        height: fit-content;
+        margin-top: 20px;
+        height: calc(100% - 20px);
+        display: flex;
+        flex-direction: column;
 
         @include abstracts.screen(md) {
             margin-top: 50px;
@@ -142,12 +225,20 @@
     &__total-text {
         font-size: 1.6rem;
         line-height: 2.6rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--caption-color);
+
+        & > svg {
+            color: inherit;
+        }
     }
 
     &__total {
         font-size: 2.4rem;
         line-height: 2.85rem;
-        font-weight: 600;
+        font-weight: 500;
     }
 
     &__price {
@@ -157,7 +248,7 @@
     }
 
     &__checkout-btn {
-        margin-top: 30px;
+        margin-top: auto;
         width: 100%;
         height: 53px;
         transition: var(--transition-config);
@@ -197,6 +288,12 @@
 .cart-item {
     & > td {
         padding-top: 40px;
+
+        @include abstracts.screen(sm) {
+            width: 100% !important;
+            min-width: 100% !important;
+            text-align: center;
+        }
     }
 
     &__product {
@@ -235,6 +332,8 @@
         height: 100%;
         width: 100%;
         border-radius: 22px;
+        object-fit: contain;
+        mix-blend-mode: multiply;
     }
 
     &__body {
@@ -262,12 +361,38 @@
         font-weight: 600;
         color: var(--text-color);
         margin-top: 8px;
+
+        @include abstracts.screen(md) {
+            margin-bottom: 8px;
+        }
+    }
+
+    &__variant {
+    }
+
+    &__variant-top {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        cursor: pointer;
+        user-select: none;
+        margin-bottom: 5px;
+
+        & > svg {
+            cursor: pointer;
+            color: var(--caption-color);
+        }
+
+        &.active > svg {
+            rotate: 180deg;
+        }
     }
 
     &__options {
+        flex: 1;
         display: flex;
         flex-wrap: wrap;
-        margin-top: 8px;
     }
 
     &__option {
@@ -280,6 +405,15 @@
             position: absolute;
             right: -12px;
         }
+
+        &:last-child::after {
+            display: none;
+        }
+    }
+
+    &__quantity {
+        padding-right: 9px;
+        padding-left: 9px;
     }
 
     &__price {
@@ -291,6 +425,30 @@
             margin-top: 8px;
             line-height: 2.4rem;
         }
+
+        & > div {
+            justify-content: center !important;
+            flex-direction: row-reverse;
+            gap: 10px !important;
+
+            @include abstracts.screen(lg) {
+                justify-content: flex-start !important;
+                flex-direction: row;
+                margin: 10px 0;
+            }
+        }
+
+        & * {
+            font-size: 1.6rem !important;
+            line-height: 1.92rem !important;
+        }
+    }
+
+    &__actions {
+        text-align: right;
+        & > div {
+            cursor: pointer;
+        }
     }
 
     &__total {
@@ -300,7 +458,8 @@
 
         & > svg {
             position: absolute;
-            right: -10px;
+            // right: -10px;
+            right: 0;
             top: 54%;
             cursor: pointer;
         }
@@ -380,6 +539,133 @@
 
         &:hover {
             color: var(--primary-color);
+        }
+    }
+}
+
+.variant {
+    &__container {
+        background-color: var(--white-color);
+        padding: 24px;
+        border-color: rgba(0, 0, 0, 0.09);
+        box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.09);
+        border-radius: 2px;
+        width: 400px;
+        position: relative;
+        animation: animateMenuOpen 0.3s ease;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: 48%;
+            width: 16px;
+            height: 16px;
+            transform: rotate(45deg);
+            border-top-left-radius: 2px;
+            background-color: var(--white-color);
+        }
+
+        @include abstracts.screen(lg) {
+            width: 300px;
+        }
+
+        @include abstracts.screen(sm) {
+            width: calc(100vw - 30px);
+        }
+    }
+
+    &__group {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+
+        & + & {
+            margin-top: 24px;
+        }
+    }
+
+    &__label {
+        font-size: 1.6rem;
+        line-height: 1.92rem;
+        color: var(--caption-color);
+
+        @include abstracts.screen(md) {
+            font-size: 1.5rem;
+            line-height: 2.7rem;
+        }
+    }
+
+    &__select-btn {
+        padding: 4px 12px;
+        border: 1px solid rgba(0, 0, 0, 0.09);
+        border-radius: 2px;
+        font-weight: 400;
+        min-width: 80px;
+        min-height: 34px;
+
+        &:hover,
+        &.active {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        @include abstracts.screen(md) {
+            font-size: 1.5rem;
+            line-height: 2.7rem;
+        }
+    }
+
+    &__bottom {
+        margin-top: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    &__cancel-btn {
+        background-color: transparent;
+        color: #555;
+        font-weight: 400;
+        margin-right: 6px;
+        padding: 10px 0;
+        text-transform: uppercase;
+        width: 140px;
+
+        &:hover {
+            background-color: var(--background-color);
+        }
+
+        @include abstracts.screen(md) {
+            font-size: 1.5rem;
+            line-height: 2.7rem;
+        }
+
+        @include abstracts.screen(sm) {
+            padding: 8px 0;
+        }
+    }
+
+    &__confirm-btn {
+        font-weight: 400;
+        padding: 10px 0;
+        text-transform: uppercase;
+        width: 140px;
+        border-radius: 2px;
+        box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.09);
+
+        &:hover {
+            opacity: 0.9;
+        }
+
+        @include abstracts.screen(md) {
+            font-size: 1.5rem;
+            line-height: 2.7rem;
+        }
+
+        @include abstracts.screen(sm) {
+            padding: 8px 0;
         }
     }
 }

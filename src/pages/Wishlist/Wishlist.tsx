@@ -1,23 +1,171 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
+
 import styles from './Wishlist.module.scss';
 import Breadcrumb from '../../components/Breadcrumb';
-import Product from './Product';
 import Button from '../../components/Button';
 import config from '../../config';
+import Card from '../Shop/components/Card';
+import * as productServices from '../../services/productServices';
+import ProductModel from '../../models/ProductModel';
+import Pagination from '../../components/Pagination';
+import PreLoader from '../../components/PreLoader';
+import { useMediaQuery } from 'react-responsive';
+import * as favoriteServices from '../../services/favoriteServices';
+import WishlistComponent from '../../components/Wishlist';
+import { useLocation } from 'react-router-dom';
+import PageNotFound from '../PageNotFound';
 
 const cx = classNames.bind(styles);
 
 const Wishlist = () => {
     const links = ['home', 'Wishlist'];
+    const currentUser = localStorage.getItem('user_id');
+    const [loading, setLoading] = useState(true);
+    // pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPage, setTotalPage] = useState(0);
 
-    // fake wishlist
-    const wishlist: any[] = [1, 2, 3, 4, 5, 6, 7];
+    const isXxlScreen = useMediaQuery({ query: '(max-width: 1399.98px)' });
+
+    const [limit, setLimit] = useState(15);
+
+    // call api get wishlist
+    const [wishlist, setWishlist] = useState<any[]>(
+        JSON.parse(localStorage.getItem('wishlist') + '') || []
+    );
+
+    const location = useLocation();
+    const pathName = location.pathname;
+
+    // useEffect(() => {
+    //     if (currentUser) {
+    //         if (pathName === '/cart') {
+    //             setLoading(true);
+    //         }
+    //     }
+    // }, [pathName, currentUser]);
+
+    // get wishlist from db
+    useEffect(() => {
+        if (currentUser) {
+            localStorage.removeItem('wishlist');
+            const fetchApi = async () => {
+                const res = await favoriteServices.getFavoriteByUserId();
+                setWishlist(res.result);
+            };
+            fetchApi();
+            setTimeout(() => {
+                setLoading(false);
+            }, 1000);
+        }
+    }, [currentUser]);
+
+    // re-render component when remove wishlist-item
+    useEffect(() => {
+        const handleStorageChange = () => {
+            if (!currentUser) {
+                // setLoading(true);
+
+                setTimeout(() => {
+                    setWishlist(
+                        JSON.parse(localStorage.getItem('wishlist') + '') || []
+                    );
+                    // setLoading(false);
+                }, 300);
+            } else {
+                // setLoading(true);
+                const fetchApi = async () => {
+                    const res = await favoriteServices.getFavoriteByUserId();
+                    setWishlist(res.result);
+                    // setLoading(false);
+                };
+                setTimeout(() => {
+                    fetchApi();
+                }, 300);
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        // Lắng nghe sự kiện tùy chỉnh "storageChanged" trong cùng tab
+        window.addEventListener('storageChanged', handleStorageChange);
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('storageChanged', handleStorageChange);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (isXxlScreen) {
+            setLimit(12);
+        }
+    }, []);
+
+    // useEffect(() => {
+    //     if (!currentUser) {
+    //         const fetchApi = async (wishlistItem: any) => {
+    //             // setLoading(true);
+
+    //             const responseData = await productServices.getProductById(
+    //                 wishlistItem.product_id
+    //             );
+
+    //             setWishlist([...wishlist, responseData]);
+    //         };
+    //         wishlist.forEach((wishlistItem: any) => {
+    //             fetchApi(wishlistItem);
+    //         });
+    //     }
+    // }, [currentPage]);
+
+    const pagination = (presentPage: number) => {
+        setCurrentPage(presentPage);
+    };
+
+    const handleChangeWishlist: any = (newArr: any) => {
+        setLoading(true);
+        if (newArr.length === 0) {
+            setWishlist([]);
+            setLoading(false);
+            localStorage.setItem('wishlist', JSON.stringify(newArr));
+            return;
+        }
+        let result: any[] = [];
+        const fetchApi = async (wishlistItem: any) => {
+            const responseData = await productServices.getProductById(
+                wishlistItem.product_id
+            );
+            result.push(responseData);
+
+            if (result.length === newArr.length) {
+                setWishlist(result);
+                setLoading(false);
+                return;
+            }
+        };
+        newArr.forEach((wishlistItem: any, index: number) => {
+            fetchApi(wishlistItem);
+        });
+        localStorage.setItem('wishlist', JSON.stringify(newArr));
+    };
+
+    if (!currentUser) {
+        return <PageNotFound></PageNotFound>;
+    }
+
+    if (loading) {
+        window.scrollTo(0, 0);
+        return <PreLoader show></PreLoader>;
+    }
 
     return (
         <div className={cx('wishlist', { 'container-spacing': true })}>
             <Breadcrumb title="wishlist" links={links}></Breadcrumb>
-            <div
+            <div className={cx('', { 'd-none': wishlist.length === 0 })}>
+                <WishlistComponent></WishlistComponent>
+            </div>
+            {/* <div
                 className={cx('wishlist__list', {
                     'd-none': wishlist.length === 0,
                 })}
@@ -28,35 +176,49 @@ const Wishlist = () => {
                             row: true,
                             'row-cols-5': true,
                             'row-cols-xxl-4': true,
-                            'row-cols-xl-3': true,
-                            'row-cols-md-2': true,
-                            'row-cols-sm-1': true,
+                            'row-cols-lg-3': true,
+                            'row-cols-sm-2': true,
+                            'gy-3': true,
+                            'g-md-2': true,
                         })}
                     >
-                        {wishlist.map((item, index) => (
-                            <Product></Product>
+                        {wishlist.map((item: any, index: any) => (
+                            <Card
+                                key={index}
+                                isReview={false}
+                                productItem={item}
+                                handleChangeWishlist={handleChangeWishlist}
+                            ></Card>
                         ))}
                     </div>
                 </div>
-            </div>
+                <Pagination
+                    hide={wishlist.length === 0}
+                    currentPage={currentPage}
+                    totalPage={
+                        !isXxlScreen
+                            ? Math.floor(wishlist.length / 15 + 1)
+                            : Math.floor(wishlist.length / 12 + 1)
+                    }
+                    pagination={pagination}
+                ></Pagination>
+            </div> */}
             {/* Empty wishlist */}
-            <div
-                className={cx('wishlist__empty', {
-                    'd-none': wishlist.length > 0,
-                })}
-            >
-                <h2 className={cx('wishlist__empty-title')}>
-                    Nothing found in wishlist!
-                </h2>
-                <Button
-                    to={config.routes.shop}
-                    rounded
-                    primary
-                    className={cx('wishlist__btn')}
-                >
-                    Continue shopping
-                </Button>
-            </div>
+            {wishlist.length === 0 && (
+                <div className={cx('wishlist__empty')}>
+                    <h2 className={cx('wishlist__empty-title')}>
+                        Nothing found in wishlist!
+                    </h2>
+                    <Button
+                        to={config.routes.shop}
+                        rounded
+                        primary
+                        className={cx('wishlist__btn')}
+                    >
+                        Continue shopping
+                    </Button>
+                </div>
+            )}
         </div>
     );
 };

@@ -89,11 +89,11 @@
         }
 
         &::-webkit-scrollbar {
-            height: 5px;
+            height: 8px;
         }
 
         &::-webkit-scrollbar-thumb {
-            height: 5px;
+            height: 8px;
             background-color: #00000080;
         }
         &::-webkit-scrollbar-track {
@@ -113,11 +113,19 @@
     &__thumbnail {
         padding: 30px 20px !important;
         position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+
+        @include abstracts.screen(sm) {
+            padding: 20px !important;
+        }
     }
 
     &__thumbnail-wrapper {
         display: block;
         margin-bottom: 20px;
+        flex: 1;
     }
 
     &__img {
@@ -125,6 +133,8 @@
         height: 100%;
         border-radius: 15px;
         display: inline;
+        object-fit: contain;
+        mix-blend-mode: multiply;
     }
 
     &__caption {
@@ -135,7 +145,7 @@
         line-height: 2.52rem;
 
         @include abstracts.screen(sm) {
-            font-size: 1rem;
+            font-size: 1.2rem;
             line-height: 1.8rem;
         }
     }
@@ -146,13 +156,15 @@
         font-size: 2rem;
         font-weight: 700;
         line-height: 3.6rem;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
+        // text-overflow: ellipsis;
+        // white-space: nowrap;
+        // overflow: hidden;
 
         @include abstracts.screen(sm) {
-            font-size: 1.4rem;
-            line-height: 2.52rem;
+            font-size: 1.5rem;
+            line-height: 2.7rem;
+            white-space: initial;
+            word-break: initial;
         }
     }
 
@@ -166,7 +178,7 @@
         }
 
         @include abstracts.screen(sm) {
-            font-size: 1rem;
+            font-size: 1.2rem;
             line-height: 1.8rem;
         }
     }
@@ -180,8 +192,8 @@
         border: 1px solid var(--text-color);
 
         position: absolute;
-        right: 37px;
-        top: 47px;
+        right: 20px;
+        top: 20px;
 
         @include abstracts.screen(md) {
             width: 30px;
@@ -189,10 +201,8 @@
         }
 
         @include abstracts.screen(sm) {
-            width: 24px;
-            height: 24px;
-            right: 30px;
-            top: 40px;
+            right: 10px;
+            top: 10px;
 
             & > svg {
                 width: 8px;
@@ -217,6 +227,10 @@
 
         &:hover {
             background-color: var(--text-color);
+        }
+
+        @include abstracts.screen(sm) {
+            font-weight: 500;
         }
     }
 }

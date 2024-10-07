@@ -6,13 +6,16 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import './styles/main.scss';
 import App from './App';
+import { CartProvider } from './contexts/CartContext';
 
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
 );
 root.render(
     <React.StrictMode>
-        <App />
+        <CartProvider>
+            <App />
+        </CartProvider>
     </React.StrictMode>
 );
 

@@ -120,7 +120,6 @@ const Reviews = () => {
                                             interactive
                                             offset={[0, 3]}
                                             placement="bottom-end"
-                                            trigger="click"
                                             // onClickOutside={() => setShowDropdownProfile(false)}
                                             render={(attrs) => (
                                                 <div
@@ -222,7 +221,6 @@ const Reviews = () => {
                                             interactive
                                             offset={[0, 3]}
                                             placement="bottom-end"
-                                            trigger="click"
                                             // onClickOutside={() => setShowDropdownProfile(false)}
                                             render={(attrs) => (
                                                 <div

@@ -1,22 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames/bind';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
 import Button from '../../components/Button';
 import styles from './Register.module.scss';
-import AccountForm from '../../components/AccountForm';
 import { CheckIcon, ErrorIcon } from '../../components/Icons';
+import * as authServices from '../../services/authServices';
+import UserDTO from '../../dtos/UserDTO';
+import { useDebounce } from '../../hooks';
 
 const cx = classNames.bind(styles);
 
 const Register = () => {
+    const navigate = useNavigate();
+
     const formik = useFormik({
         initialValues: {
             firstName: '',
             lastName: '',
             email: '',
+            phoneNumber: '',
             password: '',
             confirmPassword: '',
         },
@@ -30,6 +35,18 @@ const Register = () => {
             ),
             email: Yup.string()
                 .email('Invalid email.')
+                .required('You must fill in this section.')
+                .test(
+                    'checkEmailExists',
+                    'Email already existed.',
+                    async (value) => {
+                        if (!value) return true;
+                        const res = await authServices.checkExistEmail(value);
+                        return !res; // res trả về true nếu email đã được sử dụng, phủ định res thành false để hiển thị lỗi
+                    }
+                ),
+            phoneNumber: Yup.string()
+                .matches(/^0\d{9}$/, 'Phone number is invalid.')
                 .required('You must fill in this section.'),
             password: Yup.string()
                 .min(8, 'Your password must be at least 8 characters.')
@@ -43,8 +60,22 @@ const Register = () => {
                 .required('You must fill in this section.'),
         }),
         onSubmit: (values) => {
-            //call api
-            console.log(values);
+            const data: UserDTO = {
+                first_name: values.firstName,
+                last_name: values.lastName,
+                email: values.email,
+                phone_number: values.phoneNumber,
+                password: values.password,
+                retype_password: values.confirmPassword,
+                role_ids: [2], //temp
+            };
+            const fetchApi = async () => {
+                const res = await authServices.register(data);
+                if (res) {
+                    navigate('/account-status');
+                }
+            };
+            fetchApi();
         },
     });
 
@@ -133,11 +164,40 @@ const Register = () => {
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                 />
+
                 {formik.errors.email && formik.touched.email && (
                     <div className={cx('form__error')}>
                         <ErrorIcon width="1.5rem" height="1.5rem"></ErrorIcon>
                         <span className={cx('form__error-title')}>
                             {formik.errors.email}
+                        </span>
+                    </div>
+                )}
+            </div>
+            {/* Phone number */}
+            <div className={cx('form__group')}>
+                <CheckIcon
+                    className={cx('form__icon', {
+                        valid:
+                            !formik.errors.phoneNumber &&
+                            formik.touched.phoneNumber,
+                    })}
+                ></CheckIcon>
+                <input
+                    value={formik.values.phoneNumber + ''}
+                    type="text"
+                    name="phoneNumber"
+                    id="phoneNumber"
+                    placeholder="Phone number"
+                    className={cx('form__input')}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                />
+                {formik.errors.phoneNumber && formik.touched.phoneNumber && (
+                    <div className={cx('form__error')}>
+                        <ErrorIcon width="1.5rem" height="1.5rem"></ErrorIcon>
+                        <span className={cx('form__error-title')}>
+                            {formik.errors.phoneNumber}
                         </span>
                     </div>
                 )}

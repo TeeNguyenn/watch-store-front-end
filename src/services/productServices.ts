@@ -1,6 +1,8 @@
 import ColorModel from '../models/ColorModel';
+import MaterialModel from '../models/MaterialModel';
 import ProductImageModel from '../models/ProductImageModel';
 import ProductModel from '../models/ProductModel';
+import ScreenSizeModel from '../models/ScreenSizeModel';
 import VariantModel from '../models/VariantModel';
 import * as request from '../utils/request'; // import all
 
@@ -24,19 +26,22 @@ export const getProduct = async (path: string): Promise<ResultInterface> => {
             const variants = responseData[key].variants;
 
             const colorList: ColorModel[] | undefined = [];
+            const screenSizeList: ScreenSizeModel[] | undefined = [];
+            const materialList: MaterialModel[] | undefined = [];
+
 
             variants?.forEach((variant: any) => {
-                let count = 0;
+                let countColor = 0;
                 for (let index = 0; index < colorList.length; index++) {
                     if (
                         variant.color.id ===
                         colorList[index].colorId
                     ) {
-                        count++;
+                        countColor++;
                         break;
                     }
                 }
-                if (count === 0) {
+                if (countColor === 0) {
                     colorList.push({
                         colorId: variant.color.id,
                         name: variant.color.name,
@@ -45,6 +50,40 @@ export const getProduct = async (path: string): Promise<ResultInterface> => {
                         blue: variant.color.blue,
                         alpha: variant.color.alpha,
                         totalProduct: variant.color.total_products,
+                    });
+                }
+                let countScreenSize = 0;
+                for (let index = 0; index < screenSizeList.length; index++) {
+                    if (
+                        variant.screen_size.id ===
+                        screenSizeList[index].sizeId
+                    ) {
+                        countScreenSize++;
+                        break;
+                    }
+                }
+                if (countScreenSize === 0) {
+                    screenSizeList.push({
+                        sizeId: variant.screen_size.id,
+                        size: variant.screen_size.size,
+                        // totalProduct: variant.color.total_products,
+                    });
+                }
+                let countMaterial = 0;
+                for (let index = 0; index < materialList.length; index++) {
+                    if (
+                        variant.material.id ===
+                        materialList[index].materialId
+                    ) {
+                        countMaterial++;
+                        break;
+                    }
+                }
+                if (countMaterial === 0) {
+                    materialList.push({
+                        materialId: variant.material.id,
+                        name: variant.material.name,
+                        // totalProduct: variant.color.total_products,
                     });
                 }
             });
@@ -58,6 +97,28 @@ export const getProduct = async (path: string): Promise<ResultInterface> => {
                 imageUrl: productImage.image_url,
                 isMainImage: productImage.is_main_image,
                 colorId: productImage.color_id,
+            }))
+
+            const variantList: VariantModel[] = [];
+
+            responseData[key].variants.forEach((variant: any) => variantList.push({
+                color: {
+                    colorId: variant.color.id,
+                    name: variant.color.name,
+                    red: variant.color.red,
+                    green: variant.color.green,
+                    blue: variant.color.blue,
+                    alpha: variant.color.alpha,
+                },
+                screenSize: {
+                    sizeId: variant.screen_size.id,
+                    size: variant.screen_size.size,
+                },
+                material: {
+                    materialId: variant.material.id,
+                    name: variant.material.name,
+                },
+                quantity: variant.quantity,
             }))
 
 
@@ -74,7 +135,14 @@ export const getProduct = async (path: string): Promise<ResultInterface> => {
                 colors: colorList.sort(
                     (a: any, b: any) => a.colorId - b.colorId
                 ),
+                materials: materialList.sort(
+                    (a: any, b: any) => a.materialId - b.materialId
+                ),
+                screenSizes: screenSizeList.sort(
+                    (a: any, b: any) => a.sizeId - b.sizeId
+                ),
                 productImages: productImages,
+                variants: variantList,
             })
         }
 
@@ -110,6 +178,8 @@ export const getProductById = async (productId: number): Promise<ProductModel> =
         const variants: any[] = responseData.variants;
 
         const colorList: ColorModel[] | undefined = [];
+        const screenSizeList: ScreenSizeModel[] | undefined = [];
+        const materialList: MaterialModel[] | undefined = [];
 
         variants?.forEach((variant) => {
             let count = 0;
@@ -131,6 +201,41 @@ export const getProductById = async (productId: number): Promise<ProductModel> =
                     blue: variant.color.blue,
                     alpha: variant.color.alpha,
                     totalProduct: variant.color.total_products,
+                });
+            }
+
+            let countScreenSize = 0;
+            for (let index = 0; index < screenSizeList.length; index++) {
+                if (
+                    variant.screen_size.id ===
+                    screenSizeList[index].sizeId
+                ) {
+                    countScreenSize++;
+                    break;
+                }
+            }
+            if (countScreenSize === 0) {
+                screenSizeList.push({
+                    sizeId: variant.screen_size.id,
+                    size: variant.screen_size.size,
+                    // totalProduct: variant.color.total_products,
+                });
+            }
+            let countMaterial = 0;
+            for (let index = 0; index < materialList.length; index++) {
+                if (
+                    variant.material.id ===
+                    materialList[index].materialId
+                ) {
+                    countMaterial++;
+                    break;
+                }
+            }
+            if (countMaterial === 0) {
+                materialList.push({
+                    materialId: variant.material.id,
+                    name: variant.material.name,
+                    // totalProduct: variant.color.total_products,
                 });
             }
         });
@@ -182,8 +287,15 @@ export const getProductById = async (productId: number): Promise<ProductModel> =
             colors: colorList.sort(
                 (a: any, b: any) => a.colorId - b.colorId
             ),
+            materials: materialList.sort(
+                (a: any, b: any) => a.materialId - b.materialId
+            ),
+            screenSizes: screenSizeList.sort(
+                (a: any, b: any) => a.sizeId - b.sizeId
+            ),
             productImages: productImages,
             variants: variantList,
+            collections: responseData.collections,
 
         };
 

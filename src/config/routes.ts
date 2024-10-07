@@ -8,7 +8,7 @@ const routes = {
     register: '/register',
     login: '/login',
     detail: '/products/:productId',
-    accountStatus: '/account-status',
+    accountStatus: '/account-status/:email?/:activeCode?',
     checkout: '/checkout',
     cart: '/cart',
     wishlist: '/wishlist',
@@ -17,7 +17,7 @@ const routes = {
     pageNotFound: '/404-not-found',
     forgotPassword: '/forgot-password',
     profile: '/customer/profile',
-    orderDetails: '/customer/order-details',
+    orderDetails: '/customer/order-details/:orderId',
     searchResult: '/search',
 };
 

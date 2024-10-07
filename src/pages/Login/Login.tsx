@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames/bind';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -6,12 +6,19 @@ import * as Yup from 'yup';
 import Button from '../../components/Button';
 import styles from './Login.module.scss';
 import { CheckIcon, ErrorIcon } from '../../components/Icons';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import config from '../../config';
+import * as authServices from '../../services/authServices';
+import UserLoginDTO from '../../dtos/UserLoginDTO';
+import PreLoader from '../../components/PreLoader';
 
 const cx = classNames.bind(styles);
 
 const Login = () => {
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
+
     const links = [
         {
             to: config.routes.forgotPassword,
@@ -41,10 +48,43 @@ const Login = () => {
                 ),
         }),
         onSubmit: (values) => {
-            //call api
-            console.log(values);
+            const fetchApi = async () => {
+                const previousPage =
+                    localStorage.getItem('previousPage') || '/'; // Nếu không có trang trước thì chuyển về trang chủ
+                if (previousPage === '/') {
+                    setLoading(true);
+                }
+                const res = await authServices.login({
+                    email: values.email,
+                    password: values.password,
+                });
+                if (!res.token) {
+                    setError(true);
+                    setLoading(false);
+                    return;
+                }
+
+                navigate(previousPage);
+                localStorage.removeItem('wishlist');
+                setLoading(false);
+            };
+            fetchApi();
         },
     });
+
+    const handleChangeEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setError(false);
+        formik.handleChange(e);
+    };
+
+    const handleChangePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setError(false);
+        formik.handleChange(e);
+    };
+
+    if (loading) {
+        return <PreLoader show></PreLoader>;
+    }
 
     return (
         <form className={cx('form')} onSubmit={formik.handleSubmit}>
@@ -70,7 +110,7 @@ const Login = () => {
                     id="email"
                     placeholder={'Email'}
                     className={cx('form__input')}
-                    onChange={formik.handleChange}
+                    onChange={handleChangeEmail}
                     onBlur={formik.handleBlur}
                 />
                 {formik.errors.email && formik.touched.email && (
@@ -97,7 +137,7 @@ const Login = () => {
                     id="password"
                     placeholder={'Password'}
                     className={cx('form__input')}
-                    onChange={formik.handleChange}
+                    onChange={handleChangePassword}
                     onBlur={formik.handleBlur}
                 />
                 {formik.errors.password && formik.touched.password && (
@@ -105,6 +145,14 @@ const Login = () => {
                         <ErrorIcon width="1.5rem" height="1.5rem"></ErrorIcon>
                         <span className={cx('form__error-title')}>
                             {formik.errors.password}
+                        </span>
+                    </div>
+                )}
+                {error && (
+                    <div className={cx('form__error')}>
+                        <ErrorIcon width="1.5rem" height="1.5rem"></ErrorIcon>
+                        <span className={cx('form__error-title')}>
+                            Wrong email or password. Please try again.
                         </span>
                     </div>
                 )}
