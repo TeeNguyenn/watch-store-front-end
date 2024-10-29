@@ -47,6 +47,8 @@ export const login = async (loginDTO: any) => {
         const decodedToken: any = jwtDecode(token);
         localStorage.setItem('user_id', decodedToken.userId);
 
+
+
         return response;
 
     } catch (error) {

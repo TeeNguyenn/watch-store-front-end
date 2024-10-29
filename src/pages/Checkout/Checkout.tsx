@@ -5,6 +5,8 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import Tippy from '@tippyjs/react/headless';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import Button from '../../components/Button';
 import styles from './Checkout.module.scss';
@@ -23,17 +25,16 @@ import * as cartItemServices from '../../services/cartItemServices';
 import * as productServices from '../../services/productServices';
 import ProductModel from '../../models/ProductModel';
 import PreLoader from '../../components/PreLoader';
-import { formatPrice } from '../../utils/Functions';
+import { convertToVND, formatPrice } from '../../utils/Functions';
 import * as paymentMethodServices from '.././../services/paymentMethodServices';
 import PaymentMethodModel from '../../models/PaymentMethodModel';
 import * as orderServices from '../../services/orderServices';
 import OrderDTO from '../../dtos/OrderDTO';
 import * as shippingMethodServices from '../../services/shippingMethodServices';
 import ShippingMethodModel from '../../models/ShippingMethodModel';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
 import icons from '../../assets/icons';
 import PageNotFound from '../PageNotFound';
+import * as paymentServices from '../../services/paymentServices';
 
 const cx = classNames.bind(styles);
 
@@ -62,6 +63,62 @@ const Checkout = () => {
         useState(false);
     const [activeShippingMethod, setActiveShippingMethod] = useState<any>(1);
     const [tempShippingMethod, setTempShippingMethod] = useState<any>(1);
+    const location = useLocation();
+
+    const queryParams = new URLSearchParams(location.search);
+    const responseCode = queryParams.get('vnp_ResponseCode');
+    const orderId = queryParams.get('order_Id');
+    const [notFound, setNotFound] = useState(false);
+
+    const notifyPaymentFailure = () => {
+        toast.error('Payment order failed!', {
+            position: 'top-right',
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+        });
+    }; //error payment chua hien thong bao
+
+    useEffect(() => {
+        if (responseCode) {
+            setLoading(true);
+            const currentOrderId = localStorage.getItem('orderId');
+
+            const fetchApi = async () => {
+                const res = await orderServices.getOrderByOrderId(orderId + '');
+
+                // Truong hop order chua thanh toan va nguoi dung gia mao url
+                if (res.payment_status !== true) {
+                    setTimeout(() => {
+                        setLoading(false);
+                        notifyPaymentFailure();
+                        return;
+                    }, 200);
+                } else {
+                    navigate(config.routes.orderSuccessful);
+                    setTimeout(() => {
+                        setLoading(false);
+                    }, 200);
+                }
+            };
+
+            if (responseCode !== '00') {
+                // run 2 lan do bat che do strict mode, moi truong production khong bi
+                setTimeout(() => {
+                    setLoading(false);
+                    notifyPaymentFailure();
+                }, 200);
+            } else if (responseCode === '00' && orderId !== currentOrderId) {
+                // Truong hop nguoi dung su dung orderId cua order truoc de thanh toan order hien tai
+                setNotFound(true);
+            } else if (responseCode === '00' && orderId === currentOrderId) {
+                fetchApi();
+            }
+        }
+    }, [responseCode, orderId]);
 
     useEffect(() => {
         if (currentUser && products.length > 0) {
@@ -212,43 +269,78 @@ const Checkout = () => {
                 (item) => item.name === values.payment
             );
 
-            const data: OrderDTO = {
+            const totalMoney = shippingMethodList.map(
+                (item) =>
+                    item.shippingMethodId === activeShippingMethod &&
+                    (item?.cost ? item?.cost + total : total)
+            );
+
+            const data = {
                 user_id: Number.parseInt(currentUser + ''),
                 first_name: values.fullName,
                 last_name: '',
                 email: values.email,
                 phone_number: values.telephone,
-                address: `${values.apartment}, ${commune[0].full_name}, ${district[0].full_name}, ${province[0].full_name}`,
+                address: values.apartment
+                    ? `${values.apartment}, ${commune[0].full_name}, ${district[0].full_name}, ${province[0].full_name}`
+                    : `${commune[0].full_name}, ${district[0].full_name}, ${province[0].full_name}`,
                 note: '',
-                total_money: total,
+                total_money: Number.parseFloat(totalMoney.at(0) + ''),
                 sub_total: total,
                 shipping_method_id: activeShippingMethod,
                 payment_method_id: Number.parseInt(
                     paymentMethodId.at(0)?.paymentMethodId + ''
                 ),
                 payment_status: false,
-                shipping_address: `${values.apartment}, ${commune[0].full_name}, ${district[0].full_name}, ${province[0].full_name}`,
+                shipping_address: values.apartment
+                    ? `${values.apartment}, ${commune[0].full_name}, ${district[0].full_name}, ${province[0].full_name}`
+                    : `${commune[0].full_name}, ${district[0].full_name}, ${province[0].full_name}`,
                 cart_items: products,
-            };
-
-            const fetchApi = async () => {
-                // setLoading(true);
-
-                const res = await orderServices.postOrder(data);
-
-                if (res.message === 'Insert Successfully') {
-                    setTimeout(() => {
-                        navigate(config.routes.orderSuccessful);
-                        localStorage.setItem('orderId', res.data.id);
-                    }, 200);
-                } else {
-                    console.log('Error!');
-                    setLoading(false);
-                }
             };
 
             // Checkout for COD
             if (paymentMethodId.at(0)?.paymentMethodId + '' === '2') {
+                const fetchApi = async () => {
+                    // setLoading(true);
+
+                    const res = await orderServices.postOrder(data);
+
+                    if (res.message === 'Insert Successfully') {
+                        setTimeout(() => {
+                            localStorage.setItem('orderId', res.data.id);
+                            navigate(config.routes.orderSuccessful);
+                        }, 200);
+                    } else {
+                        console.log('Error!');
+                        setLoading(false);
+                    }
+                };
+                fetchApi();
+            } else {
+                //VPN PAY
+                const fetchApi = async () => {
+                    const res = await orderServices.postOrder(data);
+
+                    if (res.message === 'Insert Successfully') {
+                        localStorage.setItem('orderId', res.data.id);
+                    } else {
+                        console.log('Error!');
+                        setLoading(false);
+                    }
+
+                    const response = await paymentServices.getPaymentViaVNPAY(
+                        convertToVND(Number.parseFloat(totalMoney.at(0) + '')),
+                        'NCB',
+                        res.data.id
+                    );
+
+                    // Redirect to vnpay
+                    if (response.status === 'Ok') {
+                        window.location.href = response.url;
+
+                        // window.open(response.url, '_blank');
+                    }
+                };
                 fetchApi();
             }
         },
@@ -271,7 +363,7 @@ const Checkout = () => {
         setActiveShippingMethod(tempShippingMethod);
     };
 
-    if (products.length === 0) {
+    if (products.length === 0 || notFound) {
         return <PageNotFound></PageNotFound>;
     }
     if (loading) {
@@ -280,6 +372,7 @@ const Checkout = () => {
 
     return (
         <div className={cx('checkout')}>
+            <ToastContainer />
             <header className={cx('banner')}>
                 <div className={cx('banner__inner')}>
                     <Link
@@ -856,10 +949,10 @@ const Checkout = () => {
                                                                     item.shippingMethodId ===
                                                                         activeShippingMethod &&
                                                                     formatPrice(
-                                                                        item.cost
-                                                                            ? item.cost /
-                                                                                  1000
-                                                                            : 3
+                                                                        Number.parseFloat(
+                                                                            item.cost +
+                                                                                ''
+                                                                        )
                                                                     )
                                                             )}
                                                         </p>
@@ -983,10 +1076,10 @@ const Checkout = () => {
                                                                             )}
                                                                         >
                                                                             {formatPrice(
-                                                                                item.cost
-                                                                                    ? item.cost /
-                                                                                          1000
-                                                                                    : 3
+                                                                                Number.parseFloat(
+                                                                                    item.cost +
+                                                                                        ''
+                                                                                )
                                                                             )}
                                                                         </p>
                                                                     </div>
@@ -1330,9 +1423,9 @@ const Checkout = () => {
                                                     item.shippingMethodId ===
                                                         activeShippingMethod &&
                                                     formatPrice(
-                                                        item.cost
-                                                            ? item.cost / 1000
-                                                            : 3
+                                                        Number.parseFloat(
+                                                            item.cost + ''
+                                                        )
                                                     )
                                             )}
                                         </span>
@@ -1358,9 +1451,8 @@ const Checkout = () => {
                                                         activeShippingMethod &&
                                                     formatPrice(
                                                         item.cost
-                                                            ? item.cost / 1000 +
-                                                                  total
-                                                            : 3 + total
+                                                            ? item.cost + total
+                                                            : total
                                                     )
                                             )}
                                         </span>

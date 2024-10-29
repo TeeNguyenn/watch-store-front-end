@@ -27,3 +27,28 @@ export const getMainProductImageListByProductId = async (productId: number): Pro
     return result;
 
 }
+
+
+
+export const postProductImage = async (imageList: any, productId: number, colorId: number) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.post('products/uploads', imageList, {
+            params: {
+                'product-id': productId,
+                'color-id': colorId,
+                files: '',
+            },
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return response;
+    } catch (error) {
+        throw (error);
+
+    }
+};

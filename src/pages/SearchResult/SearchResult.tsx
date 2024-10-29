@@ -42,6 +42,7 @@ const cx = classNames.bind(styles);
 const links = ['home', 'shop'];
 
 const SearchResult = () => {
+    const [sort, setSort] = useState('');
     const [sortBy, setSortBy] = useState('Relevance');
     const [visible, setVisible] = useState(false);
     const [showOption, setShowOption] = useState(4);
@@ -83,6 +84,22 @@ const SearchResult = () => {
         }
         setSortBy(name);
         setVisible(false);
+
+        switch (name) {
+            case 'Relevance':
+                setSort('');
+                break;
+
+            case 'Price, low to high':
+                setSort('low');
+                break;
+            case 'Price, high to low':
+                setSort('high');
+                break;
+
+            default:
+                break;
+        }
     };
 
     const pagination = (presentPage: number) => {
@@ -91,7 +108,8 @@ const SearchResult = () => {
 
     // Get keyword from url
     const [searchParams] = useSearchParams();
-    const keyword = searchParams.get('keyword') || '';
+    const [keyword, setKeyword] = useState(searchParams.get('keyword') + '');
+    // const keyword = searchParams.get('keyword') || '';
 
     const settings = {
         slidesToShow: 4,
@@ -138,7 +156,8 @@ const SearchResult = () => {
                 categoryFilter.ids.join(',') + '',
                 colorFilter.ids.join(',') + '',
                 materialFilter.ids.join(',') + '',
-                keyword
+                keyword,
+                sort
             );
 
             if (responseData) {
@@ -175,6 +194,7 @@ const SearchResult = () => {
         colorFilter,
         materialFilter,
         keyword,
+        sort,
     ]);
 
     const handleFilterCollection = (activeCollection: string) => {

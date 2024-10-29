@@ -157,9 +157,9 @@ export const getProduct = async (path: string): Promise<ResultInterface> => {
     }
 };
 
-export const getAllProduct = async (currentPage: number, limit: number = 12, collectionId?: string, categoryId?: string, colorId?: string, materialId?: string, keyword?: string): Promise<ResultInterface> => {
+export const getAllProduct = async (currentPage = 1, limit: number = 12, collectionId?: string, categoryId?: string, colorId?: string, materialId?: string, keyword?: string, sort?: string): Promise<ResultInterface> => {
 
-    const path = `products?page=${currentPage}&limit=${limit}&collection-ids=${collectionId || ''}&category-ids=${categoryId || ''}&color-ids=${colorId || ''}&material-ids=${materialId || ''}&keyword=${keyword || ''}`;
+    const path = `products?page=${currentPage - 1}&limit=${limit}&collection-ids=${collectionId || ''}&category-ids=${categoryId || ''}&color-ids=${colorId || ''}&material-ids=${materialId || ''}&keyword=${keyword || ''}&sort=${sort || ''}`;
     return getProduct(path);
 };
 
@@ -283,7 +283,10 @@ export const getProductById = async (productId: number): Promise<ProductModel> =
             thumbnail: responseData.thumbnail,
             averageRate: responseData.average_rate,
             quantityStock: responseData.quantity_stock,
-            category: responseData.category,
+            category: {
+                categoryId: responseData.category.id,
+                name: responseData.category.name
+            },
             colors: colorList.sort(
                 (a: any, b: any) => a.colorId - b.colorId
             ),
@@ -302,5 +305,42 @@ export const getProductById = async (productId: number): Promise<ProductModel> =
 
     } catch (error) {
         throw (error);
+    }
+};
+
+
+export const deleteProductItem = async (productId: string) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.del(`products/${productId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return response;
+
+    } catch (error) {
+        throw (error);
+
+    }
+};
+
+
+export const postProduct = async (product: any) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.post('products', product, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return response;
+    } catch (error) {
+        throw (error);
+
     }
 };

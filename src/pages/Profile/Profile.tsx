@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
 
 import Button from '../../components/Button';
@@ -16,11 +16,81 @@ import Orders from '../../components/Orders';
 import Reviews from '../../components/Reviews';
 import Wishlist from '../../components/Wishlist';
 import PersonalInfo from '../PersonalInfo';
+import * as orderServices from '../../services/orderServices';
+import * as feedbackServices from '../../services/feedbackServices';
+import FeedbackModel from '../../models/FeedbackModel';
+import { useParams } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
 const Profile = () => {
     const [showTabContent, setShowTabContent] = useState(1);
+    const [totalOrders, setTotalOrders] = useState<any>([]);
+    const [feedbackList, setFeedbackList] = useState<FeedbackModel[]>([]);
+
+    const currentUser = localStorage.getItem('user_id');
+
+    // Get customerId from url
+    const { customerId } = useParams();
+
+    let customerIdNumber = 0;
+    try {
+        customerIdNumber = parseInt(customerId + '');
+        if (Number.isNaN(customerIdNumber)) {
+            customerIdNumber = 0;
+        }
+    } catch (error) {
+        customerIdNumber = 0;
+        console.log('Error:', error);
+    }
+
+    useEffect(() => {
+        if (currentUser) {
+            const fetchApi = async () => {
+                const res = await orderServices.getAllOrderByUserId(currentUser);
+
+                setTotalOrders(res.totalOrders);
+            };
+
+            fetchApi();
+        }
+    }, [currentUser]);
+
+    // re-render component when remove order-item
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const fetchApi = async () => {
+                const res = await orderServices.getAllOrderByUserId(currentUser + '');
+
+                setTotalOrders(res.totalOrders);
+            };
+
+            fetchApi();
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        // Lắng nghe sự kiện tùy chỉnh "storageChanged" trong cùng tab
+        window.addEventListener('storageChanged', handleStorageChange);
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('storageChanged', handleStorageChange);
+        };
+    }, []);
+
+    useEffect(() => {
+        const fetchApi = async () => {
+            const feedbackData =
+                await feedbackServices.getAllFeedbackByUserId(
+                    customerId || currentUser + ''
+                );
+
+            setFeedbackList(feedbackData.result);
+        };
+
+        fetchApi();
+    }, []);
+
     return (
         <div className="container-spacing">
             <div className={cx('profile')}>
@@ -42,7 +112,7 @@ const Profile = () => {
                                 Orders
                             </Button>
                             <span className={cx('profile__nav-count')}>
-                                (35)
+                                {`(${totalOrders})`}
                             </span>
                         </div>
                     </div>
@@ -60,7 +130,7 @@ const Profile = () => {
                                 Reviews
                             </Button>
                             <span className={cx('profile__nav-count')}>
-                                (24)
+                                {`(${feedbackList.length})`}
                             </span>
                         </div>
                     </div>

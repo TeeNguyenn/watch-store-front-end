@@ -88,9 +88,9 @@ const HomeProduct = () => {
                 await feedbackServices.getAllFeedbackByProductId(
                     4 //temp
                 );
-            setFeedbackList(feedbackData);
+            setFeedbackList(feedbackData.result);
 
-            const recommendProducts = await productServices.getAllProduct(0, 5);
+            const recommendProducts = await productServices.getAllProduct(1, 5);
 
             if (recommendProducts) {
                 setProductList(recommendProducts.result);
@@ -281,17 +281,17 @@ const HomeProduct = () => {
                                         >
                                             {tempColor
                                                 ? productDetail?.colors.map(
-                                                      (item) =>
-                                                          item.colorId ===
-                                                              tempColor &&
-                                                          item.name
-                                                  )
+                                                    (item) =>
+                                                        item.colorId ===
+                                                        tempColor &&
+                                                        item.name
+                                                )
                                                 : productDetail?.colors.map(
-                                                      (item) =>
-                                                          item.colorId ===
-                                                              activeColor &&
-                                                          item.name
-                                                  )}
+                                                    (item) =>
+                                                        item.colorId ===
+                                                        activeColor &&
+                                                        item.name
+                                                )}
                                         </p>
                                     </div>
                                     <div
@@ -374,7 +374,7 @@ const HomeProduct = () => {
                                             {productDetail?.variants?.map(
                                                 (item) =>
                                                     item.color.colorId ===
-                                                        activeColor &&
+                                                    activeColor &&
                                                     `${item.screenSize.size} inches`
                                             )}
                                         </p>
@@ -387,7 +387,7 @@ const HomeProduct = () => {
                                         {productDetail?.variants?.map(
                                             (item) =>
                                                 item.color.colorId ===
-                                                    activeColor && (
+                                                activeColor && (
                                                     <Button
                                                         rounded
                                                         className={cx(
@@ -399,21 +399,21 @@ const HomeProduct = () => {
                                                                     activeColor,
                                                             }
                                                         )}
-                                                        // onClick={() =>
-                                                        //     setActiveSize(
-                                                        //         item.screenSize
-                                                        //             .sizeId
-                                                        //     )
-                                                        // }
-                                                        // onMouseEnter={() =>
-                                                        //     setActiveSize(
-                                                        //         item.screenSize
-                                                        //             .sizeId
-                                                        //     )
-                                                        // }
-                                                        // onMouseLeave={() =>
-                                                        //     setActiveSize(undefined)
-                                                        // }
+                                                    // onClick={() =>
+                                                    //     setActiveSize(
+                                                    //         item.screenSize
+                                                    //             .sizeId
+                                                    //     )
+                                                    // }
+                                                    // onMouseEnter={() =>
+                                                    //     setActiveSize(
+                                                    //         item.screenSize
+                                                    //             .sizeId
+                                                    //     )
+                                                    // }
+                                                    // onMouseLeave={() =>
+                                                    //     setActiveSize(undefined)
+                                                    // }
                                                     >
                                                         {`${item.screenSize.size} Inches`}
                                                     </Button>
@@ -441,7 +441,7 @@ const HomeProduct = () => {
                                             {productDetail?.variants?.map(
                                                 (item) =>
                                                     item.color.colorId ===
-                                                        activeColor &&
+                                                    activeColor &&
                                                     `${item.material.name}`
                                             )}
                                         </p>
@@ -454,7 +454,7 @@ const HomeProduct = () => {
                                         {productDetail?.variants?.map(
                                             (item) =>
                                                 item.color.colorId ===
-                                                    activeColor && (
+                                                activeColor && (
                                                     <Button
                                                         rounded
                                                         className={cx(

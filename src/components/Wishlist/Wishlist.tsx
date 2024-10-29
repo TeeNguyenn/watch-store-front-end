@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import Tippy from '@tippyjs/react/headless';
 
 import Button from '../Button';
@@ -26,7 +26,11 @@ import PreLoader from '../PreLoader';
 
 const cx = classNames.bind(styles);
 
-const Wishlist = () => {
+interface WishlistProps {
+    className?: string;
+}
+
+const Wishlist = ({ className }: WishlistProps) => {
     // pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPage, setTotalPage] = useState(0);
@@ -44,6 +48,21 @@ const Wishlist = () => {
     // const [wishlistShow, wishlistHide] = splitArrayAtIndex(wishlist, 6);
     const [limit, setLimit] = useState(6);
 
+
+    // Get customerId from url
+    const { customerId } = useParams();
+
+    let customerIdNumber = 0;
+    try {
+        customerIdNumber = parseInt(customerId + '');
+        if (Number.isNaN(customerIdNumber)) {
+            customerIdNumber = 0;
+        }
+    } catch (error) {
+        customerIdNumber = 0;
+        console.log('Error:', error);
+    }
+
     // get wishlist from db
     useEffect(() => {
         if (currentUser) {
@@ -51,6 +70,7 @@ const Wishlist = () => {
             localStorage.removeItem('wishlist');
             const fetchApi = async () => {
                 const res = await favoriteServices.getFavoriteByUserId(
+                    customerId || currentUser,
                     currentPage,
                     limit
                 );
@@ -89,7 +109,7 @@ const Wishlist = () => {
             setTotalPage(
                 Math.ceil(
                     JSON.parse(localStorage.getItem('wishlist') + '').length /
-                        limit
+                    limit
                 )
             );
 
@@ -114,7 +134,9 @@ const Wishlist = () => {
             } else {
                 setLoading(true);
                 const fetchApi = async () => {
-                    const res = await favoriteServices.getFavoriteByUserId();
+                    const res = await favoriteServices.getFavoriteByUserId(
+                        customerId || currentUser
+                    );
                     setWishlist(res.result);
                     setTotalPage(res.totalPage);
                     setTotalProduct(res.totalProduct);
@@ -146,6 +168,7 @@ const Wishlist = () => {
             setLoading(true);
             const fetchApi = async () => {
                 const res = await favoriteServices.getFavoriteByUserId(
+                    customerId || currentUser + '',
                     currentPage
                 );
                 setWishlist(res.result);
@@ -198,7 +221,7 @@ const Wishlist = () => {
             setTotalPage(
                 Math.ceil(
                     JSON.parse(localStorage.getItem('wishlist') + '').length /
-                        limit
+                    limit
                 )
             );
 
@@ -206,7 +229,7 @@ const Wishlist = () => {
             const remainder = wishList.length % 6;
             const totalPages = Math.ceil(
                 (JSON.parse(localStorage.getItem('wishlist') + '').length + 1) /
-                    limit
+                limit
             );
 
             if (
@@ -241,10 +264,16 @@ const Wishlist = () => {
         return <PreLoader show></PreLoader>;
     }
 
+    if (wishlist.length === 0) {
+        return <></>
+    }
+
     return (
-        <div className={cx('wishlist')}>
+        <div className={cx('wishlist', className)}>
             <div className={cx('wishlist__container')}>
-                <table className={cx('wishlist__table')}>
+                <table className={cx('wishlist__table', {
+                    modifier: className
+                })}>
                     <thead>
                         <tr>
                             <th
@@ -254,27 +283,55 @@ const Wishlist = () => {
                             <th
                                 className={cx('wishlist__heading')}
                                 style={{
-                                    minWidth: '250px',
+                                    minWidth: className ? '300px' : '250px',
                                     width: '30%',
                                 }}
                             >
                                 products
                             </th>
                             <th
-                                className={cx('wishlist__heading')}
+                                className={cx('wishlist__heading', {
+                                    'd-none': className
+                                })}
                                 style={{ width: '22%', minWidth: '300px' }}
                             >
                                 Variant
                             </th>
 
                             <th
+                                className={cx('wishlist__heading', {
+                                    'd-none': !className
+                                })}
+                                style={{ width: '20%', minWidth: className ? '230px' : '200px', textAlign: 'left' }}
+                            >
+                                color
+                            </th>
+                            <th
+                                className={cx('wishlist__heading', {
+                                    'd-none': !className
+                                })}
+                                style={{ width: '20%', minWidth: '180px' }}
+                            >
+                                size
+                            </th>
+                            <th
+                                className={cx('wishlist__heading', {
+                                    'd-none': !className
+                                })}
+                                style={{ width: '20%', minWidth: '180px', textAlign: 'right' }}
+                            >
+                                material
+                            </th>
+                            <th
                                 className={cx('wishlist__heading')}
-                                style={{ width: '20%', minWidth: '200px' }}
+                                style={{ width: '20%', minWidth: '200px', textAlign: className ? 'right' : 'center' }}
                             >
                                 price
                             </th>
                             <th
-                                className={cx('wishlist__heading')}
+                                className={cx('wishlist__heading', {
+                                    'd-none': className
+                                })}
                                 style={{ width: '20%' }}
                             ></th>
                         </tr>
@@ -283,43 +340,24 @@ const Wishlist = () => {
                         {wishlist.map((wishlistItem, index) => (
                             <WishlistItem
                                 key={index}
+                                modifier={!!className}
                                 wishlistItem={
                                     currentUser
                                         ? wishlistItem
                                         : {
-                                              productId:
-                                                  wishlistItem.product_id,
-                                              colorId: wishlistItem.color_id,
-                                              screenSizeId:
-                                                  wishlistItem.screen_size_id,
-                                              materialId:
-                                                  wishlistItem.material_id,
-                                          }
+                                            productId:
+                                                wishlistItem.product_id,
+                                            colorId: wishlistItem.color_id,
+                                            screenSizeId:
+                                                wishlistItem.screen_size_id,
+                                            materialId:
+                                                wishlistItem.material_id,
+                                        }
                                 }
                                 handleChangeWishlist={handleChangeWishlist}
                             ></WishlistItem>
                         ))}
-                        {/* Wishlist hide */}
-                        {/* {wishlistHide.map((wishlistItem, index) => (
-                            <WishlistItem
-                                key={index}
-                                className={!viewAll ? 'd-none' : ''}
-                                wishlistItem={
-                                    currentUser
-                                        ? wishlistItem
-                                        : {
-                                              productId:
-                                                  wishlistItem.product_id,
-                                              colorId: wishlistItem.color_id,
-                                              screenSizeId:
-                                                  wishlistItem.screen_size_id,
-                                              materialId:
-                                                  wishlistItem.material_id,
-                                          }
-                                }
-                                handleChangeWishlist={handleChangeWishlist}
-                            ></WishlistItem>
-                        ))} */}
+
                     </tbody>
                 </table>
             </div>
@@ -328,7 +366,7 @@ const Wishlist = () => {
                     'd-none': currentUser
                         ? totalPage === 1 && wishlist.length <= 6
                         : JSON.parse(localStorage.getItem('wishlist') + '')
-                              .length <= 6,
+                            .length <= 6,
                 })}
             >
                 <div className={cx('wishlist__view')}>
@@ -339,15 +377,14 @@ const Wishlist = () => {
                     >
                         {viewAll
                             ? `1 to ${totalProduct} items of ${totalProduct}`
-                            : `${limit * (currentPage - 1) + 1} to ${
-                                  currentPage * 6 >= totalProduct
-                                      ? totalProduct
-                                      : currentPage * 6
-                              } items of ${totalProduct}`}
+                            : `${limit * (currentPage - 1) + 1} to ${currentPage * 6 >= totalProduct
+                                ? totalProduct
+                                : currentPage * 6
+                            } items of ${totalProduct}`}
                     </p>
                     <Button
                         className={cx('wishlist__view-btn', {
-                            'd-none': currentPage > 1,
+                            'd-none': currentPage > 1 || className,
                         })}
                         rightIcon={<RightIcon></RightIcon>}
                         onClick={handleViewAll}

@@ -16,6 +16,7 @@ import {
     DeliveryIcon,
     HeartIcon,
     NextIcon,
+    RightIcon,
     ShareIcon,
     ShippingDetailIcon,
     ZoomInIcon,
@@ -39,6 +40,7 @@ import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { CartContext } from './../../contexts/CartContext';
 import * as favoriteServices from '.././../services/favoriteServices';
 import * as cartItemServices from '../../services/cartItemServices';
+import Pagination from '../../components/Pagination';
 
 const cx = classNames.bind(styles);
 
@@ -48,6 +50,14 @@ interface DetailProps {
 }
 
 const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPage, setTotalPage] = useState(0);
+    const [totalFeedbacks, setTotalFeedbacks] = useState(0);
+    const [limit, setLimit] = useState(5);
+    const [sort, setSort] = useState('latest');
+
+    const [viewAll, setViewAll] = useState(false);
+
     const context = useContext(CartContext);
     const navigate = useNavigate();
     const location = useLocation();
@@ -119,6 +129,46 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
         productIdNumber = 0;
         console.log('Error:', error);
     }
+
+    // Get customerId from url
+    const { customerId } = useParams();
+
+    let customerIdNumber = 0;
+    try {
+        customerIdNumber = parseInt(customerId + '');
+        if (Number.isNaN(customerIdNumber)) {
+            customerIdNumber = 0;
+        }
+    } catch (error) {
+        customerIdNumber = 0;
+        console.log('Error:', error);
+    }
+
+    // re-render component when remove wishlist-item
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const fetchApi = async () => {
+                const feedbackData =
+                    await feedbackServices.getAllFeedbackByProductId(
+                        productIdNumber
+                    );
+                setFeedbackList(feedbackData.result);
+            };
+
+            setTimeout(() => {
+                fetchApi();
+            }, 10000);
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        // Lắng nghe sự kiện tùy chỉnh "storageChanged" trong cùng tab
+        window.addEventListener('storageChanged', handleStorageChange);
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('storageChanged', handleStorageChange);
+        };
+    }, []);
 
     useEffect(() => {
         if (!quickBuy) {
@@ -205,19 +255,26 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                         item.colorId === responseData?.colors.at(0)?.colorId
                 )
             );
-            const feedbackData =
-                await feedbackServices.getAllFeedbackByProductId(
-                    productIdNumber
-                );
-            setFeedbackList(feedbackData);
+            // const feedbackData =
+            //     await feedbackServices.getAllFeedbackByProductId(
+            //         productIdNumber,
+            //         currentPage,
+            //         limit
+            //     );
 
-            const recommendProducts = await productServices.getAllProduct(0, 5);
+            // setFeedbackList(feedbackData.result);
+            // setTotalPage(feedbackData.totalPage);
+            // setTotalFeedbacks(feedbackData.totalFeedbacks);
+
+            const recommendProducts = await productServices.getAllProduct(1, 5, '', responseData.category.categoryId + '');
 
             if (recommendProducts) {
                 setProductList(recommendProducts.result);
             }
 
-            const res = await favoriteServices.getFavoriteByUserId();
+            const res = await favoriteServices.getFavoriteByUserId(
+                customerId || currentUser + ''
+            );
 
             res.result.forEach((item) => {
                 if (
@@ -231,8 +288,45 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
             });
             setLoading(false);
         };
+        if (productIdNumber) {
+            fetchApi();
+        }
+    }, [productIdNumber]);
+
+    useEffect(() => {
+        const fetchApi = async () => {
+            const feedbackData =
+                await feedbackServices.getAllFeedbackByProductId(
+                    productIdNumber,
+                    currentPage,
+                    limit,
+                    sort
+                );
+            setFeedbackList(feedbackData.result);
+            setTotalPage(feedbackData.totalPage);
+            setTotalFeedbacks(feedbackData.totalFeedbacks);
+        };
+
         fetchApi();
-    }, []);
+    }, [currentUser, currentPage, limit, sort]);
+
+    const handleSort = (name: string) => {
+        setSort(name);
+        setCurrentPage(1);
+    };
+
+    const pagination = (presentPage: number) => {
+        setCurrentPage(presentPage);
+    };
+
+    const handleViewAll = () => {
+        if (!viewAll) {
+            if (totalFeedbacks > 0) setLimit(totalFeedbacks);
+        } else {
+            setLimit(5);
+        }
+        setViewAll(!viewAll);
+    };
 
     const handleSelectColor = (colorId: number) => {
         const newArr = productDetail?.productImages.filter(
@@ -670,7 +764,7 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                         'product-detail__review-quantity'
                                     )}
                                 >
-                                    {feedbackList.length} review
+                                    {totalFeedbacks} review
                                 </span>
                             </div>
                             <p
@@ -710,17 +804,17 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                         >
                                             {tempColor
                                                 ? productDetail?.colors.map(
-                                                      (item) =>
-                                                          item.colorId ===
-                                                              tempColor &&
-                                                          item.name
-                                                  )
+                                                    (item) =>
+                                                        item.colorId ===
+                                                        tempColor &&
+                                                        item.name
+                                                )
                                                 : productDetail?.colors.map(
-                                                      (item) =>
-                                                          item.colorId ===
-                                                              activeColor &&
-                                                          item.name
-                                                  )}
+                                                    (item) =>
+                                                        item.colorId ===
+                                                        activeColor &&
+                                                        item.name
+                                                )}
                                         </p>
                                     </div>
                                     <div
@@ -787,19 +881,19 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                         >
                                             {tempSize
                                                 ? sizeList?.map(
-                                                      (item) =>
-                                                          item.screenSize
-                                                              .sizeId ===
-                                                              tempSize &&
-                                                          `${item.screenSize.size} inches`
-                                                  )
+                                                    (item) =>
+                                                        item.screenSize
+                                                            .sizeId ===
+                                                        tempSize &&
+                                                        `${item.screenSize.size} inches`
+                                                )
                                                 : sizeList?.map(
-                                                      (item) =>
-                                                          item.screenSize
-                                                              .sizeId ===
-                                                              activeSize &&
-                                                          `${item.screenSize.size} inches`
-                                                  )}
+                                                    (item) =>
+                                                        item.screenSize
+                                                            .sizeId ===
+                                                        activeSize &&
+                                                        `${item.screenSize.size} inches`
+                                                )}
                                         </p>
                                     </div>
                                     <div
@@ -857,19 +951,19 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                         >
                                             {tempMaterial
                                                 ? materialList?.map(
-                                                      (item) =>
-                                                          item.material
-                                                              .materialId ===
-                                                              tempMaterial &&
-                                                          `${item.material.name}`
-                                                  )
+                                                    (item) =>
+                                                        item.material
+                                                            .materialId ===
+                                                        tempMaterial &&
+                                                        `${item.material.name}`
+                                                )
                                                 : materialList?.map(
-                                                      (item) =>
-                                                          item.material
-                                                              .materialId ===
-                                                              activeMaterial &&
-                                                          `${item.material.name}`
-                                                  )}
+                                                    (item) =>
+                                                        item.material
+                                                            .materialId ===
+                                                        activeMaterial &&
+                                                        `${item.material.name}`
+                                                )}
                                         </p>
                                     </div>
                                     <div
@@ -938,6 +1032,7 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                                 handleQuantityProduct={
                                                     handleQuantityProduct
                                                 }
+                                                productId={productIdNumber}
                                             ></Quantity>
                                             <Button
                                                 primary
@@ -1920,7 +2015,102 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                                         feedbackList={
                                                             feedbackList
                                                         }
+                                                        productId={
+                                                            productIdNumber
+                                                        }
+                                                        totalFeedbacks={
+                                                            totalFeedbacks
+                                                        }
+                                                        handleSort={handleSort}
                                                     ></Review>
+                                                    <div
+                                                        className={cx(
+                                                            'feedback__bottom',
+                                                            {
+                                                                'd-none':
+                                                                    currentUser
+                                                                        ? totalPage ===
+                                                                        1 &&
+                                                                        feedbackList.length <=
+                                                                        6
+                                                                        : false,
+                                                            }
+                                                        )}
+                                                    >
+                                                        <div
+                                                            className={cx(
+                                                                'feedback__view',
+                                                                {
+                                                                    'd-none':
+                                                                        true,
+                                                                }
+                                                            )}
+                                                        >
+                                                            <p
+                                                                className={cx(
+                                                                    'feedback__view-desc',
+                                                                    {
+                                                                        'd-sm-none':
+                                                                            true,
+                                                                    }
+                                                                )}
+                                                            >
+                                                                {viewAll
+                                                                    ? `1 to ${totalFeedbacks} items of ${totalFeedbacks}`
+                                                                    : `${limit *
+                                                                    (currentPage -
+                                                                        1) +
+                                                                    1
+                                                                    } to ${currentPage *
+                                                                        6 >=
+                                                                        totalFeedbacks
+                                                                        ? totalFeedbacks
+                                                                        : currentPage *
+                                                                        6
+                                                                    } items of ${totalFeedbacks}`}
+                                                            </p>
+                                                            <Button
+                                                                className={cx(
+                                                                    'feedback__view-btn',
+                                                                    {
+                                                                        'd-none':
+                                                                            currentPage >
+                                                                            1,
+                                                                    }
+                                                                )}
+                                                                rightIcon={
+                                                                    <RightIcon></RightIcon>
+                                                                }
+                                                                onClick={
+                                                                    handleViewAll
+                                                                }
+                                                            >
+                                                                {viewAll
+                                                                    ? 'View less'
+                                                                    : 'View all'}
+                                                            </Button>
+                                                        </div>
+                                                        <div
+                                                            className={cx(
+                                                                'feedback__paging'
+                                                            )}
+                                                        >
+                                                            <Pagination
+                                                                modifier
+                                                                currentPage={
+                                                                    currentPage
+                                                                }
+                                                                totalPage={
+                                                                    viewAll
+                                                                        ? 1
+                                                                        : totalPage
+                                                                }
+                                                                pagination={
+                                                                    pagination
+                                                                }
+                                                            ></Pagination>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

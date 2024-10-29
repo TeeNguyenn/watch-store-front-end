@@ -15,6 +15,7 @@ const images = {
     MobileSlider2: require('./slide-show/Mobile_Slider_2.jpg'),
     MobileSlider3: require('./slide-show/Mobile_Slider_3.jpg'),
     orderSuccess: require('./order-success.png'),
+    addImg: require('./addImg.png'),
     defaultAvatar: require('./default-avatar-profile-icon-social-600nw-1677509740.webp'),
 };
 

@@ -1,29 +1,105 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
 import Tippy from '@tippyjs/react/headless';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 
 import Button from '../../../../components/Button';
 import styles from './Review.module.scss';
 import { renderRating } from '../../../../utils/Functions';
 import Image from '../../../../components/Image';
-import images from '../../../../assets/images/home';
 import {
     faArrowUpFromBracket,
     faStar as starFill,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import FeedbackModel from '../../../../models/FeedbackModel';
+import images from '../../../../assets/images';
+import { CheckIcon, ErrorIcon } from '../../../../components/Icons';
+import * as feedbackServices from '../../../../services/feedbackServices';
 
 const cx = classNames.bind(styles);
 
 interface ReviewProps {
     feedbackList?: FeedbackModel[];
+    productId?: any;
+    totalFeedbacks?: any;
+    handleSort?: any;
 }
 
-const Review = ({ feedbackList }: ReviewProps) => {
+const Review = ({
+    feedbackList,
+    productId,
+    totalFeedbacks,
+    handleSort,
+}: ReviewProps) => {
+    const [sort, setSort] = useState('latest');
     const [sortBy, setSortBy] = useState('Most Recent');
     const [visible, setVisible] = useState(false);
     const [showReviewForm, setShowReviewForm] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [fullFeedbackList, setFullFeedbackList] = useState<FeedbackModel[]>(
+        []
+    );
+
+    useEffect(() => {
+        const fetchApi = async () => {
+            const res = await feedbackServices.getAllFeedbackByProductId(
+                productId,
+                1,
+                5,
+                sort
+            );
+            if (res.totalFeedbacks > 0) {
+                const resData =
+                    await feedbackServices.getAllFeedbackByProductId(
+                        productId,
+                        1,
+                        res.totalFeedbacks,
+                        sort
+                    );
+                setFullFeedbackList(resData.result);
+            }
+        };
+
+        fetchApi();
+    }, [sort]);
+
+    const formik = useFormik({
+        initialValues: {
+            rating: '',
+            title: '',
+            review: '',
+            name: '',
+            email: '',
+        },
+        validationSchema: Yup.object({
+            rating: Yup.string().required('You must fill in this section.'),
+            title: Yup.string().required('You must fill in this section.'),
+            review: Yup.string().required('You must fill in this section.'),
+            name: Yup.string().required('You must fill in this section.'),
+            email: Yup.string()
+                .email('Invalid email.')
+                .required('You must fill in this section.'),
+        }),
+        onSubmit: (values) => {
+            const data = {
+                product_id: productId,
+                comment: values.review,
+                rate: values.rating,
+            };
+            const fetchApi = async () => {
+                const res = await feedbackServices.postFeedback(data);
+                if (res) {
+                    setSubmitted(true);
+                    window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
+                }
+            };
+            setTimeout(() => {
+                fetchApi();
+            }, 1000);
+        },
+    });
 
     const handleSortBy = (name: string) => {
         if (name === sortBy) {
@@ -31,6 +107,58 @@ const Review = ({ feedbackList }: ReviewProps) => {
         }
         setSortBy(name);
         setVisible(false);
+        switch (name) {
+            case 'Most Recent':
+                setSort('latest');
+                handleSort('latest');
+                break;
+            case 'Oldest':
+                setSort('oldest');
+                handleSort('oldest');
+                break;
+            case 'Highest Rating':
+                setSort('high');
+                handleSort('high');
+                break;
+            case 'Lowest Rating':
+                setSort('low');
+                handleSort('low');
+                break;
+
+            default:
+                break;
+        }
+    };
+
+    const handleAverageRating = () => {
+        const fiveStarQuantity =
+            fullFeedbackList!.filter(
+                (item) => Number.parseInt(item.rate + '') === 5
+            ).length * 5;
+        const fourStarQuantity =
+            fullFeedbackList!.filter(
+                (item) => Number.parseInt(item.rate + '') === 4
+            ).length * 4;
+        const threeStarQuantity =
+            fullFeedbackList!.filter(
+                (item) => Number.parseInt(item.rate + '') === 3
+            ).length * 3;
+        const twoStarQuantity =
+            fullFeedbackList!.filter(
+                (item) => Number.parseInt(item.rate + '') === 2
+            ).length * 2;
+        const oneStarQuantity =
+            fullFeedbackList!.filter(
+                (item) => Number.parseInt(item.rate + '') === 1
+            ).length * 1;
+        return (
+            (fiveStarQuantity +
+                fourStarQuantity +
+                threeStarQuantity +
+                twoStarQuantity +
+                oneStarQuantity) /
+            totalFeedbacks
+        );
     };
 
     return (
@@ -42,14 +170,16 @@ const Review = ({ feedbackList }: ReviewProps) => {
                     <div className={cx('review__summary')}>
                         <div className={cx('review__summary-inner')}>
                             <div className={cx('review__summary-stars')}>
-                                {renderRating(5)}
+                                {renderRating(handleAverageRating())}
                             </div>
                             <span className={cx('review__summary-average')}>
-                                5.00 out of 5
+                                {`${Number.parseFloat(
+                                    handleAverageRating().toFixed(2)
+                                )} out of 5`}
                             </span>
                         </div>
                         <div className={cx('review__summary-text')}>
-                            Based on 1 review
+                            {`Based on ${totalFeedbacks} review`}
                         </div>
                     </div>
                     {/* Histogram */}
@@ -59,9 +189,33 @@ const Review = ({ feedbackList }: ReviewProps) => {
                             <div className={cx('review__histogram-stars')}>
                                 {renderRating(5)}
                             </div>
-                            <div className={cx('review__histogram-bar')}></div>
+                            <div className={cx('review__histogram-bar')}>
+                                <span
+                                    className={cx(
+                                        'review__histogram-bar-percent'
+                                    )}
+                                    style={{
+                                        width: `${
+                                            (fullFeedbackList!.filter(
+                                                (item) =>
+                                                    Number.parseInt(
+                                                        item.rate + ''
+                                                    ) === 5
+                                            ).length *
+                                                100) /
+                                            totalFeedbacks
+                                        }%`,
+                                    }}
+                                ></span>
+                            </div>
                             <div className={cx('review__histogram-frequency')}>
-                                1
+                                {
+                                    fullFeedbackList?.filter(
+                                        (item) =>
+                                            Number.parseInt(item.rate + '') ===
+                                            5
+                                    ).length
+                                }
                             </div>
                         </div>
                         {/* 4 stars */}
@@ -69,9 +223,33 @@ const Review = ({ feedbackList }: ReviewProps) => {
                             <div className={cx('review__histogram-stars')}>
                                 {renderRating(4)}
                             </div>
-                            <div className={cx('review__histogram-bar')}></div>
+                            <div className={cx('review__histogram-bar')}>
+                                <span
+                                    className={cx(
+                                        'review__histogram-bar-percent'
+                                    )}
+                                    style={{
+                                        width: `${
+                                            (fullFeedbackList!.filter(
+                                                (item) =>
+                                                    Number.parseInt(
+                                                        item.rate + ''
+                                                    ) === 4
+                                            ).length *
+                                                100) /
+                                            totalFeedbacks
+                                        }%`,
+                                    }}
+                                ></span>
+                            </div>
                             <div className={cx('review__histogram-frequency')}>
-                                0
+                                {
+                                    fullFeedbackList?.filter(
+                                        (item) =>
+                                            Number.parseInt(item.rate + '') ===
+                                            4
+                                    ).length
+                                }
                             </div>
                         </div>
                         {/* 3 stars */}
@@ -79,9 +257,33 @@ const Review = ({ feedbackList }: ReviewProps) => {
                             <div className={cx('review__histogram-stars')}>
                                 {renderRating(3)}
                             </div>
-                            <div className={cx('review__histogram-bar')}></div>
+                            <div className={cx('review__histogram-bar')}>
+                                <span
+                                    className={cx(
+                                        'review__histogram-bar-percent'
+                                    )}
+                                    style={{
+                                        width: `${
+                                            (fullFeedbackList!.filter(
+                                                (item) =>
+                                                    Number.parseInt(
+                                                        item.rate + ''
+                                                    ) === 3
+                                            ).length *
+                                                100) /
+                                            totalFeedbacks
+                                        }%`,
+                                    }}
+                                ></span>
+                            </div>
                             <div className={cx('review__histogram-frequency')}>
-                                0
+                                {
+                                    fullFeedbackList?.filter(
+                                        (item) =>
+                                            Number.parseInt(item.rate + '') ===
+                                            3
+                                    ).length
+                                }
                             </div>
                         </div>
                         {/* 2 stars */}
@@ -89,9 +291,33 @@ const Review = ({ feedbackList }: ReviewProps) => {
                             <div className={cx('review__histogram-stars')}>
                                 {renderRating(2)}
                             </div>
-                            <div className={cx('review__histogram-bar')}></div>
+                            <div className={cx('review__histogram-bar')}>
+                                <span
+                                    className={cx(
+                                        'review__histogram-bar-percent'
+                                    )}
+                                    style={{
+                                        width: `${
+                                            (fullFeedbackList!.filter(
+                                                (item) =>
+                                                    Number.parseInt(
+                                                        item.rate + ''
+                                                    ) === 2
+                                            ).length *
+                                                100) /
+                                            totalFeedbacks
+                                        }%`,
+                                    }}
+                                ></span>
+                            </div>
                             <div className={cx('review__histogram-frequency')}>
-                                0
+                                {
+                                    fullFeedbackList?.filter(
+                                        (item) =>
+                                            Number.parseInt(item.rate + '') ===
+                                            2
+                                    ).length
+                                }
                             </div>
                         </div>
                         {/* 1 stars */}
@@ -99,9 +325,33 @@ const Review = ({ feedbackList }: ReviewProps) => {
                             <div className={cx('review__histogram-stars')}>
                                 {renderRating(1)}
                             </div>
-                            <div className={cx('review__histogram-bar')}></div>
+                            <div className={cx('review__histogram-bar')}>
+                                <span
+                                    className={cx(
+                                        'review__histogram-bar-percent'
+                                    )}
+                                    style={{
+                                        width: `${
+                                            (fullFeedbackList!.filter(
+                                                (item) =>
+                                                    Number.parseInt(
+                                                        item.rate + ''
+                                                    ) === 1
+                                            ).length *
+                                                100) /
+                                            totalFeedbacks
+                                        }%`,
+                                    }}
+                                ></span>
+                            </div>
                             <div className={cx('review__histogram-frequency')}>
-                                0
+                                {
+                                    fullFeedbackList?.filter(
+                                        (item) =>
+                                            Number.parseInt(item.rate + '') ===
+                                            1
+                                    ).length
+                                }
                             </div>
                         </div>
                     </div>
@@ -123,7 +373,11 @@ const Review = ({ feedbackList }: ReviewProps) => {
                             })}
                         >
                             <div>
-                                <form action="" className={cx('review-form')}>
+                                <form
+                                    action=""
+                                    className={cx('review-form')}
+                                    onSubmit={formik.handleSubmit}
+                                >
                                     <div className={cx('review-form__title')}>
                                         Write a review
                                     </div>
@@ -139,9 +393,14 @@ const Review = ({ feedbackList }: ReviewProps) => {
                                         >
                                             <input
                                                 type="radio"
-                                                name="rate"
                                                 id="rate-5"
+                                                name="rating"
                                                 className=""
+                                                value="5"
+                                                onChange={formik.handleChange}
+                                                checked={
+                                                    formik.values.rating === '5'
+                                                }
                                             />
                                             <label
                                                 htmlFor="rate-5"
@@ -154,9 +413,14 @@ const Review = ({ feedbackList }: ReviewProps) => {
 
                                             <input
                                                 type="radio"
-                                                name="rate"
                                                 id="rate-4"
                                                 className=""
+                                                name="rating"
+                                                value="4"
+                                                onChange={formik.handleChange}
+                                                checked={
+                                                    formik.values.rating === '4'
+                                                }
                                             />
                                             <label
                                                 htmlFor="rate-4"
@@ -169,9 +433,14 @@ const Review = ({ feedbackList }: ReviewProps) => {
 
                                             <input
                                                 type="radio"
-                                                name="rate"
                                                 id="rate-3"
+                                                name="rating"
                                                 className=""
+                                                value="3"
+                                                onChange={formik.handleChange}
+                                                checked={
+                                                    formik.values.rating === '3'
+                                                }
                                             />
                                             <label
                                                 htmlFor="rate-3"
@@ -184,9 +453,14 @@ const Review = ({ feedbackList }: ReviewProps) => {
 
                                             <input
                                                 type="radio"
-                                                name="rate"
                                                 id="rate-2"
+                                                name="rating"
                                                 className=""
+                                                value="2"
+                                                onChange={formik.handleChange}
+                                                checked={
+                                                    formik.values.rating === '2'
+                                                }
                                             />
                                             <label
                                                 htmlFor="rate-2"
@@ -199,9 +473,14 @@ const Review = ({ feedbackList }: ReviewProps) => {
 
                                             <input
                                                 type="radio"
-                                                name="rate"
                                                 id="rate-1"
+                                                name="rating"
                                                 className=""
+                                                value="1"
+                                                onChange={formik.handleChange}
+                                                checked={
+                                                    formik.values.rating === '1'
+                                                }
                                             />
                                             <label
                                                 htmlFor="rate-1"
@@ -212,6 +491,22 @@ const Review = ({ feedbackList }: ReviewProps) => {
                                                 />
                                             </label>
                                         </div>
+                                        {formik.errors.rating &&
+                                            formik.touched.rating && (
+                                                <div
+                                                    className={cx(
+                                                        'review-form__error-mess'
+                                                    )}
+                                                >
+                                                    <ErrorIcon
+                                                        width="1.5rem"
+                                                        height="1.5rem"
+                                                    ></ErrorIcon>
+                                                    <span className={cx('')}>
+                                                        {formik.errors.rating}
+                                                    </span>
+                                                </div>
+                                            )}
                                     </div>
 
                                     <div className={cx('review-form__group')}>
@@ -224,9 +519,28 @@ const Review = ({ feedbackList }: ReviewProps) => {
                                         <input
                                             id="review-form__input"
                                             type="text"
+                                            name="title"
+                                            value={formik.values.title}
                                             className={cx('review-form__input')}
                                             placeholder="Give your review a title"
+                                            onChange={formik.handleChange}
                                         />
+                                        {formik.errors.title &&
+                                            formik.touched.title && (
+                                                <div
+                                                    className={cx(
+                                                        'review-form__error-mess'
+                                                    )}
+                                                >
+                                                    <ErrorIcon
+                                                        width="1.5rem"
+                                                        height="1.5rem"
+                                                    ></ErrorIcon>
+                                                    <span className={cx('')}>
+                                                        {formik.errors.title}
+                                                    </span>
+                                                </div>
+                                            )}
                                     </div>
                                     <div className={cx('review-form__group')}>
                                         <label
@@ -237,10 +551,29 @@ const Review = ({ feedbackList }: ReviewProps) => {
                                         </label>
                                         <textarea
                                             id="review-form__input"
+                                            name="review"
+                                            value={formik.values.review}
                                             rows={5}
                                             className={cx('review-form__input')}
                                             placeholder="Write your comments here"
+                                            onChange={formik.handleChange}
                                         />
+                                        {formik.errors.review &&
+                                            formik.touched.review && (
+                                                <div
+                                                    className={cx(
+                                                        'review-form__error-mess'
+                                                    )}
+                                                >
+                                                    <ErrorIcon
+                                                        width="1.5rem"
+                                                        height="1.5rem"
+                                                    ></ErrorIcon>
+                                                    <span className={cx('')}>
+                                                        {formik.errors.review}
+                                                    </span>
+                                                </div>
+                                            )}
                                     </div>
                                     <div className={cx('review-form__group')}>
                                         <label
@@ -275,10 +608,29 @@ const Review = ({ feedbackList }: ReviewProps) => {
                                         </label>
                                         <input
                                             type="text"
+                                            name="name"
+                                            value={formik.values.name}
                                             id="review-form__input"
                                             className={cx('review-form__input')}
                                             placeholder="Enter your name (public)"
+                                            onChange={formik.handleChange}
                                         />
+                                        {formik.errors.name &&
+                                            formik.touched.name && (
+                                                <div
+                                                    className={cx(
+                                                        'review-form__error-mess'
+                                                    )}
+                                                >
+                                                    <ErrorIcon
+                                                        width="1.5rem"
+                                                        height="1.5rem"
+                                                    ></ErrorIcon>
+                                                    <span className={cx('')}>
+                                                        {formik.errors.name}
+                                                    </span>
+                                                </div>
+                                            )}
                                     </div>
                                     <div className={cx('review-form__group')}>
                                         <label
@@ -289,10 +641,29 @@ const Review = ({ feedbackList }: ReviewProps) => {
                                         </label>
                                         <input
                                             type="text"
+                                            name="email"
+                                            value={formik.values.email}
                                             id="review-form__input"
                                             className={cx('review-form__input')}
                                             placeholder="Enter your email (private)"
+                                            onChange={formik.handleChange}
                                         />
+                                        {formik.errors.email &&
+                                            formik.touched.email && (
+                                                <div
+                                                    className={cx(
+                                                        'review-form__error-mess'
+                                                    )}
+                                                >
+                                                    <ErrorIcon
+                                                        width="1.5rem"
+                                                        height="1.5rem"
+                                                    ></ErrorIcon>
+                                                    <span className={cx('')}>
+                                                        {formik.errors.email}
+                                                    </span>
+                                                </div>
+                                            )}
                                     </div>
                                     <div className={cx('review-form__group')}>
                                         <p className={cx('review-form__desc')}>
@@ -306,21 +677,68 @@ const Review = ({ feedbackList }: ReviewProps) => {
                                     </div>
                                     <div className={cx('review-form__group')}>
                                         <Button
-                                            className={cx('review-form__btn')}
+                                            type="button"
+                                            className={cx('review-form__btn', {
+                                                'd-none': submitted,
+                                            })}
+                                            onClick={() =>
+                                                setShowReviewForm(
+                                                    !showReviewForm
+                                                )
+                                            }
                                         >
                                             Cancel review
                                         </Button>
-                                        <Button
-                                            className={cx('review-form__btn')}
-                                            type="submit"
-                                            primary
-                                        >
-                                            Submit Review
-                                        </Button>
+                                        {submitted ? (
+                                            <Button
+                                                className={cx(
+                                                    'review-form__btn'
+                                                )}
+                                                primary
+                                                onClick={() => {
+                                                    window.location.reload();
+                                                    setShowReviewForm(false);
+                                                    setTimeout(() => {
+                                                        setSubmitted(false);
+                                                    }, 300);
+                                                }}
+                                            >
+                                                Refresh Page
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                className={cx(
+                                                    'review-form__btn'
+                                                )}
+                                                type="submit"
+                                                primary
+                                            >
+                                                Submit Review
+                                            </Button>
+                                        )}
                                     </div>
                                 </form>
                             </div>
                         </div>
+                    </div>
+                    <div
+                        className={cx('review__submitted', {
+                            'd-none': !submitted,
+                        })}
+                    >
+                        <Button className={cx('review__submitted-icon')}>
+                            <CheckIcon
+                                width="3.2rem"
+                                height="3.2rem"
+                            ></CheckIcon>
+                        </Button>
+                        <p className={cx('review__submitted-title')}>
+                            Review Submitted!
+                        </p>
+                        <p className={cx('review__submitted-desc')}>
+                            Thank you! Please refresh the page in a few moments
+                            to see your review.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -352,6 +770,27 @@ const Review = ({ feedbackList }: ReviewProps) => {
                                     onClick={() => handleSortBy('Most Recent')}
                                 >
                                     Most Recent
+                                </span>
+                            </label>
+                            <label
+                                htmlFor="option-4"
+                                className={cx('sort__option')}
+                            >
+                                <input
+                                    hidden
+                                    type="radio"
+                                    name="sort"
+                                    id="option-4"
+                                    className={cx('sort__radio')}
+                                />
+                                <span
+                                    className={cx('sort__text', {
+                                        'primary-hover': true,
+                                        active: sortBy === 'Oldest',
+                                    })}
+                                    onClick={() => handleSortBy('Oldest')}
+                                >
+                                    Oldest
                                 </span>
                             </label>
                             <label
@@ -400,30 +839,8 @@ const Review = ({ feedbackList }: ReviewProps) => {
                                     Lowest Rating
                                 </span>
                             </label>
-                            <label
-                                htmlFor="option-4"
-                                className={cx('sort__option')}
-                            >
-                                <input
-                                    hidden
-                                    type="radio"
-                                    name="sort"
-                                    id="option-4"
-                                    className={cx('sort__radio')}
-                                />
-                                <span
-                                    className={cx('sort__text', {
-                                        'primary-hover': true,
-                                        active: sortBy === 'Only Pictures',
-                                    })}
-                                    onClick={() =>
-                                        handleSortBy('Only Pictures')
-                                    }
-                                >
-                                    Only Pictures
-                                </span>
-                            </label>
-                            <label
+
+                            {/* <label
                                 htmlFor="option-5"
                                 className={cx('sort__option')}
                             >
@@ -487,7 +904,7 @@ const Review = ({ feedbackList }: ReviewProps) => {
                                 >
                                     Most Helpful
                                 </span>
-                            </label>
+                            </label> */}
                         </div>
                     )}
                 >
@@ -505,17 +922,21 @@ const Review = ({ feedbackList }: ReviewProps) => {
                     <div key={item.feedbackId} className={cx('review__item')}>
                         <div className={cx('review__profile-wrapper')}>
                             <Image
-                                src={images.testimonialImg01}
+                                src={images.defaultAvatar}
+                                alt="Avatar"
                                 className={cx('review__profile-img')}
                             ></Image>
                         </div>
                         <div className={cx('review__top')}>
-                            <p className={cx('review__author')}>Tee</p>
+                            <p className={cx('review__author')}>
+                                {item?.firstName + ' ' + item?.lastName + ''}
+                            </p>
                             <div className={cx('review__stars')}>
-                                {renderRating(item.rate || 0)}
+                                {renderRating(Number.parseInt(item.rate + ''))}
                             </div>
                             <div className={cx('review__timestamp')}>
-                                05/21/2024
+                                {item.updateAt?.substring(0, 10)}{' '}
+                                {item.updateAt?.substring(11, 16)}
                             </div>
 
                             <div className={cx('review__content')}>

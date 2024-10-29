@@ -4,7 +4,7 @@ import 'tippy.js/dist/tippy.css';
 
 import classNames from 'classnames/bind';
 import styles from './ProductIcons.module.scss';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
     ActiveHeartIcon,
     AddToCartIcon,
@@ -54,6 +54,20 @@ const ProductIcons = ({
     const [isWishlist, setIsWishlist] = useState(false);
     const [showQuickBuyModal, setShowQuickBuyModal] = useState(false);
     const [showCompareModal, setShowCompareModal] = useState(false);
+
+    // Get customerId from url
+    const { customerId } = useParams();
+
+    let customerIdNumber = 0;
+    try {
+        customerIdNumber = parseInt(customerId + '');
+        if (Number.isNaN(customerIdNumber)) {
+            customerIdNumber = 0;
+        }
+    } catch (error) {
+        customerIdNumber = 0;
+        console.log('Error:', error);
+    }
 
     const context = useContext(CartContext);
 
@@ -121,7 +135,9 @@ const ProductIcons = ({
             }
         } else {
             const fetchApi = async () => {
-                const res = await favoriteServices.getFavoriteByUserId();
+                const res = await favoriteServices.getFavoriteByUserId(
+                    customerId || currentUser
+                );
 
                 res.result.forEach((item) => {
                     if (item.productId === productItem?.productId) {
@@ -223,6 +239,11 @@ const ProductIcons = ({
                         id: cartItem.at(0).id,
                     });
                     window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
+                    setTimeout(() => {
+                        context?.handleCart();
+                        setLoading(false);
+                        return;
+                    }, 500);
                 } else {
                     const res = await cartItemServices.postCartItem({
                         user_id: currentUser,
@@ -233,14 +254,14 @@ const ProductIcons = ({
                         quantity: 1,
                     });
                     window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
+                    setTimeout(() => {
+                        context?.handleCart();
+                        setLoading(false);
+                        return;
+                    }, 500);
                 }
             };
             fetchApi();
-            setTimeout(() => {
-                context?.handleCart();
-                setLoading(false);
-                return;
-            }, 1000);
         }
     };
 

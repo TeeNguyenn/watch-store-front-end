@@ -8,7 +8,8 @@ const routes = {
     register: '/register',
     login: '/login',
     detail: '/products/:productId',
-    accountStatus: '/account-status/:email?/:activeCode?',
+    // accountStatus: '/account-status/:email?/:activeCode?',
+    accountStatus: '/active-account/:email?/:activeCode?',
     checkout: '/checkout',
     cart: '/cart',
     wishlist: '/wishlist',
@@ -19,6 +20,15 @@ const routes = {
     profile: '/customer/profile',
     orderDetails: '/customer/order-details/:orderId',
     searchResult: '/search',
+
+    adminDashboard: '/admin/dashboard',
+    adminCustomers: '/admin/customers',
+    adminNewCustomer: '/admin/customer/new',
+    adminDetailCustomer: '/admin/customer/detail/:customerId',
+    adminProducts: '/admin/products',
+    adminNewProduct: '/admin/product/new',
+    adminOrders: '/admin/orders',
+    adminOrderDetails: '/admin/order-details/:orderId',
 };
 
 export default routes;

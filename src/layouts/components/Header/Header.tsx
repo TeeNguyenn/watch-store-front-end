@@ -536,45 +536,45 @@ const Header = () => {
                                 navList={
                                     isProfileDrawer
                                         ? [
-                                              {
-                                                  to: '/profile',
-                                                  name: 'Profile',
-                                              },
-                                              {
-                                                  to: '/dashboard',
-                                                  name: 'Dashboard',
-                                              },
-                                              {
-                                                  to: '/posts-activity',
-                                                  name: 'Posts & Activity',
-                                              },
-                                              {
-                                                  to: '/setting-privacy',
-                                                  name: 'Settings & Privacy ',
-                                              },
-                                              {
-                                                  to: '/help-center',
-                                                  name: 'Help Center',
-                                              },
-                                              {
-                                                  to: '/logout',
-                                                  name: 'Log out',
-                                              },
-                                          ]
+                                            {
+                                                to: '/profile',
+                                                name: 'Profile',
+                                            },
+                                            {
+                                                to: '/dashboard',
+                                                name: 'Dashboard',
+                                            },
+                                            {
+                                                to: '/posts-activity',
+                                                name: 'Posts & Activity',
+                                            },
+                                            {
+                                                to: '/setting-privacy',
+                                                name: 'Settings & Privacy ',
+                                            },
+                                            {
+                                                to: '/help-center',
+                                                name: 'Help Center',
+                                            },
+                                            {
+                                                to: '/logout',
+                                                name: 'Log out',
+                                            },
+                                        ]
                                         : [
-                                              {
-                                                  to: config.routes.blog,
-                                                  name: 'Blog',
-                                              },
-                                              {
-                                                  to: config.routes.faq,
-                                                  name: 'Faq',
-                                              },
-                                              {
-                                                  to: config.routes.contact,
-                                                  name: 'Contact',
-                                              },
-                                          ]
+                                            {
+                                                to: config.routes.blog,
+                                                name: 'Blog',
+                                            },
+                                            {
+                                                to: config.routes.faq,
+                                                name: 'Faq',
+                                            },
+                                            {
+                                                to: config.routes.contact,
+                                                name: 'Contact',
+                                            },
+                                        ]
                                 }
                                 handleMobileSubMenu={handleMobileSubMenu}
                             ></MobileSubMenu>
@@ -765,10 +765,10 @@ const Header = () => {
                                             </span>
                                         </Link>
                                         <Link
-                                            to={'#!'}
+                                            to={config.routes.adminDashboard}
                                             className={cx(
                                                 'dropdown-profile__group',
-                                                { 'd-none': true }
+                                                { 'd-none': !userDetail?.role?.some(roleItem => roleItem.id === 1) }    // id = 1 is admin
                                             )}
                                             onClick={() =>
                                                 setShowDropdownProfile(false)
@@ -856,9 +856,9 @@ const Header = () => {
                                 onClick={
                                     currentUser
                                         ? () =>
-                                              setShowDropdownProfile(
-                                                  !showDropdownProfile
-                                              )
+                                            setShowDropdownProfile(
+                                                !showDropdownProfile
+                                            )
                                         : () => setShowLoginModal(true)
                                 }
                             >

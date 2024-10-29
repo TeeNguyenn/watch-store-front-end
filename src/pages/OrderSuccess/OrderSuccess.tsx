@@ -65,7 +65,9 @@ const OrderSuccess = () => {
                     setTotal(totalTemp);
                     window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
 
-                    setLoading(false);
+                    setTimeout(() => {
+                        setLoading(false);
+                    }, 200);
 
                     setTimeout(() => {
                         localStorage.setItem('products', JSON.stringify([]));
@@ -310,9 +312,7 @@ const OrderSuccess = () => {
                                     Shipping
                                 </h3>
                                 <p className={cx('order__shipping-price')}>
-                                    {formatPrice(
-                                        orderDetail.shipping_cost / 1000
-                                    )}
+                                    {formatPrice(orderDetail.shipping_cost)}
                                 </p>
                             </div>
                             <div className={cx('order__total')}>
@@ -321,7 +321,7 @@ const OrderSuccess = () => {
                                 </h3>
                                 <p className={cx('order__total-price')}>
                                     {formatPrice(
-                                        total + orderDetail.shipping_cost / 1000
+                                        total + orderDetail.shipping_cost
                                     )}
                                 </p>
                             </div>

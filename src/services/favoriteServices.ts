@@ -9,9 +9,9 @@ interface ResultInterface {
     totalProduct: number,
 }
 
-export const getFavoriteByUserId = async (currentPage = 1, limit: number = 6, sort = 'latest'): Promise<ResultInterface> => {
+export const getFavoriteByUserId = async (userId: string, currentPage = 1, limit: number = 6, sort = 'latest'): Promise<ResultInterface> => {
     const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('user_id');
+    // const userId = localStorage.getItem('user_id');
 
     try {
         const response = await request.get(`favorites/user/${userId}`, {

@@ -7,9 +7,16 @@ import config from '../../config';
 
 const cx = classNames.bind(styles);
 
-const PageNotFound = () => {
+interface PageNotFoundProps {
+    fullScreen?: boolean;
+}
+
+const PageNotFound = (props: PageNotFoundProps) => {
     return (
-        <div className="container-spacing">
+        <div className={cx('', {
+            'container-spacing': true,
+            fullScreen: props.fullScreen
+        })}>
             <div className={cx('page')}>
                 <p className={cx('sub-text')}>404</p>
                 <h1 className={cx('title')}>

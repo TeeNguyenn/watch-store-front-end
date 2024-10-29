@@ -1,5 +1,13 @@
 @use '../../styles/abstracts';
 
+
+.fullScreen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
 .page {
     padding: 64px 0 60px;
     text-align: center;

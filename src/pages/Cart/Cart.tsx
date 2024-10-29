@@ -90,10 +90,10 @@ const Cart = () => {
                         const res =
                             await cartItemServices.getCartItemByUserId();
                         setCartList(res.reverse());
-                        localStorage.setItem(
-                            'products',
-                            JSON.stringify(res.reverse())
-                        );
+                        // localStorage.setItem(
+                        //     'products',
+                        //     JSON.stringify(res.reverse())
+                        // );
                     }
                 };
                 fetchApi();

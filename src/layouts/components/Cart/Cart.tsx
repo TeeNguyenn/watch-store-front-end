@@ -45,10 +45,39 @@ const Cart = ({ handleCloseCartDrawer }: CartProps) => {
                     const res = await cartItemServices.getCartItemByUserId();
                     setCartList(res.reverse());
 
-                    localStorage.setItem(
-                        'products',
-                        JSON.stringify(res.reverse())
-                    );
+                    // localStorage.setItem(
+                    //     'products',
+                    //     JSON.stringify(res.reverse())
+                    // );
+
+                    let result = 0;
+                    const fetchApi = async (cartItem: any) => {
+                        // setLoading(true);
+
+                        const responseData =
+                            await productServices.getProductById(
+                                cartItem.product_id
+                            );
+
+                        if (responseData.discount) {
+                            result =
+                                result +
+                                responseData.price *
+                                    (1 - responseData.discount / 100) *
+                                    cartItem.quantity;
+                        } else {
+                            result =
+                                subtotal +
+                                responseData.price * cartItem.quantity;
+                        }
+
+                        setSubtotal(result);
+
+                        // setLoading(false);
+                    };
+                    res.reverse().forEach((cartItem: any) => {
+                        fetchApi(cartItem);
+                    });
                 };
 
                 fetchApi();
@@ -93,6 +122,35 @@ const Cart = ({ handleCloseCartDrawer }: CartProps) => {
                 if (currentUser) {
                     const res = await cartItemServices.getCartItemByUserId();
                     setCartList(res.reverse());
+
+                    let result = 0;
+                    const fetchApi = async (cartItem: any) => {
+                        // setLoading(true);
+
+                        const responseData =
+                            await productServices.getProductById(
+                                cartItem.product_id
+                            );
+
+                        if (responseData.discount) {
+                            result =
+                                result +
+                                responseData.price *
+                                    (1 - responseData.discount / 100) *
+                                    cartItem.quantity;
+                        } else {
+                            result =
+                                subtotal +
+                                responseData.price * cartItem.quantity;
+                        }
+
+                        setSubtotal(result);
+
+                        // setLoading(false);
+                    };
+                    res.reverse().forEach((cartItem: any) => {
+                        fetchApi(cartItem);
+                    });
                 }
             };
             setTimeout(fetchApi, 0);
@@ -100,33 +158,33 @@ const Cart = ({ handleCloseCartDrawer }: CartProps) => {
     }, [currentUser]);
 
     // calculate subtotal
-    useEffect(() => {
-        let result = 0;
-        const fetchApi = async (cartItem: any) => {
-            // setLoading(true);
+    // useEffect(() => {
+    //     let result = 0;
+    //     const fetchApi = async (cartItem: any) => {
+    //         // setLoading(true);
 
-            const responseData = await productServices.getProductById(
-                cartItem.product_id
-            );
+    //         const responseData = await productServices.getProductById(
+    //             cartItem.product_id
+    //         );
 
-            if (responseData.discount) {
-                result =
-                    result +
-                    responseData.price *
-                        (1 - responseData.discount / 100) *
-                        cartItem.quantity;
-            } else {
-                result = subtotal + responseData.price * cartItem.quantity;
-            }
+    //         if (responseData.discount) {
+    //             result =
+    //                 result +
+    //                 responseData.price *
+    //                     (1 - responseData.discount / 100) *
+    //                     cartItem.quantity;
+    //         } else {
+    //             result = subtotal + responseData.price * cartItem.quantity;
+    //         }
 
-            setSubtotal(result);
+    //         setSubtotal(result);
 
-            // setLoading(false);
-        };
-        cartList.forEach((cartItem) => {
-            fetchApi(cartItem);
-        });
-    }, [cartList]);
+    //         // setLoading(false);
+    //     };
+    //     cartList.forEach((cartItem) => {
+    //         fetchApi(cartItem);
+    //     });
+    // }, [cartList]);
 
     const handleChangeCartList: any = (newArr: any) => {
         setCartList(newArr);

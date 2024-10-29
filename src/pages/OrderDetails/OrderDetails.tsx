@@ -9,22 +9,36 @@ import { CheckNoCircleIcon } from '../../components/Icons';
 import * as orderDetailServices from '../../services/orderDetailServices';
 import ProductModel from '../../models/ProductModel';
 import * as productServices from '../../services/productServices';
-import { formatPrice, getCurrentDateWithHour } from '../../utils/Functions';
+import {
+    formatPrice,
+    getCurrentDate,
+    getCurrentDateWithHour,
+    getCurrentHour,
+    getMonth,
+} from '../../utils/Functions';
 import PreLoader from '../../components/PreLoader';
 import * as orderServices from '../../services/orderServices';
 
 const cx = classNames.bind(styles);
 
 // Note: Check xem timeline co 2 thang khac nhau khong de loai bo min-width
+// Note: Timeline con truong hop index < orderStatus
+// Note: Timeline chi moi dung cho TH orderStatus = 2 = PENDING
 
-const OrderDetails = () => {
-    const [orderStatus, setOrderStatus] = useState(1);
+interface OrderDetailsProps {
+    modifier?: boolean;
+}
+
+const OrderDetails = ({ modifier }: OrderDetailsProps) => {
+    const [orderStatus, setOrderStatus] = useState(2);
     const currentUser = localStorage.getItem('user_id');
     const [total, setTotal] = useState(0);
     const [productList, setProductList] = useState<ProductModel[]>([]);
     const [loading, setLoading] = useState(true);
     const [orderProducts, setOrderProducts] = useState<any>([]);
     const [orderDetail, setOrderDetail] = useState<any>({});
+
+
 
     // Get productId from url
     const { orderId } = useParams();
@@ -66,8 +80,8 @@ const OrderDetails = () => {
                                 totalTemp =
                                     totalTemp +
                                     orderProducts.at(index).quantity *
-                                        productItem.price *
-                                        (1 - productItem.discount / 100);
+                                    productItem.price *
+                                    (1 - productItem.discount / 100);
                             } else {
                                 totalTemp =
                                     orderProducts.at(index).quantity *
@@ -117,11 +131,10 @@ const OrderDetails = () => {
             // case 'Order is processing':
             //     setOrderStatus(1);
             //     break;
-            // InitialValue = 1 =>> PENDING
-            case 'Picked Up':
+            // InitialValue = 2 =>> PENDING
+            case 'PENDING':
                 setOrderStatus(2);
                 break;
-
             case 'Ready to Ship':
                 setOrderStatus(3);
                 break;
@@ -136,22 +149,52 @@ const OrderDetails = () => {
         }
     }, []);
 
+    const handleOrderTime = (index: number, isGetDate: string) => {
+        if (isGetDate) {
+            if (orderStatus === index) {
+                return getCurrentDate(orderDetail.order_date);
+            } else if (orderStatus + 1 === index) {
+                return getCurrentDate(orderDetail.order_date + 104400000); //104400000 = 1 day 5 hours
+            } else if (orderStatus + 1 < index) {
+                return 'Estimated time';
+            }
+            // Còn trường hợp index < orderStatus
+        } else {
+            if (orderStatus === index) {
+                return getCurrentHour(orderDetail.order_date);
+            } else if (orderStatus + 1 === index) {
+                return getCurrentHour(orderDetail.order_date + 104400000);
+            } else if (orderStatus + 1 < index) {
+                return getCurrentDate(
+                    orderDetail.order_date +
+                    104400000 +
+                    (index - orderStatus) * 24 * 60 * 60 * 1000 // (index - orderStatus) days
+                );
+            }
+            // Còn trường hợp index < orderStatus
+        }
+    };
+
     if (loading) {
         return <PreLoader show></PreLoader>;
     }
 
     return (
         <div className="container-spacing">
-            <div className={cx('order-details')}>
+            <div className={cx('order-details', {
+                modifier,
+            })}>
                 <div className={cx('order-details__top')}>
                     <h2 className={cx('order-details__title')}>
-                        Order <span>{`#OID${orderIdNumber}`}</span>
+                        {`Order #OID${orderIdNumber}`}
                     </h2>
                 </div>
                 <div className="row g-0">
                     <div className="col col-8 col-xl-12">
                         <div className={cx('order-details__left')}>
-                            <div className={cx('products')}>
+                            <div className={cx('products', {
+                                modifier
+                            })}>
                                 <div className={cx('products__container')}>
                                     <table className={cx('products__table')}>
                                         <thead>
@@ -249,10 +292,10 @@ const OrderDetails = () => {
                                                                                     item
                                                                                 ) =>
                                                                                     item.colorId ===
-                                                                                        orderProducts?.at(
-                                                                                            index
-                                                                                        )
-                                                                                            .color_id &&
+                                                                                    orderProducts?.at(
+                                                                                        index
+                                                                                    )
+                                                                                        .color_id &&
                                                                                     item.isMainImage
                                                                             )
                                                                             .at(
@@ -376,14 +419,14 @@ const OrderDetails = () => {
                                                         >
                                                             {productItem.discount
                                                                 ? formatPrice(
-                                                                      productItem.price *
-                                                                          (1 -
-                                                                              productItem.discount /
-                                                                                  100)
-                                                                  )
+                                                                    productItem.price *
+                                                                    (1 -
+                                                                        productItem.discount /
+                                                                        100)
+                                                                )
                                                                 : formatPrice(
-                                                                      productItem.price
-                                                                  )}
+                                                                    productItem.price
+                                                                )}
                                                         </td>
                                                         <td
                                                             className={cx(
@@ -413,22 +456,22 @@ const OrderDetails = () => {
                                                         >
                                                             {productItem.discount
                                                                 ? formatPrice(
-                                                                      orderProducts.at(
-                                                                          index
-                                                                      )
-                                                                          .quantity *
-                                                                          productItem.price *
-                                                                          (1 -
-                                                                              productItem.discount /
-                                                                                  100)
-                                                                  )
+                                                                    orderProducts.at(
+                                                                        index
+                                                                    )
+                                                                        .quantity *
+                                                                    productItem.price *
+                                                                    (1 -
+                                                                        productItem.discount /
+                                                                        100)
+                                                                )
                                                                 : formatPrice(
-                                                                      orderProducts.at(
-                                                                          index
-                                                                      )
-                                                                          .quantity *
-                                                                          productItem.price
-                                                                  )}
+                                                                    orderProducts.at(
+                                                                        index
+                                                                    )
+                                                                        .quantity *
+                                                                    productItem.price
+                                                                )}
                                                         </td>
                                                     </tr>
                                                 )
@@ -571,7 +614,9 @@ const OrderDetails = () => {
                                 </p>
                                 <p className={cx('summary__shipping-cost')}>
                                     {formatPrice(
-                                        orderDetail.shipping_cost / 1000
+                                        Number.parseFloat(
+                                            orderDetail.shipping_cost + ''
+                                        )
                                     )}
                                 </p>
                             </div>
@@ -581,7 +626,11 @@ const OrderDetails = () => {
                                 </p>
                                 <p className={cx('summary__total')}>
                                     {formatPrice(
-                                        total + orderDetail.shipping_cost / 1000
+                                        Number.parseFloat(
+                                            total +
+                                            orderDetail.shipping_cost +
+                                            ''
+                                        )
                                     )}
                                 </p>
                             </div>
@@ -591,7 +640,7 @@ const OrderDetails = () => {
                                 Order Status
                             </h3>
                             {/* Processing */}
-                            <div className={cx('timeline__item')}>
+                            {/* <div className={cx('timeline__item')}>
                                 <div className="row gy-xl-0 gx-xl-2">
                                     <div className="col col-12 ">
                                         <div className={cx('timeline__row')}>
@@ -693,7 +742,7 @@ const OrderDetails = () => {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
                             {/* Picked up */}
                             <div className={cx('timeline__item')}>
                                 <div className="row gy-xl-0 gx-xl-2">
@@ -706,11 +755,33 @@ const OrderDetails = () => {
                                             >
                                                 <p
                                                     className={cx(
-                                                        'timeline__date'
+                                                        'timeline__date',
+                                                        {
+                                                            modifier:
+                                                                getMonth(
+                                                                    orderDetail.order_date
+                                                                ) !==
+                                                                getMonth(
+                                                                    orderDetail.order_date +
+                                                                    104400000 +
+                                                                    (5 -
+                                                                        orderStatus -
+                                                                        1) *
+                                                                    24 *
+                                                                    60 *
+                                                                    60 *
+                                                                    1000
+                                                                ),
+                                                        }
                                                     )}
                                                 >
-                                                    23 August, 2023{' '}
-                                                    <span>11:30 AM</span>
+                                                    {handleOrderTime(
+                                                        2,
+                                                        'getDate'
+                                                    )}{' '}
+                                                    <span>
+                                                        {handleOrderTime(2, '')}{' '}
+                                                    </span>
                                                 </p>
                                             </div>
                                             <div
@@ -742,16 +813,16 @@ const OrderDetails = () => {
                                                     )}
                                                     {(orderStatus === 1 ||
                                                         orderStatus <= 0) && (
-                                                        <svg
-                                                            width={'13'}
-                                                            height={'10'}
-                                                            fill="currentColor"
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 448 512"
-                                                        >
-                                                            <path d="M50.7 58.5L0 160l208 0 0-128L93.7 32C75.5 32 58.9 42.3 50.7 58.5zM240 160l208 0L397.3 58.5C389.1 42.3 372.5 32 354.3 32L240 32l0 128zm208 32L0 192 0 416c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-224z" />
-                                                        </svg>
-                                                    )}
+                                                            <svg
+                                                                width={'13'}
+                                                                height={'10'}
+                                                                fill="currentColor"
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                viewBox="0 0 448 512"
+                                                            >
+                                                                <path d="M50.7 58.5L0 160l208 0 0-128L93.7 32C75.5 32 58.9 42.3 50.7 58.5zM240 160l208 0L397.3 58.5C389.1 42.3 372.5 32 354.3 32L240 32l0 128zm208 32L0 192 0 416c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-224z" />
+                                                            </svg>
+                                                        )}
                                                 </div>
                                                 <span
                                                     className={cx(
@@ -805,11 +876,33 @@ const OrderDetails = () => {
                                             >
                                                 <p
                                                     className={cx(
-                                                        'timeline__date'
+                                                        'timeline__date',
+                                                        {
+                                                            modifier:
+                                                                getMonth(
+                                                                    orderDetail.order_date
+                                                                ) !==
+                                                                getMonth(
+                                                                    orderDetail.order_date +
+                                                                    104400000 +
+                                                                    (5 -
+                                                                        orderStatus -
+                                                                        1) *
+                                                                    24 *
+                                                                    60 *
+                                                                    60 *
+                                                                    1000
+                                                                ),
+                                                        }
                                                     )}
                                                 >
-                                                    27 August, 2023{' '}
-                                                    <span>6:30 AM</span>
+                                                    {handleOrderTime(
+                                                        3,
+                                                        'getDate'
+                                                    )}{' '}
+                                                    <span>
+                                                        {handleOrderTime(3, '')}{' '}
+                                                    </span>
                                                 </p>
                                             </div>
                                             <div
@@ -841,23 +934,23 @@ const OrderDetails = () => {
                                                     )}
                                                     {(orderStatus === 2 ||
                                                         orderStatus <= 1) && (
-                                                        <svg
-                                                            width={'13'}
-                                                            height={'10'}
-                                                            aria-hidden="true"
-                                                            focusable="false"
-                                                            data-prefix="fas"
-                                                            data-icon="truck-ramp-box"
-                                                            role="img"
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 640 512"
-                                                        >
-                                                            <path
-                                                                fill="currentColor"
-                                                                d="M640 0V400c0 61.9-50.1 112-112 112c-61 0-110.5-48.7-112-109.3L48.4 502.9c-17.1 4.6-34.6-5.4-39.3-22.5s5.4-34.6 22.5-39.3L352 353.8V64c0-35.3 28.7-64 64-64H640zM576 400a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM23.1 207.7c-4.6-17.1 5.6-34.6 22.6-39.2l46.4-12.4 20.7 77.3c2.3 8.5 11.1 13.6 19.6 11.3l30.9-8.3c8.5-2.3 13.6-11.1 11.3-19.6l-20.7-77.3 46.4-12.4c17.1-4.6 34.6 5.6 39.2 22.6l41.4 154.5c4.6 17.1-5.6 34.6-22.6 39.2L103.7 384.9c-17.1 4.6-34.6-5.6-39.2-22.6L23.1 207.7z"
-                                                            ></path>
-                                                        </svg>
-                                                    )}
+                                                            <svg
+                                                                width={'13'}
+                                                                height={'10'}
+                                                                aria-hidden="true"
+                                                                focusable="false"
+                                                                data-prefix="fas"
+                                                                data-icon="truck-ramp-box"
+                                                                role="img"
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                viewBox="0 0 640 512"
+                                                            >
+                                                                <path
+                                                                    fill="currentColor"
+                                                                    d="M640 0V400c0 61.9-50.1 112-112 112c-61 0-110.5-48.7-112-109.3L48.4 502.9c-17.1 4.6-34.6-5.4-39.3-22.5s5.4-34.6 22.5-39.3L352 353.8V64c0-35.3 28.7-64 64-64H640zM576 400a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM23.1 207.7c-4.6-17.1 5.6-34.6 22.6-39.2l46.4-12.4 20.7 77.3c2.3 8.5 11.1 13.6 19.6 11.3l30.9-8.3c8.5-2.3 13.6-11.1 11.3-19.6l-20.7-77.3 46.4-12.4c17.1-4.6 34.6 5.6 39.2 22.6l41.4 154.5c4.6 17.1-5.6 34.6-22.6 39.2L103.7 384.9c-17.1 4.6-34.6-5.6-39.2-22.6L23.1 207.7z"
+                                                                ></path>
+                                                            </svg>
+                                                        )}
                                                 </div>
                                                 <span
                                                     className={cx(
@@ -911,11 +1004,33 @@ const OrderDetails = () => {
                                             >
                                                 <p
                                                     className={cx(
-                                                        'timeline__date'
+                                                        'timeline__date',
+                                                        {
+                                                            modifier:
+                                                                getMonth(
+                                                                    orderDetail.order_date
+                                                                ) !==
+                                                                getMonth(
+                                                                    orderDetail.order_date +
+                                                                    104400000 +
+                                                                    (5 -
+                                                                        orderStatus -
+                                                                        1) *
+                                                                    24 *
+                                                                    60 *
+                                                                    60 *
+                                                                    1000
+                                                                ),
+                                                        }
                                                     )}
                                                 >
-                                                    Estimated time{' '}
-                                                    <span>29 August, 2023</span>
+                                                    {handleOrderTime(
+                                                        4,
+                                                        'getDate'
+                                                    )}{' '}
+                                                    <span>
+                                                        {handleOrderTime(4, '')}{' '}
+                                                    </span>
                                                 </p>
                                             </div>
                                             <div
@@ -947,23 +1062,23 @@ const OrderDetails = () => {
                                                     )}
                                                     {(orderStatus === 3 ||
                                                         orderStatus <= 2) && (
-                                                        <svg
-                                                            width={'13'}
-                                                            height={10}
-                                                            aria-hidden="true"
-                                                            focusable="false"
-                                                            data-prefix="fas"
-                                                            data-icon="truck"
-                                                            role="img"
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 640 512"
-                                                        >
-                                                            <path
-                                                                fill="currentColor"
-                                                                d="M48 0C21.5 0 0 21.5 0 48V368c0 26.5 21.5 48 48 48H64c0 53 43 96 96 96s96-43 96-96H384c0 53 43 96 96 96s96-43 96-96h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V288 256 237.3c0-17-6.7-33.3-18.7-45.3L512 114.7c-12-12-28.3-18.7-45.3-18.7H416V48c0-26.5-21.5-48-48-48H48zM416 160h50.7L544 237.3V256H416V160zM112 416a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm368-48a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"
-                                                            ></path>
-                                                        </svg>
-                                                    )}
+                                                            <svg
+                                                                width={'13'}
+                                                                height={10}
+                                                                aria-hidden="true"
+                                                                focusable="false"
+                                                                data-prefix="fas"
+                                                                data-icon="truck"
+                                                                role="img"
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                viewBox="0 0 640 512"
+                                                            >
+                                                                <path
+                                                                    fill="currentColor"
+                                                                    d="M48 0C21.5 0 0 21.5 0 48V368c0 26.5 21.5 48 48 48H64c0 53 43 96 96 96s96-43 96-96H384c0 53 43 96 96 96s96-43 96-96h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V288 256 237.3c0-17-6.7-33.3-18.7-45.3L512 114.7c-12-12-28.3-18.7-45.3-18.7H416V48c0-26.5-21.5-48-48-48H48zM416 160h50.7L544 237.3V256H416V160zM112 416a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm368-48a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"
+                                                                ></path>
+                                                            </svg>
+                                                        )}
                                                 </div>
                                                 <span
                                                     className={cx(
@@ -1017,11 +1132,33 @@ const OrderDetails = () => {
                                             >
                                                 <p
                                                     className={cx(
-                                                        'timeline__date'
+                                                        'timeline__date',
+                                                        {
+                                                            modifier:
+                                                                getMonth(
+                                                                    orderDetail.order_date
+                                                                ) !==
+                                                                getMonth(
+                                                                    orderDetail.order_date +
+                                                                    104400000 +
+                                                                    (5 -
+                                                                        orderStatus -
+                                                                        1) *
+                                                                    24 *
+                                                                    60 *
+                                                                    60 *
+                                                                    1000
+                                                                ),
+                                                        }
                                                     )}
                                                 >
-                                                    Estimated time{' '}
-                                                    <span>29 August, 2023</span>
+                                                    {handleOrderTime(
+                                                        5,
+                                                        'getDate'
+                                                    )}{' '}
+                                                    <span>
+                                                        {handleOrderTime(5, '')}{' '}
+                                                    </span>
                                                 </p>
                                             </div>
                                             <div
@@ -1053,23 +1190,23 @@ const OrderDetails = () => {
                                                     )}
                                                     {(orderStatus === 4 ||
                                                         orderStatus <= 3) && (
-                                                        <svg
-                                                            width={'13'}
-                                                            height={'10'}
-                                                            aria-hidden="true"
-                                                            focusable="false"
-                                                            data-prefix="fas"
-                                                            data-icon="truck-fast"
-                                                            role="img"
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 640 512"
-                                                        >
-                                                            <path
-                                                                fill="currentColor"
-                                                                d="M112 0C85.5 0 64 21.5 64 48V96H16c-8.8 0-16 7.2-16 16s7.2 16 16 16H64 272c8.8 0 16 7.2 16 16s-7.2 16-16 16H64 48c-8.8 0-16 7.2-16 16s7.2 16 16 16H64 240c8.8 0 16 7.2 16 16s-7.2 16-16 16H64 16c-8.8 0-16 7.2-16 16s7.2 16 16 16H64 208c8.8 0 16 7.2 16 16s-7.2 16-16 16H64V416c0 53 43 96 96 96s96-43 96-96H384c0 53 43 96 96 96s96-43 96-96h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V288 256 237.3c0-17-6.7-33.3-18.7-45.3L512 114.7c-12-12-28.3-18.7-45.3-18.7H416V48c0-26.5-21.5-48-48-48H112zM544 237.3V256H416V160h50.7L544 237.3zM160 368a48 48 0 1 1 0 96 48 48 0 1 1 0-96zm272 48a48 48 0 1 1 96 0 48 48 0 1 1 -96 0z"
-                                                            ></path>
-                                                        </svg>
-                                                    )}
+                                                            <svg
+                                                                width={'13'}
+                                                                height={'10'}
+                                                                aria-hidden="true"
+                                                                focusable="false"
+                                                                data-prefix="fas"
+                                                                data-icon="truck-fast"
+                                                                role="img"
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                viewBox="0 0 640 512"
+                                                            >
+                                                                <path
+                                                                    fill="currentColor"
+                                                                    d="M112 0C85.5 0 64 21.5 64 48V96H16c-8.8 0-16 7.2-16 16s7.2 16 16 16H64 272c8.8 0 16 7.2 16 16s-7.2 16-16 16H64 48c-8.8 0-16 7.2-16 16s7.2 16 16 16H64 240c8.8 0 16 7.2 16 16s-7.2 16-16 16H64 16c-8.8 0-16 7.2-16 16s7.2 16 16 16H64 208c8.8 0 16 7.2 16 16s-7.2 16-16 16H64V416c0 53 43 96 96 96s96-43 96-96H384c0 53 43 96 96 96s96-43 96-96h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V288 256 237.3c0-17-6.7-33.3-18.7-45.3L512 114.7c-12-12-28.3-18.7-45.3-18.7H416V48c0-26.5-21.5-48-48-48H112zM544 237.3V256H416V160h50.7L544 237.3zM160 368a48 48 0 1 1 0 96 48 48 0 1 1 0-96zm272 48a48 48 0 1 1 96 0 48 48 0 1 1 -96 0z"
+                                                                ></path>
+                                                            </svg>
+                                                        )}
                                                 </div>
                                             </div>
                                         </div>

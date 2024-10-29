@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import Tippy from '@tippyjs/react/headless';
 
 import Button from '../Button';
@@ -10,23 +10,105 @@ import { faEllipsis } from '@fortawesome/free-solid-svg-icons';
 import { RightIcon } from '../Icons';
 import Label from '../Label';
 import Pagination from '../Pagination';
-import { renderRating } from '../../utils/Functions';
+import { formatDateTime, renderRating } from '../../utils/Functions';
+import * as feedbackServices from '../../services/feedbackServices';
+import FeedbackModel from '../../models/FeedbackModel';
+import * as productServices from '../../services/productServices';
+import PreLoader from '../PreLoader';
 
 const cx = classNames.bind(styles);
 
-// fake reviewList
-// const reviewList = [1];
-const reviewList = [1, 2, 3, 4, 5, 6];
+interface ReviewsProps {
+    className?: string;
+}
 
-const Reviews = () => {
+const Reviews = ({ className }: ReviewsProps) => {
     const [currentPage, setCurrentPage] = useState(1);
+    const [totalPage, setTotalPage] = useState(0);
+    const [totalFeedbacks, setTotalFeedbacks] = useState(0);
+    const [limit, setLimit] = useState(6);
     const [viewAll, setViewAll] = useState(false);
+    const [productList, setProductList] = useState<any>([]);
+    const [loading, setLoading] = useState(false);
+
+    const [feedbackList, setFeedbackList] = useState<FeedbackModel[]>([]);
+    const currentUser = localStorage.getItem('user_id');
+
 
     const pagination = (presentPage: number) => {
         setCurrentPage(presentPage);
     };
+
+    // Get customerId from url
+    const { customerId } = useParams();
+
+    let customerIdNumber = 0;
+    try {
+        customerIdNumber = parseInt(customerId + '');
+        if (Number.isNaN(customerIdNumber)) {
+            customerIdNumber = 0;
+        }
+    } catch (error) {
+        customerIdNumber = 0;
+        console.log('Error:', error);
+    }
+
+    useEffect(() => {
+        const fetchApi = async () => {
+            setLoading(true);
+            const feedbackData = await feedbackServices.getAllFeedbackByUserId(
+                customerId || currentUser + '',
+                currentPage,
+                limit
+            );
+
+            setFeedbackList(feedbackData.result);
+            setTotalPage(feedbackData.totalPage);
+            setTotalFeedbacks(feedbackData.totalFeedbacks);
+
+            let result: any = [];
+
+            const fetchProducts = async (productId: number) => {
+                const res = await productServices.getProductById(productId);
+
+                result.push(res);
+
+                if (result.length === feedbackData.result.length) {
+                    setProductList(result);
+                    setLoading(false);
+                    return;
+                }
+            };
+
+            feedbackData.result.forEach((item: FeedbackModel) => {
+                fetchProducts(item.productId);
+            });
+
+            setLoading(false);
+        };
+
+        fetchApi();
+    }, [currentPage, limit]);
+
+    const handleViewAll = () => {
+        if (!viewAll) {
+            setLimit(totalFeedbacks);
+        } else {
+            setLimit(6);
+        }
+        setViewAll(!viewAll);
+    };
+
+    if (loading) {
+        return <PreLoader show></PreLoader>;
+    }
+
+    if (feedbackList.length === 0) {
+        return <></>
+    }
+
     return (
-        <div className={cx('review')}>
+        <div className={cx('review', className)}>
             <div className={cx('review__container')}>
                 <table className={cx('review__table')}>
                     <thead>
@@ -72,24 +154,23 @@ const Reviews = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {reviewList.map((orderItem, index) => (
+                        {feedbackList.map((feedbackItem, index) => (
                             <tr key={index}>
                                 <td className={cx('review__product')}>
                                     <Link
-                                        to={'#!'}
+                                        to={`/products/${feedbackItem.productId}`}
                                         className={cx('review__link', {
                                             'line-clamp': true,
                                             'line-clamp-1': true,
                                         })}
                                     >
-                                        Fitbit Sense Advanced Smartwatch with
-                                        Tools Fitbit Sense Advanced Smartwatch
-                                        with Tools Fitbit Sense Advanced
-                                        Smartwatch with Tools
+                                        {productList[index]?.title}
                                     </Link>
                                 </td>
                                 <td className={cx('review__rating')}>
-                                    {renderRating(4.5)}
+                                    {renderRating(
+                                        Number.parseInt(feedbackItem?.rate + '')
+                                    )}
                                 </td>
                                 <td className={cx('review__desc')}>
                                     <p
@@ -97,21 +178,14 @@ const Reviews = () => {
                                             'line-clamp': true,
                                         })}
                                     >
-                                        As others mentioned, the team behind
-                                        this theme is super responsive. I sent a
-                                        message during the weekend, fully
-                                        expecting a response As others
-                                        mentioned, the team behind this theme is
-                                        super responsive. I sent a message
-                                        during the weekend, fully expecting a
-                                        response
+                                        {feedbackItem.comment}
                                     </p>
                                 </td>
                                 <td className={cx('review__status')}>
-                                    <Label success title="approved"></Label>
+                                    <Label success title="approved" modifier={!!className}></Label>
                                 </td>
                                 <td className={cx('review__date')}>
-                                    Nov 04, 6:53 PM
+                                    {formatDateTime(feedbackItem.updateAt + '')}
                                 </td>
                                 <td className={cx('review__options')}>
                                     <div className={cx('review__dropdown')}>
@@ -128,7 +202,7 @@ const Reviews = () => {
                                                     )}
                                                 >
                                                     <Button
-                                                        to="#!"
+                                                        to={`/products/${feedbackItem.productId}`}
                                                         className={cx(
                                                             'review__act-btn'
                                                         )}
@@ -145,108 +219,6 @@ const Reviews = () => {
                                                     </Button>
                                                     <hr />
                                                     <Button
-                                                        to="#!"
-                                                        className={cx(
-                                                            'review__act-btn'
-                                                        )}
-                                                    >
-                                                        remove
-                                                    </Button>
-                                                </div>
-                                            )}
-                                        >
-                                            <Button
-                                                className={cx('review__btn')}
-                                            >
-                                                <FontAwesomeIcon
-                                                    icon={faEllipsis}
-                                                />
-                                            </Button>
-                                        </Tippy>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                        {/* Review list hide */}
-                        {reviewList.map((orderItem, index) => (
-                            <tr
-                                key={index}
-                                className={cx('review__item-hide', {
-                                    show: viewAll,
-                                })}
-                            >
-                                <td className={cx('review__product')}>
-                                    <Link
-                                        to={'#!'}
-                                        className={cx('review__link', {
-                                            'line-clamp': true,
-                                            'line-clamp-1': true,
-                                        })}
-                                    >
-                                        AAA Fitbit Sense Advanced Smartwatch
-                                        with Tools Fitbit Sense Advanced
-                                        Smartwatch with Tools Fitbit Sense
-                                        Advanced Smartwatch with Tools
-                                    </Link>
-                                </td>
-                                <td className={cx('review__rating')}>
-                                    {renderRating(4.5)}
-                                </td>
-                                <td className={cx('review__desc')}>
-                                    <p
-                                        className={cx('', {
-                                            'line-clamp': true,
-                                        })}
-                                    >
-                                        As others mentioned, the team behind
-                                        this theme is super responsive. I sent a
-                                        message during the weekend, fully
-                                        expecting a response As others
-                                        mentioned, the team behind this theme is
-                                        super responsive. I sent a message
-                                        during the weekend, fully expecting a
-                                        response
-                                    </p>
-                                </td>
-                                <td className={cx('review__status')}>
-                                    <Label success title="approved"></Label>
-                                </td>
-                                <td className={cx('review__date')}>
-                                    Nov 04, 6:53 PM
-                                </td>
-                                <td className={cx('review__options')}>
-                                    <div className={cx('review__dropdown')}>
-                                        <Tippy
-                                            // visible={showDropdownProfile}
-                                            interactive
-                                            offset={[0, 3]}
-                                            placement="bottom-end"
-                                            // onClickOutside={() => setShowDropdownProfile(false)}
-                                            render={(attrs) => (
-                                                <div
-                                                    className={cx(
-                                                        'review__menu'
-                                                    )}
-                                                >
-                                                    <Button
-                                                        to="#!"
-                                                        className={cx(
-                                                            'review__act-btn'
-                                                        )}
-                                                    >
-                                                        view
-                                                    </Button>
-                                                    <Button
-                                                        to="#!"
-                                                        className={cx(
-                                                            'review__act-btn'
-                                                        )}
-                                                    >
-                                                        export
-                                                    </Button>
-                                                    <hr />
-                                                    <Button
-                                                        to="#!"
                                                         className={cx(
                                                             'review__act-btn'
                                                         )}
@@ -271,28 +243,39 @@ const Reviews = () => {
                     </tbody>
                 </table>
             </div>
-            <div className={cx('review__bottom')}>
+            <div
+                className={cx('review__bottom', {
+                    'd-none': totalPage === 1 && feedbackList.length <= 6,
+                })}
+            >
                 <div className={cx('review__view')}>
                     <p
                         className={cx('review__view-desc', {
                             'd-sm-none': true,
                         })}
                     >
-                        1 to 6 items of 15
+                        {viewAll
+                            ? `1 to ${totalFeedbacks} items of ${totalFeedbacks}`
+                            : `${limit * (currentPage - 1) + 1} to ${currentPage * 6 >= totalFeedbacks
+                                ? totalFeedbacks
+                                : currentPage * 6
+                            } items of ${totalFeedbacks}`}
                     </p>
-                    {/* <Button
-                        className={cx('review__view-btn')}
+                    <Button
+                        className={cx('review__view-btn', {
+                            'd-none': currentPage > 1 || className,
+                        })}
                         rightIcon={<RightIcon></RightIcon>}
-                        onClick={() => setViewAll(!viewAll)}
+                        onClick={handleViewAll}
                     >
                         {viewAll ? 'View less' : 'View all'}
-                    </Button> */}
+                    </Button>
                 </div>
                 <div className={cx('review__paging')}>
                     <Pagination
                         modifier
                         currentPage={currentPage}
-                        totalPage={5}
+                        totalPage={viewAll ? 1 : totalPage}
                         pagination={pagination}
                     ></Pagination>
                 </div>

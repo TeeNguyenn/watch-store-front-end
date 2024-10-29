@@ -39,6 +39,57 @@
     }
 }
 
+.order-details.modifier {
+
+    & * {
+        font-size: 1.4rem ;
+    }
+
+    .order-details__top {
+        margin-bottom: 30px;
+    }
+
+    .order-details__title {
+        font-size: 2.8rem;
+    color: var(--caption-color);
+    }
+
+    .summary__title {
+        font-size: 2rem;
+    }
+
+    .summary__label, .summary__subtotal {
+        font-size: 1.6rem;
+    }
+
+    .summary__label-total, .summary__total {
+        font-size: 1.8rem;
+    }
+
+    .order__info-title {
+        font-size: 2rem;
+    }
+
+    .timeline__heading {
+        font-size: 2rem;
+    }
+
+    .timeline__date , .timeline__date *{
+        font-size: 1.1rem;
+    }
+
+    .timeline__label {
+        font-size: 1.6rem;
+    }
+
+    .timeline__desc {
+        font-size: 1.3rem;
+    }
+
+
+
+}
+
 .products {
     border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
@@ -182,6 +233,8 @@
         background-color: var(--background-color);
     }
 
+    
+
     &__img {
         width: 100%;
         height: 85px;
@@ -274,6 +327,55 @@
             font-size: 1.6rem;
         }
     }
+}
+
+.products.modifier tbody {
+    display: block;
+    max-height: 271.2px;
+    overflow-y: auto;
+    padding-right: 5px;
+
+    @include abstracts.screen(xxl) {
+        max-height: 294px;
+    }
+
+    @include abstracts.screen(xl) {
+        max-height: 279px;
+    }
+
+    @include abstracts.screen(lg) {
+        max-height: 270px;
+        margin-right: -5px;
+    }
+}
+
+.products.modifier .products__img-wrapper {
+    background-color: whitesmoke;
+}
+
+.products.modifier .products__img {
+    height: 60px;
+
+    
+    @include abstracts.screen(xxl) {
+        height: 55px;
+    }
+
+    @include abstracts.screen(xl) {
+        height: 50px;
+    }
+
+    @include abstracts.screen(lg) {
+        height: 45px;
+    }
+}
+
+.products.modifier .products__subtotal {
+    font-size: 1.6rem;
+}
+
+.products.modifier .products__subtotal-price {
+    font-size: 1.6rem;
 }
 
 .order {
@@ -510,9 +612,10 @@
             flex-direction: column;
             line-height: 1.8rem;
             align-items: flex-end;
-            min-width: 114px;
 
-            //Nếu timeline không có 2 tháng khác nhau bỏ min-width
+            &.modifier {
+                min-width: 114px;
+            }
         }
 
         @include abstracts.screen(sm) {

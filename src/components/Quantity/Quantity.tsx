@@ -1,10 +1,11 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import classNames from 'classnames/bind';
 
 import Button from '../Button';
 import styes from './Quantity.module.scss';
 import ProductModel from '../../models/ProductModel';
 import * as cartItemServices from '../../services/cartItemServices';
+import * as productServices from '../../services/productServices';
 
 const cx = classNames.bind(styes);
 
@@ -16,6 +17,7 @@ interface QuantityProps {
     widthBtn: string;
     heightBtn: string;
     cartItem?: any;
+    productId?: any;
     handleErrorQuantity?: (isError: boolean) => void;
     handleQuantityProduct?: (quantity: number) => void;
 }
@@ -28,6 +30,7 @@ const Quantity = ({
     widthBtn,
     heightBtn,
     cartItem,
+    productId,
     handleErrorQuantity = () => {},
     handleQuantityProduct = () => {},
 }: QuantityProps) => {
@@ -38,6 +41,9 @@ const Quantity = ({
 
     const currentUser = localStorage.getItem('user_id');
 
+    const refInput = useRef<HTMLInputElement | null>(null);
+    const [quantityStock, setQuantityStock] = useState(20);
+
     useEffect(() => {
         if (value) {
             setQuantityInputValue(value);
@@ -46,31 +52,45 @@ const Quantity = ({
     }, [value]);
 
     useEffect(() => {
-        if (value) {
-            if (!currentUser) {
-                const newArr = cartList.map((item) => {
-                    if (
-                        item.product_id === cartItem?.product_id &&
-                        item.color_id === cartItem?.color_id &&
-                        item.screen_size_id === cartItem?.screen_size_id &&
-                        item.material_id === cartItem?.material_id
-                    ) {
-                        item.quantity = quantityInputValue;
-                    }
-                    return item;
-                });
+        if (productId || cartItem?.product_id) {
+            const fetchApi = async () => {
+                const responseData = await productServices.getProductById(
+                    productId || cartItem?.product_id
+                );
 
-                localStorage.setItem('cart_list', JSON.stringify(newArr));
-                window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
-            }
-            handleQuantityProduct(Number.parseInt(quantityInputValue));
+                setQuantityStock(responseData.quantityStock);
+            };
+            fetchApi();
         }
-    }, [changeQuantity]);
+    }, []);
+
+    // useEffect(() => {
+    //     if (value) {
+    //         if (!currentUser) {
+    //             const newArr = cartList.map((item) => {
+    //                 if (
+    //                     item.product_id === cartItem?.product_id &&
+    //                     item.color_id === cartItem?.color_id &&
+    //                     item.screen_size_id === cartItem?.screen_size_id &&
+    //                     item.material_id === cartItem?.material_id
+    //                 ) {
+    //                     item.quantity = quantityInputValue;
+    //                 }
+    //                 return item;
+    //             });
+
+    //             localStorage.setItem('cart_list', JSON.stringify(newArr));
+    //             window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
+    //         }
+    //         handleQuantityProduct(Number.parseInt(quantityInputValue));
+    //     }
+    // }, [changeQuantity]);
 
     const handleIncreaseQuantity = () => {
-        if (Number(quantityInputValue) >= 100) {
-            setQuantityInputValue('100');
-            setChangeQuantity('100');
+        if (Number(quantityInputValue) >= quantityStock) {
+            setQuantityInputValue(quantityStock + '');
+            setChangeQuantity(quantityStock + '');
+            return;
         } else {
             setQuantityInputValue((Number(quantityInputValue) + 1).toString());
             setChangeQuantity((Number(quantityInputValue) + 1).toString());
@@ -86,17 +106,25 @@ const Quantity = ({
                     material_id: cartItem?.material_id,
                     quantity: 1,
                 });
+                window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
             };
 
             fetchApi();
-            window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
         }
     };
 
     const handleDecreaseQuantity = () => {
         if (Number(quantityInputValue) <= 1) {
-            setQuantityInputValue('1');
-            setChangeQuantity('1');
+            const fetchApi = async () => {
+                const res = await cartItemServices.deleteCartItem({
+                    productId: cartItem?.product_id,
+                    colorId: cartItem?.color_id,
+                    screenSizeId: cartItem?.screen_size_id,
+                    materialId: cartItem?.material_id,
+                });
+                window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
+            };
+            fetchApi();
             return;
         } else {
             setQuantityInputValue((Number(quantityInputValue) - 1).toString());
@@ -105,7 +133,7 @@ const Quantity = ({
 
         if (currentUser && cartItem) {
             const fetchApi = async () => {
-                const res = cartItemServices.putCartItem({
+                const res = await cartItemServices.putCartItem({
                     id: cartItem?.id,
                     userId: Number.parseInt(currentUser),
                     productId: cartItem?.product_id,
@@ -114,10 +142,15 @@ const Quantity = ({
                     materialId: cartItem?.material_id,
                     quantity: Number(quantityInputValue) - 1,
                 });
+
+                console.log(Number(quantityInputValue) - 1);
+
+                console.log(res.data);
+
+                window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
             };
             fetchApi();
             // window.dispatchEvent(new Event('quantityChanged')); // Phát sự kiện tuỳ chỉnh
-            window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
         }
     };
 
@@ -129,11 +162,11 @@ const Quantity = ({
     const handleOnBlur = (e: ChangeEvent<HTMLInputElement>) => {
         let cartQuantity = e.target.value;
         const quantity = e.target.value;
-        if (Number(quantity) >= 100) {
+        if (Number(quantity) >= quantityStock) {
             // handleErrorQuantity(true);
-            setQuantityInputValue('100');
-            setChangeQuantity('100');
-            cartQuantity = '100';
+            setQuantityInputValue(quantityStock + '');
+            setChangeQuantity(quantityStock + '');
+            cartQuantity = quantityStock + '';
         } else if (Number(quantity) <= 1) {
             // handleErrorQuantity(true);
             setQuantityInputValue('1');
@@ -163,6 +196,47 @@ const Quantity = ({
         }
     };
 
+    const handleOnKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            let cartQuantity = quantityInputValue;
+            const quantity = quantityInputValue;
+            if (Number(quantity) >= quantityStock) {
+                // handleErrorQuantity(true);
+                setQuantityInputValue(quantityStock + '');
+                setChangeQuantity(quantityStock + '');
+                cartQuantity = quantityStock + '';
+            } else if (Number(quantity) <= 1) {
+                // handleErrorQuantity(true);
+                setQuantityInputValue('1');
+                setChangeQuantity('1');
+
+                cartQuantity = '1';
+            } else {
+                setQuantityInputValue(quantity);
+                setChangeQuantity(quantity);
+            }
+
+            if (currentUser && cartItem) {
+                const fetchApi = async () => {
+                    const res = cartItemServices.putCartItem({
+                        id: cartItem?.id,
+                        userId: Number.parseInt(currentUser),
+                        productId: cartItem?.product_id,
+                        colorId: cartItem?.color_id,
+                        screenSizeId: cartItem?.screen_size_id,
+                        materialId: cartItem?.material_id,
+                        quantity: cartQuantity,
+                    });
+
+                    refInput?.current?.blur();
+                };
+                fetchApi();
+                // window.dispatchEvent(new Event('quantityChanged')); // Phát sự kiện tuỳ chỉnh
+                window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
+            }
+        }
+    };
+
     return (
         <div className={cx('quantity__wrapper', className)}>
             <Button
@@ -179,6 +253,8 @@ const Quantity = ({
                 onChange={handleInputQuantity}
                 onBlur={handleOnBlur}
                 style={{ height: heightBtn }}
+                onKeyDown={handleOnKeyDown}
+                ref={refInput}
             />
             <Button
                 style={{ width: widthBtn, height: heightBtn }}

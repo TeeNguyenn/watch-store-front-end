@@ -1,3 +1,8 @@
+interface IRole {
+    id: number;
+    name: string;
+}
+
 class UserModel {
     userId: number;
     firstName: string;
@@ -5,6 +10,7 @@ class UserModel {
     email: string;
     phoneNumber: string;
     address?: string;
+    role?: IRole[];
 
 
     constructor(userId: number,
@@ -13,6 +19,7 @@ class UserModel {
         email: string,
         phoneNumber: string,
         address: string,
+        role: IRole[],
     ) {
         this.userId = userId;
         this.firstName = firstName;
@@ -20,6 +27,7 @@ class UserModel {
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.address = address;
+        this.role = role;
 
     }
 

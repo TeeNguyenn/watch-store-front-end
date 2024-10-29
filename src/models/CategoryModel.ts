@@ -1,7 +1,7 @@
 class CategoryModel {
     categoryId: number;
     name?: string;
-    totalProduct: number;
+    totalProduct?: number;
 
 
 

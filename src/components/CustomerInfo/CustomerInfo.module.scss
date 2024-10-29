@@ -38,7 +38,7 @@
     border-radius: 6px;
     font-size: 1.3rem;
     line-height: 1.6rem;
-    padding: 10px 24px;
+    padding: 8px 16px;
     color: rgba($color: #000, $alpha: 0.7);
 
     &:hover {
@@ -299,6 +299,86 @@
 
         @include abstracts.screen(sm) {
             padding: 6px 18px;
+        }
+    }
+}
+
+.modifier {
+    padding: 30px 30px 40px;
+
+    .heading {
+        font-size: 2.8rem;
+        color: var(--caption-color);
+
+        @include abstracts.screen(md) {
+            font-size: 2.6rem;
+        }
+
+        @include abstracts.screen(sm) {
+            font-size: 2.4rem;
+            width: 100%;
+        }
+    }
+
+    .info {
+        padding: 20px;
+    }
+
+    .info__top {
+        padding-bottom: 32px;
+    }
+
+    .info__avatar-wrapper {
+        width: 120px;
+        height: 120px;
+    }
+
+    .info__name {
+        font-size: 2rem;
+    }
+
+    .info__status {
+        font-size: 1.4rem;
+    }
+
+    .info__label {
+        font-size: 1.2rem;
+    }
+
+    .info__text {
+        font-size: 1.8rem;
+    }
+
+    .address {
+        padding: 20px;
+
+        &__modifier-btn {
+            width: 14px;
+            height: 14px;
+        }
+
+        &__title {
+            font-size: 2rem;
+        }
+
+        &__label {
+            font-size: 1.4rem;
+        }
+
+        &__place,
+        &__mail,
+        &__tel {
+            font-size: 1.4rem;
+        }
+
+        &__btn {
+            padding: 8px 18px;
+            font-size: 1.4rem;
+        }
+
+        &__actions {
+            visibility: hidden;
+            opacity: 0;
         }
     }
 }

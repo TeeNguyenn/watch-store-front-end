@@ -21,12 +21,14 @@ const cx = classNames.bind(styles);
 interface SearchProps {
     className?: string;
     keyword?: string;
+    adminSearch?: boolean;
     handleCloseSearchModal?: () => void;
 }
 
 const Search = ({
     className,
     keyword,
+    adminSearch = false,
     handleCloseSearchModal,
 }: SearchProps) => {
     const refInput = useRef<HTMLInputElement | null>(null);
@@ -77,6 +79,9 @@ const Search = ({
     };
 
     const handleSubmit = () => {
+        if (adminSearch) {
+            return; //temp
+        }
         navigate(`${config.routes.searchResult}?keyword=${debounced}`);
         if (!handleCloseSearchModal) return;
         handleCloseSearchModal();
@@ -84,7 +89,7 @@ const Search = ({
 
     return (
         <Tippy
-            visible={visible && searchResult.length > 0}
+            visible={visible && searchResult.length > 0 && !adminSearch} //adminSearch temp
             interactive
             delay={[0, 300]}
             offset={[0, 5]}

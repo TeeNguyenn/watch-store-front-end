@@ -13,7 +13,7 @@ import PreLoader from '../../components/PreLoader';
 import { useMediaQuery } from 'react-responsive';
 import * as favoriteServices from '../../services/favoriteServices';
 import WishlistComponent from '../../components/Wishlist';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import PageNotFound from '../PageNotFound';
 
 const cx = classNames.bind(styles);
@@ -46,12 +46,28 @@ const Wishlist = () => {
     //     }
     // }, [pathName, currentUser]);
 
+    // Get customerId from url
+    const { customerId } = useParams();
+
+    let customerIdNumber = 0;
+    try {
+        customerIdNumber = parseInt(customerId + '');
+        if (Number.isNaN(customerIdNumber)) {
+            customerIdNumber = 0;
+        }
+    } catch (error) {
+        customerIdNumber = 0;
+        console.log('Error:', error);
+    }
+
     // get wishlist from db
     useEffect(() => {
         if (currentUser) {
             localStorage.removeItem('wishlist');
             const fetchApi = async () => {
-                const res = await favoriteServices.getFavoriteByUserId();
+                const res = await favoriteServices.getFavoriteByUserId(
+                    customerId || currentUser
+                );
                 setWishlist(res.result);
             };
             fetchApi();
@@ -76,7 +92,9 @@ const Wishlist = () => {
             } else {
                 // setLoading(true);
                 const fetchApi = async () => {
-                    const res = await favoriteServices.getFavoriteByUserId();
+                    const res = await favoriteServices.getFavoriteByUserId(
+                        customerId || currentUser
+                    );
                     setWishlist(res.result);
                     // setLoading(false);
                 };

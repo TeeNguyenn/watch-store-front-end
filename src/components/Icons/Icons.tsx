@@ -110,6 +110,169 @@ export const ErrorLabelIcon = ({
     </svg>
 );
 
+interface PricingIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const PricingIcon = ({
+    width,
+    height,
+    className,
+}: PricingIconProps) => (
+    <svg className={className}
+        width={width || '1.6rem'}
+        height={height || '1.6rem'} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><g><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></g></svg>
+);
+
+interface RestockIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const RestockIcon = ({
+    width,
+    height,
+    className,
+}: RestockIconProps) => (
+    <svg className={className}
+        width={width || '1.6rem'}
+        height={height || '1.6rem'} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><g><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></g></svg>
+);
+
+interface TransitionIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const TransitionIcon = ({
+    width,
+    height,
+    className,
+}: TransitionIconProps) => (
+    <svg className={className}
+        width={width || '1.6rem'}
+        height={height || '1.6rem'} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><g><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></g></svg>
+);
+
+interface GlobalIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const GlobalIcon = ({
+    width,
+    height,
+    className,
+}: GlobalIconProps) => (
+    <svg className={className}
+        width={width || '1.6rem'}
+        height={height || '1.6rem'} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><g><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></g></svg>
+);
+
+interface AttributeIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const AttributeIcon = ({
+    width,
+    height,
+    className,
+}: AttributeIconProps) => (
+    <svg className={className}
+        width={width || '1.6rem'}
+        height={height || '1.6rem'} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><g><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></g></svg>
+);
+
+interface SecureIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const SecureIcon = ({
+    width,
+    height,
+    className,
+}: SecureIconProps) => (
+    <svg className={className}
+        width={width || '1.6rem'}
+        height={height || '1.6rem'} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><g><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></g></svg>
+);
+
+interface LogoIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const LogoIcon = ({ width, height, className }: LogoIconProps) => (
+    <svg
+        className={className}
+        width={width || '155px'}
+        height={height || '40px'}
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 198 55"
+    >
+        <path
+            stroke-width="7"
+            stroke="black"
+            fill="black"
+            d="M103.61 43.6911V29.7329H119.028V28.9148H103.61V15.2467H120.706V14.4287H102.751V44.509H121.306V43.6911H103.61Z"
+        />
+        <path
+            stroke-width="7"
+            stroke="black"
+            fill="black"
+            d="M51.6721 13.9216V44.5093H52.5212V15.071L51.7134 13.9216H51.6721Z"
+        />
+        <path
+            stroke-width="7"
+            stroke="black"
+            fill="black"
+            d="M89.2842 22.2673V44.5091H90.1436V21.0973H90.1023L89.2842 22.2673Z"
+        />
+        <path
+            stroke-width="7"
+            stroke="black"
+            fill="black"
+            d="M37.7871 14.4288H36.9277V44.4988H37.7871V14.4288Z"
+        />
+        <path
+            stroke-width="7"
+            stroke="black"
+            fill="black"
+            d="M4 15.2468H13.3399V44.5091H14.189V15.2468H23.529V14.4288H4V15.2468Z"
+        />
+        <path
+            stroke-width="7"
+            stroke="#B299D2"
+            fill="#B299D2"
+            d="M86.2461 11L69.7334 37.681C69.5676 37.5982 69.3917 37.5464 69.1949 37.5464C69.0293 37.5464 68.8635 37.5774 68.7185 37.6395L60 25.2243V26.6637L68.1387 38.1365C68.0248 38.323 67.9523 38.5404 67.9523 38.7785C67.9523 39.462 68.5011 40.0211 69.1949 40.0211C69.8784 40.0211 70.4375 39.4723 70.4375 38.7785C70.4375 38.5508 70.3754 38.3333 70.2614 38.1469L78.6307 24.8234L87 12L91.5 6L89 6.5L86.2461 11Z"
+            clip-rule="evenodd"
+            fill-rule="evenodd"
+        />
+        <path
+            stroke-width="7"
+            stroke="black"
+            d="M159.353 14.6979H160.275L146.855 43.9601M146.855 43.9601L146.5 45L133.415 14.6979H134.43C142.931 34.6306 137.66 22.2568 146.855 43.9601Z"
+        />
+        <path
+            stroke-miterlimit="10"
+            stroke-width="7"
+            stroke="black"
+            d="M180.141 44.4263C187.779 44.4263 193.97 38.2352 193.97 30.5979C193.97 22.9606 187.779 16.7694 180.141 16.7694C172.504 16.7694 166.312 22.9606 166.312 30.5979C166.312 38.2352 172.504 44.4263 180.141 44.4263Z"
+        />
+    </svg>
+);
+
 interface ProcessingLabelIconProps {
     width?: string;
     height?: string;
@@ -959,8 +1122,9 @@ export const CheckNoCircleIcon = ({
     className,
 }: CheckNoCircleIconProps) => (
     <svg
-        width="12"
-        height="12"
+        className={className}
+        width={width || '1.2rem'}
+        height={height || '1.2rem'}
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -971,6 +1135,36 @@ export const CheckNoCircleIcon = ({
         <g>
             <polyline points="20 6 9 17 4 12"></polyline>
         </g>
+    </svg>
+);
+
+interface ModifierIconProps {
+    width?: string;
+    height?: string;
+    className?: string;
+}
+
+export const ModifierIcon = ({
+    width,
+    height,
+    className,
+}: ModifierIconProps) => (
+    <svg
+        className={className}
+        width={width || '1.6rem'}
+        height={height || '1.6rem'}
+        aria-hidden="true"
+        focusable="false"
+        data-prefix="fas"
+        data-icon="pen"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 512 512"
+    >
+        <path
+            fill="currentColor"
+            d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"
+        ></path>
     </svg>
 );
 

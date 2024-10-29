@@ -87,7 +87,7 @@ export const deleteCartItem = async (cartItem: any) => {
                 'product-id': cartItem.productId,
                 'color-id': cartItem.colorId,
                 'screen-size-id': cartItem.screenSizeId,
-                ' material-id': cartItem.materialId,
+                'material-id': cartItem.materialId,
             },
             headers: {
                 'Authorization': `Bearer ${token}`

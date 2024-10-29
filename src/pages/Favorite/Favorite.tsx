@@ -12,6 +12,7 @@ import Pagination from '../../components/Pagination';
 import PreLoader from '../../components/PreLoader';
 import { useMediaQuery } from 'react-responsive';
 import * as favoriteServices from '../../services/favoriteServices';
+import { useParams } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
@@ -61,12 +62,28 @@ const Favorite = () => {
         });
     });
 
+    // Get customerId from url
+    const { customerId } = useParams();
+
+    let customerIdNumber = 0;
+    try {
+        customerIdNumber = parseInt(customerId + '');
+        if (Number.isNaN(customerIdNumber)) {
+            customerIdNumber = 0;
+        }
+    } catch (error) {
+        customerIdNumber = 0;
+        console.log('Error:', error);
+    }
+
     // get wishlist from db
     useEffect(() => {
         if (currentUser) {
             localStorage.removeItem('wishlist');
             const fetchApi = async () => {
-                const res = await favoriteServices.getFavoriteByUserId();
+                const res = await favoriteServices.getFavoriteByUserId(
+                    customerId || currentUser
+                );
 
                 if (res.result.length === 0) {
                     setWishlist([]);
@@ -119,7 +136,9 @@ const Favorite = () => {
             } else {
                 setLoading(true);
                 const fetchApi = async () => {
-                    const res = await favoriteServices.getFavoriteByUserId();
+                    const res = await favoriteServices.getFavoriteByUserId(
+                        customerId || currentUser
+                    );
 
                     if (res.result.length === 0) {
                         setWishlist([]);

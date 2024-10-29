@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
 import Tippy from '@tippyjs/react/headless';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import styles from './Wishlist.module.scss';
 import Image from '../Image';
@@ -30,11 +30,13 @@ interface WishlistItemProps {
     wishlistItem: any;
     handleChangeWishlist: any;
     className?: string;
+    modifier?: boolean;
 }
 
 const WishlistItem = ({
     className,
     wishlistItem,
+    modifier,
     handleChangeWishlist,
 }: WishlistItemProps) => {
     const [showDropdownVariant, setShowDropdownVariant] = useState(false);
@@ -66,6 +68,20 @@ const WishlistItem = ({
     const [loadingCart, setLoadingCart] = useState(false);
     const context = useContext(CartContext);
     const [loading, setLoading] = useState(false);
+
+    // Get customerId from url
+    const { customerId } = useParams();
+
+    let customerIdNumber = 0;
+    try {
+        customerIdNumber = parseInt(customerId + '');
+        if (Number.isNaN(customerIdNumber)) {
+            customerIdNumber = 0;
+        }
+    } catch (error) {
+        customerIdNumber = 0;
+        console.log('Error:', error);
+    }
 
     useEffect(() => {
         const fetchApi = async () => {
@@ -241,7 +257,9 @@ const WishlistItem = ({
         } else {
             const fetchApi = async () => {
                 setLoading(true);
-                const resData = await favoriteServices.getFavoriteByUserId();
+                const resData = await favoriteServices.getFavoriteByUserId(
+                    customerId || currentUser
+                );
 
                 // Lay ra item mà đang có variant giống variant đang active
                 const putFavoriteItem = resData.result.filter((item) => {
@@ -418,8 +436,10 @@ const WishlistItem = ({
 
     return (
         <tr className={cx('', className)}>
-            <td className={cx('wishlist__media')}>
-                <div className={cx('wishlist__img-wrapper')}>
+            <td className={cx('wishlist__media', {
+                modifier
+            })}>
+                <div className={cx('wishlist__img-wrapper')} style={modifier ? { width: 60, height: 60 } : {}}>
                     <Image
                         src={imageList?.at(0)?.imageUrl}
                         alt="image"
@@ -428,7 +448,9 @@ const WishlistItem = ({
                     ></Image>
                 </div>
             </td>
-            <td className={cx('wishlist__product')}>
+            <td className={cx('wishlist__product', {
+                modifier
+            })}>
                 <Link
                     to={`/products/${productDetail?.productId}`}
                     className={cx('wishlist__link', {
@@ -440,7 +462,9 @@ const WishlistItem = ({
                 </Link>
             </td>
             <td
-                className={cx('wishlist__variant')}
+                className={cx('wishlist__variant', {
+                    'd-none': modifier
+                })}
                 style={{
                     width: '20%',
                     minWidth: '220px',
@@ -575,14 +599,48 @@ const WishlistItem = ({
                 </div>
             </td>
 
-            <td className={cx('wishlist__price')}>
+            <td className={cx('', {
+                'd-none': !modifier
+            })}>
+                <div className={cx('wishlist__styles-text')}>
+                    {productDetail?.colors.map(
+                        (item) => item.colorId === activeColor && item.name
+                    )}
+                </div>
+            </td>
+            <td className={cx('', {
+                'd-none': !modifier
+            })} >
+                <div className={cx('wishlist__styles')} style={{ textAlign: 'left' }}>
+                    {productDetail?.screenSizes?.map(
+                        (item) =>
+                            item.sizeId === activeSize &&
+                            item.size + ' Inches'
+                    )}
+                </div>
+            </td>
+            <td className={cx('wishlist__styles', {
+                'd-none': !modifier
+            })}>
+                <div className={cx('wishlist__styles')}>
+                    {productDetail?.materials?.map(
+                        (item) =>
+                            item.materialId === activeMaterial && item.name
+                    )}
+                </div>
+            </td>
+            <td className={cx('wishlist__price', {
+                modifier
+            })}>
                 <Price
                     price={productDetail?.price}
                     discount={productDetail?.discount}
                     noBadge
                 ></Price>
             </td>
-            <td className={cx('wishlist__options')}>
+            <td className={cx('wishlist__options', {
+                'd-none': modifier
+            })}>
                 <div className={cx('wishlist__option-wrapper')}>
                     <Button
                         className={cx('wishlist__trash-can')}

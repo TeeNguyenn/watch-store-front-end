@@ -38,7 +38,8 @@ const cx = classNames.bind(styles);
 const links = ['home', 'shop'];
 
 const Shop = () => {
-    const [sortBy, setSortBy] = useState('Alphabetically, A-Z');
+    const [sort, setSort] = useState('');
+    const [sortBy, setSortBy] = useState('Unpopularity'); // Sau khi them product hoan chinh de default sort khac
     const [visible, setVisible] = useState(false);
     const [showOption, setShowOption] = useState(4);
 
@@ -67,7 +68,7 @@ const Shop = () => {
 
     // pagination
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPage, setTotalPage] = useState(0);
+    const [totalPage, setTotalPage] = useState(1);
 
     // api
     const [loading, setLoading] = useState(false);
@@ -79,6 +80,30 @@ const Shop = () => {
         }
         setSortBy(name);
         setVisible(false);
+
+        switch (name) {
+            case 'Unpopularity':
+                setSort('');
+                break;
+            case 'Popularity':
+                setSort('popularity');
+                break;
+            case 'Price, low to high':
+                setSort('low');
+                break;
+            case 'Price, high to low':
+                setSort('high');
+                break;
+            case 'Date, old to new':
+                setSort('oldest');
+                break;
+            case 'Date, new to old':
+                setSort('latest');
+                break;
+
+            default:
+                break;
+        }
     };
 
     const pagination = (presentPage: number) => {
@@ -99,12 +124,14 @@ const Shop = () => {
         const fetchApi = async () => {
             setLoading(true);
             const responseData = await productServices.getAllProduct(
-                currentPage - 1,
+                currentPage,
                 12,
                 collectionId,
                 categoryFilter.ids.join(',') + '',
                 colorFilter.ids.join(',') + '',
-                materialFilter.ids.join(',') + ''
+                materialFilter.ids.join(',') + '',
+                '',
+                sort
             );
 
             if (responseData) {
@@ -131,6 +158,7 @@ const Shop = () => {
         categoryFilter,
         colorFilter,
         materialFilter,
+        sort,
     ]);
 
     // useEffect(() => {}, [loading]);
@@ -298,9 +326,9 @@ const Shop = () => {
                             style={{
                                 marginBottom:
                                     isLgScreen &&
-                                    (categoryFilter.ids.length > 0 ||
-                                        colorFilter.ids.length > 0 ||
-                                        materialFilter.ids.length > 0)
+                                        (categoryFilter.ids.length > 0 ||
+                                            colorFilter.ids.length > 0 ||
+                                            materialFilter.ids.length > 0)
                                         ? '0px'
                                         : '60px',
                             }}
@@ -422,16 +450,16 @@ const Shop = () => {
                                                                     true,
                                                                 active:
                                                                     sortBy ===
-                                                                    'Featured',
+                                                                    'Unpopularity',
                                                             }
                                                         )}
                                                         onClick={() =>
                                                             handleSortBy(
-                                                                'Featured'
+                                                                'Unpopularity'
                                                             )
                                                         }
                                                     >
-                                                        Featured
+                                                        Unpopularity
                                                     </span>
                                                 </label>
                                                 <label
@@ -457,19 +485,19 @@ const Shop = () => {
                                                                     true,
                                                                 active:
                                                                     sortBy ===
-                                                                    'Best selling',
+                                                                    'Popularity',
                                                             }
                                                         )}
                                                         onClick={() =>
                                                             handleSortBy(
-                                                                'Best selling'
+                                                                'Popularity'
                                                             )
                                                         }
                                                     >
-                                                        Best selling
+                                                        Popularity
                                                     </span>
                                                 </label>
-                                                <label
+                                                {/* <label
                                                     htmlFor="option-3"
                                                     className={cx(
                                                         'sort__option'
@@ -538,7 +566,7 @@ const Shop = () => {
                                                     >
                                                         Alphabetically, Z-A
                                                     </span>
-                                                </label>
+                                                </label> */}
                                                 <label
                                                     htmlFor="option-5"
                                                     className={cx(

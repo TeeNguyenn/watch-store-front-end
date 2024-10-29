@@ -1,23 +1,156 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
+import { Link, useParams } from 'react-router-dom';
 
 import Button from '../Button';
 import styles from './CustomerInfo.module.scss';
-import { RemoveIcon, ResetIcon } from '../Icons';
+import { ModifierIcon, RemoveIcon, ResetIcon } from '../Icons';
 import Image from '../Image';
-import { Link } from 'react-router-dom';
+import * as userServices from '../../services/userServices';
+import UserModel from '../../models/UserModel';
+import images from '../../assets/images';
+import { formatPrice, getCurrentDateWithHour, timeAgo } from '../../utils/Functions';
+import * as orderServices from '../../services/orderServices';
 
 const cx = classNames.bind(styles);
 
-const CustomerInfo = () => {
+interface CustomerInfoProps {
+    modifier?: boolean;
+}
+
+interface ICustomerDetail {
+    id: number;
+    name: string;
+    email: string;
+    totalOrder: number;
+    lastOrder: string;
+    phone: string;
+    address: string | undefined;
+    totalSpent: number;
+
+}
+
+const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
+    const [loading, setLoading] = useState(false);
+    const [customerDetail, setCustomerDetail] = useState<ICustomerDetail>();
+    const currentUser = localStorage.getItem('user_id');
+
+
+
+    // Get customerId from url
+    const { customerId } = useParams();
+
+    let customerIdNumber = 0;
+    try {
+        customerIdNumber = parseInt(customerId + '');
+        if (Number.isNaN(customerIdNumber)) {
+            customerIdNumber = 0;
+        }
+    } catch (error) {
+        customerIdNumber = 0;
+        console.log('Error:', error);
+    }
+
+    // get all users
+    useEffect(() => {
+        const fetchApi = async () => {
+            setLoading(true);
+            const responseData = await userServices.getAllUser();
+
+
+            const fetchApi1 = async (userItem: UserModel) => {
+                const res = await orderServices.getAllOrderByUserId(userItem.userId + '');
+
+                if (customerIdNumber === userItem.userId) {
+
+                    let totalSpent = 0;
+
+                    if (res.totalOrders > 0) {
+                        const resData = await orderServices.getAllOrderByUserId(userItem.userId + '', 1, res.totalOrders);
+
+                        totalSpent = resData.result.reduce((accumulator: any, currentItem: any) => {
+                            return accumulator + currentItem.total_money;
+                        }, 0)
+                    }
+
+                    setCustomerDetail({
+                        id: userItem.userId,
+                        name: userItem.firstName + ' ' + userItem.lastName,
+                        email: userItem.email,
+                        totalOrder: res.totalOrders,
+                        lastOrder: res.totalOrders > 0 ? timeAgo(res.result.at(0).order_date) : 'No orders',
+                        phone: userItem.phoneNumber,
+                        address: userItem.address, //temp
+                        totalSpent
+
+                    })
+                    setLoading(false);
+                    return;
+
+                }
+            }
+
+            async function fetchSequentially(responseData: any) {
+                for (const userItem of responseData.result) {
+                    await fetchApi1(userItem);
+                }
+            }
+            fetchSequentially(responseData);
+
+
+        };
+
+        if (customerIdNumber) {
+
+            fetchApi();
+        } else {
+            const fetchApi = async () => {
+                const res = await userServices.getUserDetail();
+                const resData = await orderServices.getAllOrderByUserId(currentUser + '');
+
+                let totalSpent = 0;
+
+                if (resData.totalOrders > 0) {
+                    const ordersData = await orderServices.getAllOrderByUserId(currentUser + '', 1, resData.totalOrders);
+
+                    totalSpent = ordersData.result.reduce((accumulator: any, currentItem: any) => {
+                        return accumulator + currentItem.total_money;
+                    }, 0)
+                }
+
+                setCustomerDetail({
+                    id: res.userId,
+                    name: res.firstName + ' ' + res.lastName,
+                    email: res.email,
+                    totalOrder: resData.totalOrders,
+                    lastOrder: resData.totalOrders > 0 ? timeAgo(resData.result.at(0).order_date) : 'No orders',
+                    phone: res.phoneNumber,
+                    address: res.address, //temp
+                    totalSpent
+
+                })
+
+            };
+            fetchApi();
+        }
+
+    }, [customerIdNumber]);
+
+
     return (
-        <div>
+        <div
+            className={cx('', {
+                modifier,
+            })}
+        >
             <div className={cx('row')}>
-                <h2 className={cx('heading')}>Profile</h2>
+                <h2 className={cx('heading')}>
+                    {modifier ? 'User details' : 'Profile'}
+                </h2>
                 <div className={cx('actions')}>
                     {/* admin */}
                     <Button
-                        className={cx('btn', 'delete-btn', { 'd-none': true })}
+                        className={cx('btn', 'delete-btn', { 'd-none': !modifier })}
                         leftIcon={
                             <RemoveIcon
                                 width="1.28rem"
@@ -25,7 +158,7 @@ const CustomerInfo = () => {
                             ></RemoveIcon>
                         }
                     >
-                        Delete customer
+                        Delete user
                     </Button>
                     <Button
                         className={cx('btn', 'reset-btn')}
@@ -77,10 +210,11 @@ const CustomerInfo = () => {
                             </div>
                             <div className={cx('info__content')}>
                                 <h3 className={cx('info__name')}>
-                                    Tee Lazinatov
+                                    {customerDetail?.name}
                                 </h3>
                                 <p className={cx('info__status')}>
-                                    Joined 3 months ago
+                                    {/* temp */}
+                                    Joined {customerDetail?.lastOrder}
                                 </p>
                                 <div className={cx('info__socials')}>
                                     <Link
@@ -154,19 +288,19 @@ const CustomerInfo = () => {
                                 <h6 className={cx('info__label')}>
                                     Total Spent
                                 </h6>
-                                <h4 className={cx('info__text')}>$894</h4>
+                                <h4 className={cx('info__text')}>{formatPrice(customerDetail?.totalSpent || 0)}</h4>
                             </div>
                             <div className={cx('info__group')}>
                                 <h6 className={cx('info__label')}>
                                     Last Order
                                 </h6>
-                                <h4 className={cx('info__text')}>1 week ago</h4>
+                                <h4 className={cx('info__text')}>{customerDetail?.lastOrder}</h4>
                             </div>
                             <div className={cx('info__group')}>
                                 <h6 className={cx('info__label')}>
                                     Total Orders
                                 </h6>
-                                <h4 className={cx('info__text')}>97</h4>
+                                <h4 className={cx('info__text')}>{customerDetail?.totalOrder}</h4>
                             </div>
                         </div>
                     </div>
@@ -178,22 +312,7 @@ const CustomerInfo = () => {
                                 Default Address
                             </h3>
                             <Button className={cx('address__modifier-btn')}>
-                                <svg
-                                    width={'16'}
-                                    height={'16'}
-                                    aria-hidden="true"
-                                    focusable="false"
-                                    data-prefix="fas"
-                                    data-icon="pen"
-                                    role="img"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 512 512"
-                                >
-                                    <path
-                                        fill="currentColor"
-                                        d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"
-                                    ></path>
-                                </svg>
+                                <ModifierIcon />
                             </Button>
                         </div>
                         <div className={cx('address__content')}>
@@ -204,29 +323,29 @@ const CustomerInfo = () => {
                                 <input
                                     type="text"
                                     className={cx('address__place')}
-                                    value={'Bình Phú, Gò Công Tây, Tiền Giang '}
+                                    value={customerDetail?.address || 'No default address set.'}
                                     disabled
                                 />
                             </div>
                             <div className={cx('address__group')}>
                                 <h5 className={cx('address__label')}>Email</h5>
                                 <Link
-                                    to={'mailto:tee@gmail.com'}
+                                    to={`mailto:${customerDetail?.email}`}
                                     className={cx('address__mail')}
                                 >
-                                    tee@gmail.com
+                                    {customerDetail?.email}
                                 </Link>
                             </div>
                             <div className={cx('address__group')}>
                                 <h5 className={cx('address__label')}>Phone</h5>
                                 <Link
-                                    to={'tel:+1234567890'}
+                                    to={`tel:${customerDetail?.phone}`}
                                     className={cx('address__tel')}
                                 >
                                     <input
                                         type="text"
                                         className={cx('address__phone')}
-                                        value={'+1234567890'}
+                                        value={customerDetail?.phone}
                                         disabled
                                     />
                                 </Link>

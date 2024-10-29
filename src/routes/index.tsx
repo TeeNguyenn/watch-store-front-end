@@ -20,6 +20,15 @@ import ForgotPassword from '../pages/ForgotPassword';
 import Profile from '../pages/Profile';
 import OrderDetails from '../pages/OrderDetails';
 import SearchResult from '../pages/SearchResult';
+import Dashboard from '../pages/Dashboard';
+import { AdminLayout } from '../layouts';
+import AdminCustomers from '../pages/AdminCustomers';
+import AdminProducts from '../pages/AdminProducts';
+import AdminNewCustomer from '../pages/AdminNewCustomer';
+import AdminDetailCustomer from '../pages/AdminDetailCustomer';
+import AdminOrders from '../pages/AdminOrders';
+import AdminOrderDetails from '../pages/AdminOrderDetails';
+import AdminNewProduct from '../pages/AdminNewProduct';
 
 const publicRoutes: Array<any> = [
     {
@@ -103,7 +112,51 @@ const publicRoutes: Array<any> = [
         path: config.routes.searchResult,
         component: SearchResult,
     },
+
+
 ];
-const privateRoutes: Array<any> = [];
+const privateRoutes: Array<any> = [
+    // admin
+    {
+        path: config.routes.adminDashboard,
+        component: Dashboard,
+        layout: AdminLayout,
+    },
+    {
+        path: config.routes.adminCustomers,
+        component: AdminCustomers,
+        layout: AdminLayout,
+    },
+    {
+        path: config.routes.adminNewCustomer,
+        component: AdminNewCustomer,
+        layout: AdminLayout,
+    },
+    {
+        path: config.routes.adminDetailCustomer,
+        component: AdminDetailCustomer,
+        layout: AdminLayout,
+    },
+    {
+        path: config.routes.adminProducts,
+        component: AdminProducts,
+        layout: AdminLayout,
+    },
+    {
+        path: config.routes.adminNewProduct,
+        component: AdminNewProduct,
+        layout: AdminLayout,
+    },
+    {
+        path: config.routes.adminOrders,
+        component: AdminOrders,
+        layout: AdminLayout,
+    },
+    {
+        path: config.routes.adminOrderDetails,
+        component: AdminOrderDetails,
+        layout: AdminLayout,
+    },
+];
 
 export { publicRoutes, privateRoutes };
