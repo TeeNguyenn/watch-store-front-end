@@ -1,16 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import classNames from 'classnames/bind';
 import { Link, useParams } from 'react-router-dom';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 
 import Button from '../Button';
 import styles from './CustomerInfo.module.scss';
-import { ModifierIcon, RemoveIcon, ResetIcon } from '../Icons';
+import { ErrorIcon, ModifierIcon, RemoveIcon, ResetIcon } from '../Icons';
 import Image from '../Image';
 import * as userServices from '../../services/userServices';
 import UserModel from '../../models/UserModel';
 import images from '../../assets/images';
-import { formatPrice, getCurrentDateWithHour, timeAgo } from '../../utils/Functions';
+import { formatPrice, getCurrentDateWithHour, notifyError, notifySuccess, timeAgo } from '../../utils/Functions';
 import * as orderServices from '../../services/orderServices';
+import PreLoader from '../PreLoader';
+import { ToastContainer, toast } from 'react-toastify';
+
 
 const cx = classNames.bind(styles);
 
@@ -31,11 +36,93 @@ interface ICustomerDetail {
 }
 
 const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
+    const [file, setFile] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [customerDetail, setCustomerDetail] = useState<ICustomerDetail>();
     const currentUser = localStorage.getItem('user_id');
+    const [showChange, setShowChange] = useState(false);
+    const [address, setAddress] = useState<string | undefined>('');
+    const [avatar, setAvatar] = useState<string | undefined>('')
+
+    const refInput = useRef<HTMLInputElement | null>(null);
 
 
+    const formik = useFormik({
+        initialValues: {
+            fullName: '',
+            phoneNumber: '',
+
+        },
+        validationSchema: Yup.object({
+            fullName: Yup.string().required('You must fill in this section.').max(
+                40,
+                'Your last name must be under 40 characters.'
+            ),
+            phoneNumber: Yup.string()
+                .matches(/^0\d{9}$/, 'Phone number is invalid.')
+                .required('You must fill in this section.'),
+
+        }),
+        onSubmit: (values) => {
+            const fetchApi = async () => {
+
+                setLoading(true);
+
+                let index = values.fullName.indexOf(' ');
+                if (index === -1) index = 1;
+
+
+                const data: any = {
+                    userId: customerDetail?.id + '',
+                    infos: {
+                        first_name: values.fullName.slice(0, index),
+                        last_name: values.fullName.slice(index + 1),
+                        phone_number: values.phoneNumber,
+                        address: address,
+                        email: customerDetail?.email
+                    }
+                };
+
+                // Tạo form data và thêm file
+                const formData = new FormData();
+                formData.append("file", file);
+
+                if (file) {
+                    const resData = await userServices.putAvatarUser(customerDetail?.id + '', formData);
+
+                    if (resData.errorMessage) {
+
+                        setTimeout(() => {
+                            setLoading(false);
+                        }, 200);
+                        setTimeout(() => {
+                            notifyError(resData.errorMessage)
+                        }, 300);
+                        return;
+                    }
+                }
+                const res = await userServices.putUser(data);
+
+                if (res.status !== 'OK') {
+                    setTimeout(() => {
+                        setLoading(false);
+                    }, 200);
+                    setTimeout(() => {
+                        notifyError('An error occurred.')
+                    }, 300);
+                    return;
+                }
+
+                setShowChange(false);
+                setLoading(false);
+                setTimeout(() => {
+                    notifySuccess('Change user information successfully');
+                }, 100);
+            }
+
+            fetchApi();
+        }
+    });
 
     // Get customerId from url
     const { customerId } = useParams();
@@ -51,7 +138,7 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
         console.log('Error:', error);
     }
 
-    // get all users
+    // get user
     useEffect(() => {
         const fetchApi = async () => {
             setLoading(true);
@@ -84,6 +171,13 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                         totalSpent
 
                     })
+
+
+                    setAvatar(userItem.avatar)
+                    setAddress(userItem.address || 'No default address set.');
+                    formik.setFieldValue('phoneNumber', userItem.phoneNumber);
+                    formik.setFieldValue('fullName', userItem.firstName + ' ' + userItem.lastName);
+
                     setLoading(false);
                     return;
 
@@ -105,6 +199,7 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
             fetchApi();
         } else {
             const fetchApi = async () => {
+                setLoading(true);
                 const res = await userServices.getUserDetail();
                 const resData = await orderServices.getAllOrderByUserId(currentUser + '');
 
@@ -130,6 +225,12 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
 
                 })
 
+                setAvatar(res.avatar)
+                formik.setFieldValue('fullName', res.firstName + ' ' + res.lastName);
+                setAddress(res.address || 'No default address set.');
+                formik.setFieldValue('phoneNumber', res.phoneNumber);
+                setLoading(false);
+
             };
             fetchApi();
         }
@@ -137,12 +238,19 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
     }, [customerIdNumber]);
 
 
+
+    if (loading) {
+        return <PreLoader show></PreLoader>
+    }
+
+
     return (
-        <div
+        <form onSubmit={formik.handleSubmit}
             className={cx('', {
                 modifier,
             })}
         >
+            <ToastContainer />
             <div className={cx('row')}>
                 <h2 className={cx('heading')}>
                     {modifier ? 'User details' : 'Profile'}
@@ -150,6 +258,7 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                 <div className={cx('actions')}>
                     {/* admin */}
                     <Button
+                        type='button'
                         className={cx('btn', 'delete-btn', { 'd-none': !modifier })}
                         leftIcon={
                             <RemoveIcon
@@ -161,6 +270,8 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                         Delete user
                     </Button>
                     <Button
+                        type='button'
+
                         className={cx('btn', 'reset-btn')}
                         leftIcon={<ResetIcon></ResetIcon>}
                     >
@@ -177,14 +288,22 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                                     type="file"
                                     id="avatarFile"
                                     hidden
-                                    accept="image/*"
+                                    accept="image/jpeg, image/png, image/gif, image/bmp"
+                                    onChange={(e) =>
+                                        e.target.files &&
+                                        setFile(e.target.files[0])
+                                    }
                                 />
                                 <label
                                     htmlFor="avatarFile"
                                     className={cx('info__avatar-wrapper')}
                                 >
                                     <Image
-                                        src="https://i.pinimg.com/originals/01/9a/8a/019a8a35ccbc35d91313ab3f0285ab59.jpg"
+                                        src={
+                                            file
+                                                ? URL.createObjectURL(file)
+                                                : avatar || images.defaultAvatar
+                                        }
                                         alt="avatar"
                                         className={cx('info__avatar')}
                                     ></Image>
@@ -209,9 +328,29 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                                 </label>
                             </div>
                             <div className={cx('info__content')}>
-                                <h3 className={cx('info__name')}>
-                                    {customerDetail?.name}
-                                </h3>
+                                <input
+                                    ref={refInput}
+                                    id='fullName'
+                                    name='fullName'
+                                    type="text"
+                                    className={cx('info__name')}
+                                    value={formik.values.fullName}
+                                    disabled={!showChange}
+                                    style={{
+                                        borderBottom: showChange ? '1px solid var(--text-color)' : 'none'
+                                    }}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+
+                                />
+                                {formik.errors.fullName && formik.touched.fullName && (
+                                    <div className={cx('form__error')}>
+                                        <ErrorIcon width="1.4rem" height="1.4rem"></ErrorIcon>
+                                        <span className={cx('form__error-title')}>
+                                            {formik.errors.fullName}
+                                        </span>
+                                    </div>
+                                )}
                                 <p className={cx('info__status')}>
                                     {/* temp */}
                                     Joined {customerDetail?.lastOrder}
@@ -311,7 +450,14 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                             <h3 className={cx('address__title')}>
                                 Default Address
                             </h3>
-                            <Button className={cx('address__modifier-btn')}>
+                            <Button type='button' className={cx('address__modifier-btn')} onClick={() => {
+                                setShowChange(!showChange)
+                                setTimeout(() => {
+                                    refInput.current?.focus();
+                                }, 100);
+                                return;
+
+                            }}>
                                 <ModifierIcon />
                             </Button>
                         </div>
@@ -323,8 +469,12 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                                 <input
                                     type="text"
                                     className={cx('address__place')}
-                                    value={customerDetail?.address || 'No default address set.'}
-                                    disabled
+                                    value={address}
+                                    disabled={!showChange}
+                                    style={{
+                                        borderBottom: showChange ? '1px solid var(--text-color)' : 'none'
+                                    }}
+                                    onChange={e => setAddress(e.target.value)}
                                 />
                             </div>
                             <div className={cx('address__group')}>
@@ -338,31 +488,49 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                             </div>
                             <div className={cx('address__group')}>
                                 <h5 className={cx('address__label')}>Phone</h5>
-                                <Link
-                                    to={`tel:${customerDetail?.phone}`}
+                                <input
+                                    type="text"
+                                    name='phoneNumber'
+                                    id='phoneNumber'
+                                    className={cx('address__phone')}
+                                    value={formik.values.phoneNumber}
+                                    disabled={!showChange}
+                                    style={{
+                                        borderBottom: showChange ? '1px solid var(--text-color)' : 'none'
+                                    }}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+
+                                />
+                                {formik.errors.phoneNumber && formik.touched.phoneNumber && (
+                                    <div className={cx('form__error')}>
+                                        <ErrorIcon width="1.4rem" height="1.4rem"></ErrorIcon>
+                                        <span className={cx('form__error-title')}>
+                                            {formik.errors.phoneNumber}
+                                        </span>
+                                    </div>
+                                )}
+                                {/* <div
+                                    // to={`tel:${customerDetail?.phone}`}
                                     className={cx('address__tel')}
                                 >
-                                    <input
-                                        type="text"
-                                        className={cx('address__phone')}
-                                        value={customerDetail?.phone}
-                                        disabled
-                                    />
-                                </Link>
+                                </div> */}
                             </div>
                         </div>
-                        <div className={cx('address__actions')}>
-                            <Button className={cx('address__btn')}>
+                        <div className={cx('address__actions', {
+                            'd-none': !showChange
+                        })} >
+                            <Button type='button' className={cx('address__btn')} onClick={() => setShowChange(false)}>
                                 Cancel
                             </Button>
-                            <Button primary className={cx('address__btn')}>
+                            <Button type='submit' primary className={cx('address__btn')} >
                                 Save change
                             </Button>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </form>
     );
 };
 

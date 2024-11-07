@@ -86,7 +86,7 @@ const teamList: any[] = [
 ];
 
 const About = () => {
-    const links = ['home', 'About us'];
+    const links = [{ to: config.routes.home, name: 'home' }, { name: 'About us' }];
 
     // Slider
     const [nav1, setNav1] = useState<any>();

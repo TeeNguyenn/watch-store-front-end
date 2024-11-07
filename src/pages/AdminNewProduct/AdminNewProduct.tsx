@@ -14,7 +14,7 @@ import { DriveFolderUploadOutlined } from '@mui/icons-material';
 import Navbar from '../Dashboard/components/navbar';
 import { useEffect, useState } from 'react';
 import { AttributeIcon, CheckIcon, CheckNoCircleIcon, CloseIcon, ErrorIcon, GlobalIcon, PricingIcon, RestockIcon, SecureIcon, TransitionIcon } from '../../components/Icons';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import * as productServices from '../../services/productServices';
 import * as categoryServices from '../../services/categoryServices';
 import CategoryModel from '../../models/CategoryModel';
@@ -29,6 +29,13 @@ import ScreenSizeModel from '../../models/ScreenSizeModel';
 import * as screenSizeServices from '../../services/screenSizeServices';
 import * as variantService from '../../services/variantService';
 import * as productImageServices from '../../services/productImageServices';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLayerGroup, faPalette, faPenRuler } from '@fortawesome/free-solid-svg-icons';
+import { notifySuccess } from '../../utils/Functions';
+import ProductModel from '../../models/ProductModel';
+import VariantModel from '../../models/VariantModel';
+
+// component use for new & edit product
 
 
 interface Variant {
@@ -36,6 +43,7 @@ interface Variant {
     size: string;
     material: string;
 }
+
 
 interface ColorImages {
     [color: string]: File[];
@@ -45,9 +53,9 @@ interface ColorImages {
 const cx = classNames.bind(styles);
 
 const AdminNewProduct = () => {
+    const [imagesByColor, setImagesByColor] = useState<ColorImages>({});
     const [selectedColor, setSelectedColor] = useState<string>('')
     const [selectedColorList, setSelectedColorList] = useState<string[]>([])
-    const [imagesByColor, setImagesByColor] = useState<ColorImages>({});
     // const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [activeInventory, setActiveInventory] = useState<number>(1);
     const [categoryList, setCategoryList] = useState<CategoryModel[]>([]);
@@ -59,12 +67,40 @@ const AdminNewProduct = () => {
     const [colorList, setColorList] = useState<ColorModel[]>([]);
     const [materialList, setMaterialList] = useState<MaterialModel[]>([]);
     const [screenSizeList, setScreenList] = useState<ScreenSizeModel[]>([]);
-    const [variants, setVariants] = useState<Variant[]>([
+
+    const [desc, setDesc] = useState('');
+    const [showNewModal, setShowNewModal] = useState(0);
+
+    // Add new
+    const [categoryName, setCategoryName] = useState('');
+    const [collectionName, setCollectionName] = useState('');
+    const [colorName, setColorName] = useState('');
+    const [red, setRed] = useState('');
+    const [green, setGreen] = useState('');
+    const [blue, setBlue] = useState('');
+    const [alpha, setAlpha] = useState('1');
+    const [size, setSize] = useState('');
+    const [materialName, setMaterialName] = useState('');
+
+
+    // Get productId from url
+    const { productId } = useParams();
+
+    let productIdNumber = 0;
+    try {
+        productIdNumber = parseInt(productId + '');
+        if (Number.isNaN(productIdNumber)) {
+            productIdNumber = 0;
+        }
+    } catch (error) {
+        productIdNumber = 0;
+        console.log('Error:', error);
+    }
+
+    const [variants, setVariants] = useState<Variant[]>(productIdNumber ? [] : [
         { color: '', size: '', material: '' }, // Tùy chọn ban đầu
         // { color: '', size: '', material: '' }, 
     ]);
-    const [desc, setDesc] = useState('');
-
 
     const notifyNewProductSuccess = () => {
         toast.success('Product added successfully.', {
@@ -105,7 +141,7 @@ const AdminNewProduct = () => {
     const formik = useFormik({
         initialValues: {
             title: '',
-            categoryId: '1',
+            categoryId: '',
             collectionIds: '',
         },
         validationSchema: Yup.object({
@@ -116,41 +152,50 @@ const AdminNewProduct = () => {
         }),
         onSubmit: (values) => {
 
-            // if (!values.title) {
-            //     notifyWarning('Please enter product title');
-            //     return;
-            // }
+            if (!values.title) {
+                notifyWarning('Please enter product title');
+                return;
+            }
 
-            // if (!price) {
-            //     notifyWarning('Please enter product price');
-            //     return;
-            // }
+            if (!price) {
+                notifyWarning('Please enter product price');
+                return;
+            }
 
-            // if (!quantity) {
-            //     notifyWarning('Please enter product quantity');
-            //     return;
-            // }
-            // if (!desc) {
-            //     notifyWarning('Please enter product description');
-            //     return;
-            // }
+            if (!quantity) {
+                notifyWarning('Please enter product quantity');
+                return;
+            }
+            if (!desc) {
+                notifyWarning('Please enter product description');
+                return;
+            }
 
             const productData = {
                 title: values.title,
                 price: price,
                 description: desc,
+                specification: editorContent,
                 discount: (price - salePrice) * 100 / price,
                 // average_rate: 1,
                 quantity_stock: quantity,
                 category_id: Number.parseInt(values.categoryId),
-                collection_ids: values.collectionIds.split('').map(Number),
+                // collection_ids: values.collectionIds.split('').map(Number),
+                collection_ids: [values.collectionIds],
             }
 
             const fetchApi = async () => {
                 setLoading(true);
-                const productResponse = await productServices.postProduct(
-                    productData
-                );
+
+                let productResponse: any;
+
+                if (productIdNumber) {
+                    productResponse = await productServices.putProduct(productData, productIdNumber)
+                } else {
+                    productResponse = await productServices.postProduct(
+                        productData
+                    );
+                }
 
                 console.log(productResponse.data.id);
 
@@ -168,7 +213,16 @@ const AdminNewProduct = () => {
                         // quantity
                     }
                 })
-                const variantResponse = await variantService.postVariants(variantData); // chua check duplicate variant
+
+                let variantResponse: any;
+
+                if (productIdNumber) {
+                    // delete variants truoc do
+                    variantResponse = await variantService.putVariants(variantData, productResponse.data.id);
+
+                } else {
+                    variantResponse = await variantService.postVariants(variantData);
+                }
 
                 if (isEmpty) {
                     const res = await productServices.deleteProductItem(productResponse.data.id);
@@ -188,6 +242,8 @@ const AdminNewProduct = () => {
                     setEditorContent('');
                     setImagesByColor({});
                     setVariants([{ color: '', size: '', material: '' }]);
+                    setDesc('');
+
 
                     setLoading(false);
                     setTimeout(() => {
@@ -205,7 +261,7 @@ const AdminNewProduct = () => {
                         formData.append('files', file);
                     })
 
-                    return productImageServices.postProductImage(formData, productResponse.data.id, +color)
+                    return productImageServices.putProductImage(formData, productResponse.data.id, +color)
                 });
 
                 // Thực hiện tất cả các upload song song bằng Promise.all
@@ -215,6 +271,14 @@ const AdminNewProduct = () => {
                     console.log(`Kết quả từ API cho màu ${color}:`, response);
                 })
 
+                if (productIdNumber && productResponse.status === "OK" && variantResponse.status === "OK") {
+                    setLoading(false);
+                    setTimeout(() => {
+                        notifySuccess('Product updated successfully.');
+                    }, 100);
+                    return;
+                }
+
                 if (productResponse.status === "CREATED" && variantResponse.status === "CREATED") {
                     formik.resetForm();
                     setPrice('');
@@ -223,6 +287,8 @@ const AdminNewProduct = () => {
                     setEditorContent('');
                     setImagesByColor({});
                     setVariants([{ color: '', size: '', material: '' }]);
+                    setDesc('');
+
 
                     setLoading(false);
                     setTimeout(() => {
@@ -231,7 +297,6 @@ const AdminNewProduct = () => {
                 }
 
             };
-
             fetchApi();
         },
     });
@@ -268,10 +333,82 @@ const AdminNewProduct = () => {
             setMaterialList(materialData);
             const screenSizeData = await screenSizeServices.getAllScreenSize();
             setScreenList(screenSizeData);
+
         };
 
         fetchApi();
     }, [])
+
+    useEffect(() => {
+        const fetchApi = async () => {
+            setLoading(true);
+            const responseData = await productServices.getProductById(
+                productIdNumber
+            );
+            formik.setFieldValue('title', responseData.title)
+            setDesc(responseData.desc);
+            setEditorContent(responseData.specification);
+            setPrice(responseData.price);
+            setSalePrice(responseData.discount
+                ? (responseData.price * (1 - responseData.discount / 100)).toFixed(2)
+                : responseData.price);
+            setQuantity(responseData.quantityStock);
+            formik.setFieldValue('categoryId', responseData.category.categoryId);
+
+            if (responseData.collections) {
+                formik.setFieldValue('collectionIds', responseData.collections[0].collectionId);
+            }
+
+
+            let newVariants: Variant[] = [];
+            responseData.variants?.forEach(variantRes => newVariants.push({
+                color: variantRes.color.colorId + '',
+                size: variantRes.screenSize.sizeId + '',
+                material: variantRes.material.materialId + '',
+            }));
+            setVariants(newVariants);
+
+            let newSelectedColorList: string[] = [];
+            responseData.colors.forEach(color => newSelectedColorList.push(color.colorId + ''));
+            setSelectedColorList(newSelectedColorList);
+            setSelectedColor(newSelectedColorList[0])
+
+            responseData.colors.forEach(color => {
+                // Lay ra mang anh theo color id
+                const productImagesByColor = responseData.productImages.filter(productImage => productImage.colorId === color.colorId);
+                convertUrlsToFiles(productImagesByColor).then(files => {
+                    // Cập nhật ảnh cho màu hiện tại
+                    setImagesByColor((prev) => ({
+                        ...prev,
+                        [color.colorId]: files
+                    }))
+                });
+            })
+            setLoading(false);
+        };
+        if (productIdNumber) {
+            fetchApi();
+        } else {
+            const fetchApi = async () => {
+                const categoryData = await categoryServices.getAllCategory();
+                formik.setFieldValue('categoryId', categoryData.at(0)?.categoryId);
+                const collectionData = await collectionServices.getAllCollection();
+                formik.setFieldValue('collectionIds', collectionData.at(0)?.collectionId);
+            };
+            fetchApi();
+        }
+    }, [productIdNumber]);
+
+    const convertUrlsToFiles = async (images: any): Promise<File[]> => {
+        const files: File[] = await Promise.all(
+            images.map(async (image: any, index: any) => {
+                const response = await fetch(image.imageUrl);
+                const blob = await response.blob();
+                return new File([blob], image.imageName, { type: blob.type });
+            })
+        );
+        return files;
+    };
 
     // Hàm xử lý khi chọn màu
     const handleColorChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -280,7 +417,6 @@ const AdminNewProduct = () => {
 
     // Hàm xử lý khi chọn file
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-
 
         if (event.target.files?.length && event.target.files?.length > 6) {
             notifyWarning('Enter up to 6 images per color.');
@@ -377,8 +513,93 @@ const AdminNewProduct = () => {
 
     };
 
+    const handleNewCategory = async () => {
+        if (!categoryName.trim()) {
+            notifyWarning('Please fill in information before adding');
+            return;
+        }
 
+        const res = await categoryServices.postCategory({
+            name: categoryName
+        })
+        if (res.status === 'CREATED') {
+            notifySuccess("Category added successfully.")
+        }
+        setCategoryName('');
 
+    }
+
+    const handleNewCollection = async () => {
+        if (!categoryName.trim()) {
+            notifyWarning('Please fill in information before adding');
+            return;
+        }
+
+        const res = await collectionServices.postCollection({
+            name: collectionName
+        })
+        if (res.status === 'CREATED') {
+            notifySuccess("Collection added successfully.")
+        }
+        setCollectionName('');
+
+    }
+
+    const handleNewColor = async () => {
+        if (!colorName.trim() || !red || !green || !blue) {
+            notifyWarning('Please fill in information before adding');
+            return;
+        }
+
+        const res = await colorServices.postColor({
+            name: colorName,
+            red: Number(red),
+            green: Number(green),
+            blue: Number(blue),
+            alpha: Number(alpha)
+        })
+        if (res.status === 'CREATED') {
+            notifySuccess("Color added successfully.")
+        }
+        setColorName('');
+        setRed('');
+        setGreen('');
+        setBlue('');
+        setAlpha('')
+
+    }
+
+    const handleNewScreenSize = async () => {
+        if (!size.trim()) {
+            notifyWarning('Please fill in information before adding');
+            return;
+        }
+
+        const res = await screenSizeServices.postScreenSize({
+            size: Number(size)
+        })
+        if (res.status === 'CREATED') {
+            notifySuccess("Size added successfully.")
+        }
+        setSize('');
+
+    }
+    const handleNewMaterial = async () => {
+        if (!materialName.trim()) {
+            notifyWarning('Please fill in information before adding');
+            return;
+        }
+
+        const res = await materialServices.postMaterial({
+            name: materialName
+        })
+
+        if (res.status === 'CREATED') {
+            notifySuccess("Material added successfully.")
+        }
+        setMaterialName('');
+
+    }
 
     if (loading) {
         return <PreLoader show></PreLoader>
@@ -389,13 +610,13 @@ const AdminNewProduct = () => {
             <ToastContainer />
             <form className={cx('new')} onSubmit={formik.handleSubmit}>
                 <div className={cx('new__top')}>
-                    <h1 className={cx('new__title')}>Add a product</h1>
+                    <h1 className={cx('new__title')}>{productIdNumber ? 'Edit product' : 'Add a product'}</h1>
                     <div className={cx('new__row')}>
                         <p className={cx('new__text')}>Orders placed across your store</p>
                         <div>
                             <Button type='button' className={cx('new__btn')}>Discard</Button>
                             <Button type='button' className={cx('new__btn')}>Save draft</Button>
-                            <Button type='submit' primary className={cx('new__btn')}>Publish product</Button>
+                            <Button type='submit' primary className={cx('new__btn')}>{productIdNumber ? 'Change product' : 'Publish product'}</Button>
                         </div>
                     </div>
                 </div>
@@ -936,7 +1157,7 @@ const AdminNewProduct = () => {
                                     <div className={cx('organize__group')}>
                                         <div className={cx('organize__top')}>
                                             <h5 className={cx('organize__title')}>Category</h5>
-                                            <Button type='button' className={cx('organize__btn')}>Add new category</Button>
+                                            <Button type='button' className={cx('organize__btn')} onClick={() => setShowNewModal(4)}>Add new category</Button>
                                         </div>
                                         <select
                                             value={
@@ -1016,7 +1237,7 @@ const AdminNewProduct = () => {
                                     <div className={cx('organize__group')}>
                                         <div className={cx('organize__top')}>
                                             <h5 className={cx('organize__title')}>Collection</h5>
-                                            <Button type='button' className={cx('organize__btn')}>Add new category</Button>
+                                            <Button type='button' className={cx('organize__btn')} onClick={() => setShowNewModal(5)}>Add new collection</Button>
                                         </div>
                                         <select
                                             name="collectionIds"
@@ -1084,7 +1305,12 @@ const AdminNewProduct = () => {
                                     </div>
                                 </div>
                                 <div className={cx('organize')}>
-                                    <h4 className={cx('new__label')} style={{ marginBottom: '24px' }}>Variants</h4>
+                                    <h4 className={cx('new__label')}>Variants</h4>
+                                    <div className={cx('organize__news')} style={{ marginBottom: '24px' }}>
+                                        <Button type='button' className={cx('organize__new-btn')} rightIcon={<FontAwesomeIcon icon={faPalette} />} onClick={() => setShowNewModal(1)}>Add new color</Button>
+                                        <Button type='button' className={cx('organize__new-btn')} rightIcon={<FontAwesomeIcon icon={faPenRuler} />} onClick={() => setShowNewModal(2)}>Add new size</Button>
+                                        <Button type='button' className={cx('organize__new-btn')} rightIcon={<FontAwesomeIcon icon={faLayerGroup} />} onClick={() => setShowNewModal(3)}>Add new material</Button>
+                                    </div>
                                     {/* Options */}
                                     {variants.map((variant, index) => (
                                         <div className={cx('organize__group', 'modifier')} key={index}>
@@ -1156,13 +1382,222 @@ const AdminNewProduct = () => {
                                             </select>
                                         </div>
                                     ))}
-                                    <Button type='button' className={cx('organize__add-btn')} onClick={addOption}>Add another option</Button>
+                                    <Button type='button' className={cx('organize__add-btn')} onClick={addOption}>{variants.length === 0 ? 'Add an option' : "Add another option"}</Button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </form>
+            {/* New color */}
+            <div
+                className={cx('new-modal', {
+                    show: showNewModal === 1,
+                })}
+            >
+                <div
+                    className={cx('new-modal__overlay')}
+                    onClick={() => setShowNewModal(0)}
+                ></div>
+                <div className={cx('new-modal__inner')}>
+                    <h5 className={cx('new-modal__heading')}>Add New Color</h5>
+                    <div className={cx('new-modal__content')}>
+                        <div className={cx('new-modal__input')}>
+                            <label htmlFor="firstName">Color name</label>
+                            <input
+                                value={colorName}
+                                type="text"
+                                name="name"
+                                id="name"
+                                placeholder="Enter color name"
+                                onChange={e => setColorName(e.target.value)}
+                            />
+                        </div>
+                        <div className={cx('new-modal__input')}>
+                            <label htmlFor="firstName">Red value (0 - 255)</label>
+                            <input
+                                value={red}
+                                type="number"
+                                min={0}
+                                max={255}
+                                name="red"
+                                id="red"
+                                placeholder="Enter red value"
+                                onChange={e => setRed(e.target.value)}
+                            />
+                        </div>
+                        <div className={cx('new-modal__input')}>
+                            <label htmlFor="firstName">Green value (0 - 255)</label>
+                            <input
+                                value={green}
+                                type="number"
+                                min={0}
+                                max={255}
+                                name="green"
+                                id="green"
+                                placeholder="Enter green value"
+                                onChange={e => setGreen(e.target.value)}
+                            />
+                        </div>
+                        <div className={cx('new-modal__input')}>
+                            <label htmlFor="firstName">Blue value (0 - 255)</label>
+                            <input
+                                value={blue}
+                                type="number"
+                                min={0}
+                                max={255}
+                                name="blue"
+                                id="blue"
+                                placeholder="Enter blue value"
+                                onChange={e => setBlue(e.target.value)}
+                            />
+                        </div>
+                        <div className={cx('new-modal__input')}>
+                            <label htmlFor="firstName">Alpha value (0 - 1)</label>
+                            <input
+                                value={alpha}
+                                type="number"
+                                min={0}
+                                max={1}
+                                name="alpha"
+                                id="alpha"
+                                placeholder="Enter alpha value"
+                                onChange={e => setAlpha(e.target.value)}
+                            />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button type='button' className={cx('new-modal__cancel-btn')} onClick={() => setShowNewModal(0)}>Cancel</Button>
+                            <Button type='button' primary className={cx('new-modal__add-btn')} onClick={handleNewColor}>Add new</Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* New Size */}
+            <div
+                className={cx('new-modal', {
+                    show: showNewModal === 2,
+                })}
+            >
+                <div
+                    className={cx('new-modal__overlay')}
+                    onClick={() => setShowNewModal(0)}
+                ></div>
+                <div className={cx('new-modal__inner')}>
+                    <h5 className={cx('new-modal__heading')}>Add New Size</h5>
+                    <div className={cx('new-modal__content')}>
+                        <div className={cx('new-modal__input')}>
+                            <label htmlFor="firstName">Size</label>
+                            <input
+                                value={size}
+                                type="number"
+                                min={0}
+                                max={255}
+                                name="size"
+                                id="size"
+                                placeholder="Enter size value"
+                                onChange={e => setSize(e.target.value)}
+                            />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button type='button' className={cx('new-modal__cancel-btn')} onClick={() => setShowNewModal(0)}>Cancel</Button>
+                            <Button type='button' primary className={cx('new-modal__add-btn')} onClick={handleNewScreenSize}>Add new</Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* New Material */}
+            <div
+                className={cx('new-modal', {
+                    show: showNewModal === 3,
+                })}
+            >
+                <div
+                    className={cx('new-modal__overlay')}
+                    onClick={() => setShowNewModal(0)}
+                ></div>
+                <div className={cx('new-modal__inner')}>
+                    <h5 className={cx('new-modal__heading')}>Add New Material</h5>
+                    <div className={cx('new-modal__content')}>
+                        <div className={cx('new-modal__input')}>
+                            <label htmlFor="firstName">Material name</label>
+                            <input
+                                value={materialName}
+                                type="text"
+                                name="name"
+                                id="name"
+                                placeholder="Enter color name"
+                                onChange={e => setMaterialName(e.target.value)}
+                            />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button type='button' className={cx('new-modal__cancel-btn')} onClick={() => setShowNewModal(0)}>Cancel</Button>
+                            <Button type='button' primary className={cx('new-modal__add-btn')} onClick={handleNewMaterial}>Add new</Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* New Category */}
+            <div
+                className={cx('new-modal', {
+                    show: showNewModal === 4,
+                })}
+            >
+                <div
+                    className={cx('new-modal__overlay')}
+                    onClick={() => setShowNewModal(0)}
+                ></div>
+                <div className={cx('new-modal__inner')}>
+                    <h5 className={cx('new-modal__heading')}>Add New Category</h5>
+                    <div className={cx('new-modal__content')}>
+                        <div className={cx('new-modal__input')}>
+                            <label htmlFor="firstName">Category name</label>
+                            <input
+                                value={categoryName}
+                                type="text"
+                                name="name"
+                                id="name"
+                                placeholder="Enter category name"
+                                onChange={e => setCategoryName(e.target.value)}
+                            />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button type='button' className={cx('new-modal__cancel-btn')} onClick={() => setShowNewModal(0)}>Cancel</Button>
+                            <Button type='button' primary className={cx('new-modal__add-btn')} onClick={handleNewCategory}>Add new</Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* New Collection */}
+            <div
+                className={cx('new-modal', {
+                    show: showNewModal === 5,
+                })}
+            >
+                <div
+                    className={cx('new-modal__overlay')}
+                    onClick={() => setShowNewModal(0)}
+                ></div>
+                <div className={cx('new-modal__inner')}>
+                    <h5 className={cx('new-modal__heading')}>Add New Collection</h5>
+                    <div className={cx('new-modal__content')}>
+                        <div className={cx('new-modal__input')}>
+                            <label htmlFor="firstName">Collection name</label>
+                            <input
+                                value={collectionName}
+                                type="text"
+                                name="name"
+                                id="name"
+                                placeholder="Enter collection name"
+                                onChange={e => setCollectionName(e.target.value)}
+                            />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button type='button' className={cx('new-modal__cancel-btn')} onClick={() => setShowNewModal(0)}>Cancel</Button>
+                            <Button type='button' primary className={cx('new-modal__add-btn')} onClick={handleNewCollection}>Add new</Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </>
     );
 };

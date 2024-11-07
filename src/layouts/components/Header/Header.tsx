@@ -34,6 +34,7 @@ import UserModel from '../../../models/UserModel';
 import { CartContext } from '../../../contexts/CartContext';
 import * as cartItemServices from '../../../services/cartItemServices';
 import PreLoader from '../../../components/PreLoader';
+import { RootState, useAppSelector } from '../../../redux/store';
 
 const cx = classNames.bind(styles);
 
@@ -54,9 +55,7 @@ const Header = () => {
     const context = useContext(CartContext);
     const navigate = useNavigate();
 
-    const [cartList, setCartList] = useState<any[]>(
-        JSON.parse(localStorage.getItem('cart_list') + '') || []
-    );
+    const cartList = useAppSelector((state: RootState) => state.cartList.cart);
 
     // User status
     const currentUser = localStorage.getItem('user_id');
@@ -68,55 +67,6 @@ const Header = () => {
             setIsSlideShow(false);
         }
     }, [pathName]);
-
-    useEffect(() => {
-        const handleStorageChange = () => {
-            if (!currentUser) {
-                // setCartList(
-                //     JSON.parse(localStorage.getItem('cart_list') + '') || []
-                // );
-            } else {
-                const fetchApi = async () => {
-                    const res = await cartItemServices.getCartItemByUserId();
-                    setCartList(res.reverse());
-                };
-                // fetchApi();
-                setTimeout(fetchApi, 1000); //delay for post cart item run before
-            }
-        };
-
-        // Lắng nghe sự kiện "storage" từ các tab khác
-        window.addEventListener('storage', handleStorageChange);
-
-        // Lắng nghe sự kiện tùy chỉnh "storageChanged" trong cùng tab
-        window.addEventListener('storageChanged', handleStorageChange);
-
-        return () => {
-            window.removeEventListener('storage', handleStorageChange);
-            window.removeEventListener('storageChanged', handleStorageChange);
-        };
-    }, []);
-
-    useEffect(() => {
-        if (currentUser) {
-            // const cartList =
-            //     JSON.parse(localStorage.getItem('cart_list') + '') || [];
-
-            // const fetchApi = async (cartItem: any) => {
-            //     const res = await cartItemServices.postCartItem(cartItem);
-            // };
-            // cartList.forEach((item: any) => {
-            //     fetchApi(item);
-            // });
-            localStorage.removeItem('cart_list');
-
-            const fetchApi2 = async () => {
-                const res = await cartItemServices.getCartItemByUserId();
-                setCartList(res.reverse());
-            };
-            fetchApi2();
-        }
-    }, [currentUser]);
 
     useEffect(() => {
         if (currentUser) {
@@ -173,10 +123,11 @@ const Header = () => {
 
     const handleLogout = () => {
         setShowDropdownProfile(false);
+
         localStorage.removeItem('token');
         localStorage.removeItem('user_id');
         localStorage.removeItem('refresh_token');
-        setCartList([]);
+        // setCartList([]);
 
         if (pathName === '/') {
             navigate(0); //reload
@@ -725,7 +676,7 @@ const Header = () => {
                                             )}
                                         >
                                             <Image
-                                                src={images.defaultAvatar}
+                                                src={userDetail?.avatar ? userDetail.avatar : images.defaultAvatar}
                                                 alt="avatar"
                                                 className={cx(
                                                     'dropdown-profile__avatar'
@@ -737,10 +688,11 @@ const Header = () => {
                                                 'dropdown-profile__name'
                                             )}
                                         >
-                                            {userDetail?.lastName +
+                                            {/* {userDetail?.lastName +
                                                 ', ' +
                                                 userDetail?.firstName +
-                                                ''}
+                                                ''} */}
+                                            {userDetail?.firstName + ' ' + userDetail?.lastName}
                                         </h6>
                                     </div>
                                     <div
@@ -851,7 +803,7 @@ const Header = () => {
                                 </div>
                             )}
                         >
-                            <span
+                            <div
                                 className={cx('icon', { 'd-xl-none': true })}
                                 onClick={
                                     currentUser
@@ -862,11 +814,14 @@ const Header = () => {
                                         : () => setShowLoginModal(true)
                                 }
                             >
-                                <UserIcon
-                                    width={'2.6rem'}
-                                    height={'2.6rem'}
-                                ></UserIcon>
-                            </span>
+                                {
+                                    userDetail?.avatar ? <Image className={cx('avatar')} src={userDetail?.avatar} alt='avatar'></Image> : <UserIcon
+                                        width={'2.6rem'}
+                                        height={'2.6rem'}
+                                    ></UserIcon>
+                                }
+
+                            </div>
                         </Tippy>
                     </div>
                 </header>

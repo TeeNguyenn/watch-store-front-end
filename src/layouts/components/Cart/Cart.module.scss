@@ -346,6 +346,7 @@
         font-weight: 600;
         line-height: 2.6rem;
         display: block;
+        padding-right: 4px;
 
         @include abstracts.screen(sm) {
             font-size: 1.6rem;

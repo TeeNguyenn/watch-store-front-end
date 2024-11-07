@@ -170,6 +170,7 @@
 .actions {
     display: flex;
     gap: 0 22px;
+    align-items: center;
 
     @include abstracts.screen(xl) {
         margin-left: auto;
@@ -190,12 +191,20 @@
 .icon {
     cursor: pointer;
     transition: var(--transition-config);
-    height: 26px;
     position: relative;
+    display: flex;
+    align-items: center;
 
     &:hover {
         color: var(--primary-color);
     }
+}
+
+.avatar {
+    width: 28px;
+    aspect-ratio: 1 /1;
+    object-fit: cover;
+    border-radius: 50%;
 }
 
 .quantity {
@@ -537,7 +546,7 @@
 
     &__text {
         font-size: 1.3rem;
-        line-height: 1;
+        line-height: 1.6rem;
     }
 
     &__logout-btn {

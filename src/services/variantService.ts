@@ -22,3 +22,24 @@ export const postVariants = async (variants: any) => {
         }
     }
 };
+
+export const putVariants = async (variants: any, productId: number) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.put(`variants/products/${productId}`, variants, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return response;
+
+    } catch (error) {
+        // throw (error);
+        console.log(error);
+        return {
+            status: 'CONFLICT'
+        }
+    }
+};

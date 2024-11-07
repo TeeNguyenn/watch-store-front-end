@@ -14,6 +14,7 @@ class ProductModel {
     discount?: number;
     thumbnail: string;
     desc: string;
+    specification: string;
     averageRate: number;
     quantityStock: number;
     category: CategoryModel;
@@ -33,6 +34,7 @@ class ProductModel {
         discount: number,
         thumbnail: string,
         desc: string,
+        specification: string,
         averageRate: number,
         quantityStock: number,
         category: CategoryModel,
@@ -52,6 +54,7 @@ class ProductModel {
         this.discount = discount;
         this.thumbnail = thumbnail;
         this.desc = desc;
+        this.specification = specification;
         this.averageRate = averageRate;
         this.quantityStock = quantityStock;
         this.category = category;

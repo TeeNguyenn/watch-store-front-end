@@ -19,15 +19,17 @@ import { formatPrice } from '../../../utils/Functions';
 import * as cartItemServices from '../../../services/cartItemServices';
 import PreLoader from '../../../components/PreLoader';
 import ProductImageModel from '../../../models/ProductImageModel';
+import { deleteCart, getCart } from '../../../layouts/components/Cart/cartSlice';
+import { useAppDispatch } from '../../../redux/store';
 
 const cx = classNames.bind(styles);
 
 interface CartItemProps {
     cartItem?: any;
-    handleChangeCartList?: any;
+
 }
 
-const CartItem = ({ cartItem, handleChangeCartList }: CartItemProps) => {
+const CartItem = ({ cartItem }: CartItemProps) => {
     const [showDropdownVariant, setShowDropdownVariant] = useState(false);
     const [showMobileDropdownVariant, setShowMobileDropdownVariant] =
         useState(false);
@@ -57,6 +59,8 @@ const CartItem = ({ cartItem, handleChangeCartList }: CartItemProps) => {
     const [tempMaterialList, setTempMaterialList] = useState<
         VariantModel[] | undefined
     >([]);
+
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
         const fetchApi = async () => {
@@ -202,34 +206,22 @@ const CartItem = ({ cartItem, handleChangeCartList }: CartItemProps) => {
     };
 
     const handleRemoveCartItem = () => {
-        if (!currentUser) {
-            const cartList: any[] =
-                JSON.parse(localStorage.getItem('cart_list') + '') || [];
+        const fetchData = async () => {
+            await dispatch(deleteCart({
+                userId: Number.parseInt(currentUser + ''),
+                productId: cartItem?.product_id,
+                colorId: cartItem?.color_id,
+                screenSizeId: cartItem?.screen_size_id,
+                materialId: cartItem?.material_id,
+            }))
+            await dispatch(getCart());
 
-            const index = cartList.findIndex(
-                (item) =>
-                    item.product_id === cartItem?.product_id &&
-                    item.color_id === cartItem?.color_id &&
-                    item.screen_size_id === cartItem?.screen_size_id &&
-                    item.material_id === cartItem?.material_id
-            );
-            if (index !== -1) {
-                cartList.splice(index, 1);
-            }
-            handleChangeCartList(cartList);
-        } else {
-            const fetchApi = async () => {
-                const res = await cartItemServices.deleteCartItem({
-                    userId: Number.parseInt(currentUser),
-                    productId: cartItem?.product_id,
-                    colorId: cartItem?.color_id,
-                    screenSizeId: cartItem?.screen_size_id,
-                    materialId: cartItem?.material_id,
-                });
-                window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
-            };
-            fetchApi();
         }
+
+        fetchData();
+
+
+
     };
 
     const handleConfirm = () => {
@@ -762,14 +754,14 @@ const CartItem = ({ cartItem, handleChangeCartList }: CartItemProps) => {
                 <div className={cx('cart-item__total-text')}>
                     {productDetail?.discount
                         ? formatPrice(
-                              productDetail?.price *
-                                  (1 - productDetail?.discount / 100) *
-                                  cartItem.quantity
-                          )
+                            productDetail?.price *
+                            (1 - productDetail?.discount / 100) *
+                            cartItem.quantity
+                        )
                         : formatPrice(
-                              Number.parseInt(productDetail?.price + '') *
-                                  cartItem.quantity
-                          )}
+                            Number.parseInt(productDetail?.price + '') *
+                            cartItem.quantity
+                        )}
                 </div>
             </td>
             <td

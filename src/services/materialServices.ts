@@ -24,3 +24,22 @@ export const getAllMaterial = async (): Promise<MaterialModel[]> => {
         throw (error)
     }
 };
+
+
+export const postMaterial = async (material: any) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.post('materials', material, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return response;
+
+    } catch (error) {
+        throw (error);
+
+    }
+};

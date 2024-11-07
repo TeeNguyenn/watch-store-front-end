@@ -23,6 +23,8 @@ import ProductModel from '../../models/ProductModel';
 import WishlistItem from './WishlistItem';
 import * as favoriteServices from '../../services/favoriteServices';
 import PreLoader from '../PreLoader';
+import { RootState, useAppDispatch, useAppSelector } from '../../redux/store';
+import { getWishlist } from './wishlistSlice';
 
 const cx = classNames.bind(styles);
 
@@ -33,24 +35,23 @@ interface WishlistProps {
 const Wishlist = ({ className }: WishlistProps) => {
     // pagination
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPage, setTotalPage] = useState(0);
-    const [totalProduct, setTotalProduct] = useState(0);
-
     const [viewAll, setViewAll] = useState(false);
 
     const currentUser = localStorage.getItem('user_id');
     const [loading, setLoading] = useState(false);
 
-    const [wishlist, setWishlist] = useState<any[]>(
-        JSON.parse(localStorage.getItem('wishlist') + '') || []
-    );
 
-    // const [wishlistShow, wishlistHide] = splitArrayAtIndex(wishlist, 6);
     const [limit, setLimit] = useState(6);
 
+    const dispatch = useAppDispatch()
+    const wishlist = useAppSelector((state: RootState) => state.wishlists.wishlist);
+    const totalPage = useAppSelector((state: RootState) => state.wishlists.totalPage);
+    const totalProduct = useAppSelector((state: RootState) => state.wishlists.totalProduct);
+    const status = useAppSelector((state: RootState) => state.wishlists.status);
 
     // Get customerId from url
     const { customerId } = useParams();
+
 
     let customerIdNumber = 0;
     try {
@@ -65,189 +66,37 @@ const Wishlist = ({ className }: WishlistProps) => {
 
     // get wishlist from db
     useEffect(() => {
-        if (currentUser) {
-            setLoading(true);
-            localStorage.removeItem('wishlist');
-            const fetchApi = async () => {
-                const res = await favoriteServices.getFavoriteByUserId(
-                    customerId || currentUser,
-                    currentPage,
-                    limit
-                );
-                setWishlist(res.result);
-                setTotalPage(res.totalPage);
-                setTotalProduct(res.totalProduct);
-            };
-            fetchApi();
-            setTimeout(() => {
-                setLoading(false);
-            }, 500);
-        } else {
-            setLoading(true);
-
-            const wishList =
-                JSON.parse(localStorage.getItem('wishlist') + '') || [];
-            const newArr = [];
-
-            if (wishList.length > 0) {
-                for (
-                    let index = limit * (currentPage - 1);
-                    index <= limit * currentPage - 1;
-                    index++
-                ) {
-                    if (index === wishList.length) {
-                        break;
-                    }
-                    newArr.push(wishList[index]);
-                }
-            }
-
-            setWishlist(newArr);
-            setTotalProduct(
-                JSON.parse(localStorage.getItem('wishlist') + '').length
-            );
-            setTotalPage(
-                Math.ceil(
-                    JSON.parse(localStorage.getItem('wishlist') + '').length /
-                    limit
-                )
-            );
-
-            setTimeout(() => {
-                setLoading(false);
-            }, 500);
-        }
+        dispatch(getWishlist({
+            id: customerId || currentUser + '',
+            currentPage,
+            limit
+        }))
     }, [currentUser, currentPage, limit]);
-
-    // re-render component when remove wishlist-item
-    useEffect(() => {
-        const handleStorageChange = () => {
-            if (!currentUser) {
-                setLoading(true);
-
-                setTimeout(() => {
-                    setWishlist(
-                        JSON.parse(localStorage.getItem('wishlist') + '') || []
-                    );
-                    setLoading(false);
-                }, 300);
-            } else {
-                setLoading(true);
-                const fetchApi = async () => {
-                    const res = await favoriteServices.getFavoriteByUserId(
-                        customerId || currentUser
-                    );
-                    setWishlist(res.result);
-                    setTotalPage(res.totalPage);
-                    setTotalProduct(res.totalProduct);
-
-                    setLoading(false);
-                };
-                setTimeout(() => {
-                    fetchApi();
-                }, 300);
-            }
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-
-        // Lắng nghe sự kiện tùy chỉnh "storageChanged" trong cùng tab
-        window.addEventListener('storageChanged', handleStorageChange);
-        return () => {
-            window.removeEventListener('storage', handleStorageChange);
-            window.removeEventListener('storageChanged', handleStorageChange);
-        };
-    }, []);
 
     const pagination = (presentPage: number) => {
         setCurrentPage(presentPage);
     };
 
-    const handleChangeWishlist: any = (newArr: any, isCurrentUser = false) => {
-        if (isCurrentUser) {
-            setLoading(true);
-            const fetchApi = async () => {
-                const res = await favoriteServices.getFavoriteByUserId(
-                    customerId || currentUser + '',
-                    currentPage
-                );
-                setWishlist(res.result);
-                setTotalPage(res.totalPage);
-                setTotalProduct(res.totalProduct);
+    const handleChangeWishlist: any = () => {
+        // handle remove last item
+        const remainder = (totalProduct - 1) % 6;
+        const totalPages = Math.ceil(totalProduct / limit);
 
-                // handle remove last item
-                const remainder = res.totalProduct % 6;
-                const totalPages = Math.ceil((res.totalProduct + 1) / limit);
-
-                if (
-                    remainder === 0 &&
-                    res.totalProduct > 0 &&
-                    currentPage === totalPages &&
-                    !viewAll
-                ) {
-                    setCurrentPage(currentPage - 1);
-                }
-
-                setLoading(false);
-            };
-            setTimeout(() => {
-                fetchApi();
-            }, 300);
+        if (
+            remainder === 0 &&
+            totalProduct - 1 > 0 &&
+            currentPage === totalPages &&
+            !viewAll
+        ) {
+            setCurrentPage(currentPage - 1);
         } else {
-            // setWishlist(newArr);
-            setLoading(true);
-            localStorage.setItem('wishlist', JSON.stringify(newArr));
-
-            const wishList =
-                JSON.parse(localStorage.getItem('wishlist') + '') || [];
-            const newList = [];
-            if (wishList.length > 0) {
-                for (
-                    let index = limit * (currentPage - 1);
-                    index <= limit * currentPage - 1;
-                    index++
-                ) {
-                    if (index === wishList.length) {
-                        break;
-                    }
-                    newList.push(wishList[index]);
-                }
-            }
-
-            setWishlist(newList);
-            setTotalProduct(
-                JSON.parse(localStorage.getItem('wishlist') + '').length
-            );
-            setTotalPage(
-                Math.ceil(
-                    JSON.parse(localStorage.getItem('wishlist') + '').length /
-                    limit
-                )
-            );
-
-            // handle remove last item
-            const remainder = wishList.length % 6;
-            const totalPages = Math.ceil(
-                (JSON.parse(localStorage.getItem('wishlist') + '').length + 1) /
+            dispatch(getWishlist({
+                id: customerId || currentUser + '',
+                currentPage,
                 limit
-            );
-
-            if (
-                remainder === 0 &&
-                wishList.length > 0 &&
-                currentPage === totalPages &&
-                !viewAll
-            ) {
-                setCurrentPage(currentPage - 1);
-
-                setLoading(false);
-                return;
-            }
-
-            setTimeout(() => {
-                setLoading(false);
-            }, 300);
+            }))
         }
+
     };
 
     const handleViewAll = () => {
@@ -259,7 +108,7 @@ const Wishlist = ({ className }: WishlistProps) => {
         setViewAll(!viewAll);
     };
 
-    if (loading) {
+    if (loading || status === 'loading') {
         window.scrollTo(0, 0);
         return <PreLoader show></PreLoader>;
     }

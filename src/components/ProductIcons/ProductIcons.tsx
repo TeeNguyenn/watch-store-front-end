@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
+import { ToastContainer } from 'react-toastify';
 
 import classNames from 'classnames/bind';
 import styles from './ProductIcons.module.scss';
@@ -25,6 +26,10 @@ import config from '../../config';
 import * as favoriteServices from '../../services/favoriteServices';
 import QuickBuy from '../QuickBuy';
 import PreLoader from '../PreLoader';
+import { RootState, useAppDispatch, useAppSelector } from '../../redux/store';
+import { postWishlistItem } from '../Wishlist/wishlistSlice';
+import { notifySuccess, notifyWarning } from '../../utils/Functions';
+import { getCart, postCart } from '../../layouts/components/Cart/cartSlice';
 
 const cx = classNames.bind(styles);
 
@@ -44,7 +49,6 @@ const ProductIcons = ({
     const currentUser = localStorage.getItem('user_id');
     const [loading, setLoading] = useState(false);
     const [loadingLogin, setLoadingLogin] = useState(false);
-    const [loadingFavorite, setLoadingFavorite] = useState(false);
     const [loadingQuickBuy, setLoadingQuickBuy] = useState(false);
     const [loadingCompare, setLoadingCompare] = useState(false);
     const [liked, setLiked] = useState(false);
@@ -54,6 +58,11 @@ const ProductIcons = ({
     const [isWishlist, setIsWishlist] = useState(false);
     const [showQuickBuyModal, setShowQuickBuyModal] = useState(false);
     const [showCompareModal, setShowCompareModal] = useState(false);
+
+    const dispatch = useAppDispatch()
+    const wishlistStatus = useAppSelector((state: RootState) => state.wishlists.status);
+    const cartStatus = useAppSelector((state: RootState) => state.cartList.status);
+
 
     // Get customerId from url
     const { customerId } = useParams();
@@ -116,39 +125,23 @@ const ProductIcons = ({
     }, [pathName]);
 
     // get wishlist
+    // const wishlist = useAppSelector((state: RootState) => state.wishlists.wishlist);
     useEffect(() => {
-        if (!currentUser) {
-            const wishlist: any[] =
-                JSON.parse(localStorage.getItem('wishlist') + '') || [];
+        const fetchApi = async () => {
+            const res = await favoriteServices.getFavoriteByUserId(
+                customerId || currentUser + ''
+            );
 
-            let isLiked = false;
-            wishlist.forEach((wishlistItem) => {
-                if (wishlistItem.product_id === productItem?.productId) {
-                    isLiked = true;
+            res.result.forEach((item) => {
+                if (item.productId === productItem?.productId) {
+                    setLiked(true);
                     return;
                 }
             });
+        };
+        fetchApi();
+    }, [])
 
-            if (isLiked) {
-                setLiked(true);
-                return;
-            }
-        } else {
-            const fetchApi = async () => {
-                const res = await favoriteServices.getFavoriteByUserId(
-                    customerId || currentUser
-                );
-
-                res.result.forEach((item) => {
-                    if (item.productId === productItem?.productId) {
-                        setLiked(true);
-                        return;
-                    }
-                });
-            };
-            fetchApi();
-        }
-    }, []);
 
     // get compareList
     useEffect(() => {
@@ -170,43 +163,7 @@ const ProductIcons = ({
     }, []);
 
     const handleAddToCart = () => {
-        // const cartList: any[] =
-        //     JSON.parse(localStorage.getItem('cart_list') + '') || [];
-
         if (!currentUser) {
-            // setLoading(true);
-            // let isIncrease = false;
-            // const newArr = cartList.map((item) => {
-            //     if (
-            //         item.product_id === productItem?.productId &&
-            //         item.color_id === productItem?.colors.at(0)?.colorId &&
-            //         item.screen_size_id === screenSizeId &&
-            //         item.material_id === materialId
-            //     ) {
-            //         item.quantity++;
-            //         isIncrease = true;
-            //     }
-            //     return item;
-            // });
-            // if (isIncrease) {
-            //     localStorage.setItem('cart_list', JSON.stringify(newArr));
-            // } else {
-            //     const newCartList = [
-            //         {
-            //             product_id: productItem?.productId,
-            //             color_id: productItem?.colors.at(0)?.colorId,
-            //             screen_size_id: screenSizeId,
-            //             material_id: materialId,
-            //             quantity: 1,
-            //         },
-            //         ...cartList,
-            //     ];
-            //     localStorage.setItem('cart_list', JSON.stringify(newCartList));
-            // }
-            // context?.handleCart();
-            // window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
-            // setLoading(false);
-
             // Force login
             setLoadingLogin(true);
             localStorage.setItem('previousPage', location.pathname);
@@ -217,80 +174,24 @@ const ProductIcons = ({
                 navigate(config.routes.login);
             }, 300);
         } else {
-            setLoading(true);
-            const fetchApi = async () => {
-                const resData = await cartItemServices.getCartItemByUserId();
-
-                const cartItem = resData.filter(
-                    (item: any) =>
-                        item.product_id === productItem?.productId &&
-                        item.color_id === productItem?.colors.at(0)?.colorId &&
-                        item.screen_size_id === screenSizeId &&
-                        item.material_id === materialId
-                );
-
-                if (cartItem.length > 0) {
-                    const res = await cartItemServices.putCartItem({
-                        productId: productItem?.productId,
-                        colorId: productItem?.colors.at(0)?.colorId,
-                        screenSizeId: screenSizeId,
-                        materialId: materialId,
-                        quantity: cartItem.at(0).quantity + 1,
-                        id: cartItem.at(0).id,
-                    });
-                    window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
-                    setTimeout(() => {
-                        context?.handleCart();
-                        setLoading(false);
-                        return;
-                    }, 500);
-                } else {
-                    const res = await cartItemServices.postCartItem({
-                        user_id: currentUser,
-                        product_id: productItem?.productId,
-                        color_id: productItem?.colors.at(0)?.colorId,
-                        screen_size_id: screenSizeId,
-                        material_id: materialId,
-                        quantity: 1,
-                    });
-                    window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
-                    setTimeout(() => {
-                        context?.handleCart();
-                        setLoading(false);
-                        return;
-                    }, 500);
+            const fetchData = async () => {
+                await dispatch(postCart({
+                    productId: productItem?.productId,
+                    colorId: productItem?.colors.at(0)?.colorId,
+                    screenSizeId: screenSizeId,
+                    materialId: materialId
+                }))
+                await dispatch(getCart());
+                if (cartStatus === 'fulfilled') {
+                    context?.handleCart();
                 }
-            };
-            fetchApi();
+            }
+            fetchData();
         }
     };
 
     const handleAddWishlist = () => {
         if (!currentUser) {
-            // setLoadingFavorite(true);
-            // if (liked) {
-            //     return;
-            // } else {
-            //     const wishlist: any[] =
-            //         JSON.parse(localStorage.getItem('wishlist') + '') || [];
-            //     const newWishlist = [
-            //         {
-            //             product_id: productItem?.productId,
-            //             color_id: productItem?.colors.at(0)?.colorId,
-            //             screen_size_id: screenSizeId,
-            //             material_id: materialId,
-            //         },
-            //         ...wishlist,
-            //     ];
-            //     setLiked(true);
-            //     window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
-            //     localStorage.setItem('wishlist', JSON.stringify(newWishlist));
-            // }
-
-            // setTimeout(() => {
-            //     setLoadingFavorite(false);
-            // }, 300);
-
             // Force login
             setLoadingLogin(true);
             localStorage.setItem('previousPage', location.pathname);
@@ -301,26 +202,23 @@ const ProductIcons = ({
                 navigate(config.routes.login);
             }, 300);
         } else {
-            setLoadingFavorite(true);
             if (liked) {
                 return;
             } else {
-                const fetchApi = async () => {
-                    const res = await favoriteServices.postFavorite({
-                        userId: currentUser,
-                        productId: productItem?.productId,
-                        colorId: productItem?.colors.at(0)?.colorId,
-                        screenSizeId: screenSizeId,
-                        materialId: materialId,
-                    });
-                };
-                fetchApi();
+                dispatch(postWishlistItem({
+                    userId: currentUser,
+                    productId: productItem?.productId,
+                    colorId: productItem?.colors.at(0)?.colorId,
+                    screenSizeId: screenSizeId,
+                    materialId: materialId,
+                }))
                 setLiked(true);
+                // if (wishlistStatus === 'fulfilled') {    no work=))
+                //     setTimeout(() => {
+                //         notifySuccess('Product added to wishlist successfully')
+                //     }, 200);
+                // }
             }
-
-            setTimeout(() => {
-                setLoadingFavorite(false);
-            }, 300);
         }
     };
 
@@ -388,7 +286,7 @@ const ProductIcons = ({
                     'custom-wishlist': isWishlist,
                 })}
             >
-                {loadingFavorite ? (
+                {wishlistStatus === 'loading' ? (
                     <Button className={cx('loading')}>
                         <FontAwesomeIcon icon={faSpinner} />
                     </Button>
@@ -418,7 +316,7 @@ const ProductIcons = ({
                     </div>
                 )}
 
-                {loading ? (
+                {cartStatus === 'loading' ? (
                     <Button className={cx('loading')}>
                         <FontAwesomeIcon icon={faSpinner} />
                     </Button>
@@ -437,12 +335,13 @@ const ProductIcons = ({
 
     return (
         <>
+            <ToastContainer />
             <div
                 className={cx('product-icons', className, {
                     'custom-wishlist': isWishlist,
                 })}
             >
-                {loadingFavorite ? (
+                {wishlistStatus === 'loading' ? (
                     <Button className={cx('loading')}>
                         <FontAwesomeIcon icon={faSpinner} />
                     </Button>
@@ -510,7 +409,7 @@ const ProductIcons = ({
                     </Tippy>
                 )}
 
-                {loading ? (
+                {cartStatus === 'loading' ? (
                     <Button className={cx('loading')}>
                         <FontAwesomeIcon icon={faSpinner} />
                     </Button>

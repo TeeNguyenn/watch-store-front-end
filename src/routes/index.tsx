@@ -133,6 +133,11 @@ const privateRoutes: Array<any> = [
         layout: AdminLayout,
     },
     {
+        path: config.routes.adminEditCustomer,
+        component: AdminNewCustomer,
+        layout: AdminLayout,
+    },
+    {
         path: config.routes.adminDetailCustomer,
         component: AdminDetailCustomer,
         layout: AdminLayout,
@@ -144,6 +149,11 @@ const privateRoutes: Array<any> = [
     },
     {
         path: config.routes.adminNewProduct,
+        component: AdminNewProduct,
+        layout: AdminLayout,
+    },
+    {
+        path: config.routes.adminEditProduct,
         component: AdminNewProduct,
         layout: AdminLayout,
     },

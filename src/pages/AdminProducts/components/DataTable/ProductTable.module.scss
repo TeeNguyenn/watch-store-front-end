@@ -62,4 +62,20 @@
             background-color: rgba(220, 20, 60, 0.6);
         }
     }
+
+    
+&__modifier-btn {
+    height: 100%;
+    padding: 3px 8px;
+    border-radius: 5px;
+    color: var(--primary-second-color);
+    border: 1px dotted var(--primary-second-color);
+    font-weight: 400;
+    line-height: 2.7rem;
+
+    &:hover {
+        color: var(--white-color);
+        background-color: var(--primary-second-color);
+    }
+}
 }

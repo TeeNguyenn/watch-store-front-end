@@ -23,3 +23,22 @@ export const getAllCollection = async (): Promise<CollectionModel[]> => {
         throw (error)
     }
 };
+
+
+export const postCollection = async (collection: any) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.post('collections', collection, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return response;
+
+    } catch (error) {
+        throw (error);
+
+    }
+};

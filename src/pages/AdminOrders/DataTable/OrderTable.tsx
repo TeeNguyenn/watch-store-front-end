@@ -22,7 +22,7 @@ const OrderTable = () => {
         {
             field: 'id', headerName: 'ID', width: 100, renderCell: (params: any) => {
                 return (
-                    <Link to={`/customer/order-details/${params.row.id}`} className={cx('cell-link')}>
+                    <Link to={`/admin/order-details/${params.row.id}`} className={cx('cell-link')}>
                         {params.row.id}
                     </Link>
 

@@ -30,11 +30,11 @@ export const getMainProductImageListByProductId = async (productId: number): Pro
 
 
 
-export const postProductImage = async (imageList: any, productId: number, colorId: number) => {
+export const putProductImage = async (imageList: any, productId: number, colorId: number) => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await request.post('products/uploads', imageList, {
+        const response = await request.put('products/uploads', imageList, {
             params: {
                 'product-id': productId,
                 'color-id': colorId,

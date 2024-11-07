@@ -31,11 +31,15 @@ import * as colorServices from '../../services/colorServices';
 import * as materialServices from '../../services/materialServices';
 import MobileFilter from './components/MobileFilter';
 import MobileFilterList from './components/MobileFilterList';
+import config from '../../config';
 
 const cx = classNames.bind(styles);
 
 // fake breadcrumb
-const links = ['home', 'shop'];
+const links = [{
+    to: config.routes.home,
+    name: 'Home'
+}, { to: '#!', name: 'Shop' }];
 
 const Shop = () => {
     const [sort, setSort] = useState('');

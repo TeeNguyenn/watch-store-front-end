@@ -17,6 +17,8 @@ import config from '../../../config';
 import { formatPrice } from '../../../utils/Functions';
 import * as productServices from '../../../services/productServices';
 import PreLoader from '../../../components/PreLoader';
+import { RootState, useAppDispatch, useAppSelector } from '../../../redux/store';
+import { getCart } from './cartSlice';
 
 const cx = classNames.bind(styles);
 
@@ -26,170 +28,21 @@ interface CartProps {
 
 const Cart = ({ handleCloseCartDrawer }: CartProps) => {
     const currentUser = localStorage.getItem('user_id');
-    const [subtotal, setSubtotal] = useState(0);
+    // const [subtotal, setSubtotal] = useState(0);
     const navigate = useNavigate();
 
-    //re-render component when remove cart-item
-    const [cartList, setCartList] = useState<any[]>(
-        JSON.parse(localStorage.getItem('cart_list') + '') || []
-    );
+    const dispatch = useAppDispatch();
+    const cartList = useAppSelector((state: RootState) => state.cartList.cart);
+    const subtotal = useAppSelector((state: RootState) => state.cartList.subtotal);
 
-    useEffect(() => {
-        const handleStorageChange = () => {
-            if (!currentUser) {
-                // setCartList(
-                //     JSON.parse(localStorage.getItem('cart_list') + '') || []
-                // );
-            } else {
-                const fetchApi = async () => {
-                    const res = await cartItemServices.getCartItemByUserId();
-                    setCartList(res.reverse());
-
-                    // localStorage.setItem(
-                    //     'products',
-                    //     JSON.stringify(res.reverse())
-                    // );
-
-                    let result = 0;
-                    const fetchApi = async (cartItem: any) => {
-                        // setLoading(true);
-
-                        const responseData =
-                            await productServices.getProductById(
-                                cartItem.product_id
-                            );
-
-                        if (responseData.discount) {
-                            result =
-                                result +
-                                responseData.price *
-                                    (1 - responseData.discount / 100) *
-                                    cartItem.quantity;
-                        } else {
-                            result =
-                                subtotal +
-                                responseData.price * cartItem.quantity;
-                        }
-
-                        setSubtotal(result);
-
-                        // setLoading(false);
-                    };
-                    res.reverse().forEach((cartItem: any) => {
-                        fetchApi(cartItem);
-                    });
-                };
-
-                fetchApi();
-            }
-        };
-        // const handleIncreaseQuantity = () => {
-        //     if (!currentUser) {
-        //         setCartList(
-        //             JSON.parse(localStorage.getItem('cart_list') + '') || []
-        //         );
-        //     } else {
-        //         const fetchApi = async () => {
-        //             if (currentUser) {
-        //                 const res =
-        //                     await cartItemServices.getCartItemByUserId();
-        //                 setCartList(res);
-        //             }
-        //         };
-        //         fetchApi();
-        //         setTimeout(fetchApi, 800);
-        //     }
-        // };
-
-        // Lắng nghe sự kiện "storage" từ các tab khác
-        window.addEventListener('storage', handleStorageChange);
-
-        // Lắng nghe sự kiện tùy chỉnh "storageChanged" trong cùng tab
-        window.addEventListener('storageChanged', handleStorageChange);
-
-        // window.addEventListener('quantityChanged', handleIncreaseQuantity);
-
-        return () => {
-            window.removeEventListener('storage', handleStorageChange);
-            window.removeEventListener('storageChanged', handleStorageChange);
-        };
-    }, []);
 
     // Get cart item from db
     useEffect(() => {
         if (currentUser) {
-            const fetchApi = async () => {
-                if (currentUser) {
-                    const res = await cartItemServices.getCartItemByUserId();
-                    setCartList(res.reverse());
-
-                    let result = 0;
-                    const fetchApi = async (cartItem: any) => {
-                        // setLoading(true);
-
-                        const responseData =
-                            await productServices.getProductById(
-                                cartItem.product_id
-                            );
-
-                        if (responseData.discount) {
-                            result =
-                                result +
-                                responseData.price *
-                                    (1 - responseData.discount / 100) *
-                                    cartItem.quantity;
-                        } else {
-                            result =
-                                subtotal +
-                                responseData.price * cartItem.quantity;
-                        }
-
-                        setSubtotal(result);
-
-                        // setLoading(false);
-                    };
-                    res.reverse().forEach((cartItem: any) => {
-                        fetchApi(cartItem);
-                    });
-                }
-            };
-            setTimeout(fetchApi, 0);
+            dispatch(getCart());
         }
     }, [currentUser]);
 
-    // calculate subtotal
-    // useEffect(() => {
-    //     let result = 0;
-    //     const fetchApi = async (cartItem: any) => {
-    //         // setLoading(true);
-
-    //         const responseData = await productServices.getProductById(
-    //             cartItem.product_id
-    //         );
-
-    //         if (responseData.discount) {
-    //             result =
-    //                 result +
-    //                 responseData.price *
-    //                     (1 - responseData.discount / 100) *
-    //                     cartItem.quantity;
-    //         } else {
-    //             result = subtotal + responseData.price * cartItem.quantity;
-    //         }
-
-    //         setSubtotal(result);
-
-    //         // setLoading(false);
-    //     };
-    //     cartList.forEach((cartItem) => {
-    //         fetchApi(cartItem);
-    //     });
-    // }, [cartList]);
-
-    const handleChangeCartList: any = (newArr: any) => {
-        setCartList(newArr);
-        localStorage.setItem('cart_list', JSON.stringify(newArr));
-    };
 
     const handleCheckout = () => {
         // Remove key "id" for matches CartItemDTO
@@ -229,7 +82,6 @@ const Cart = ({ handleCloseCartDrawer }: CartProps) => {
                                 <CartItem
                                     key={index}
                                     cartItem={cartItem}
-                                    handleChangeCartList={handleChangeCartList}
                                 ></CartItem>
                             ))}
                         </div>

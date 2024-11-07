@@ -6,6 +6,7 @@ import Breadcrumb from '../../components/Breadcrumb';
 import FaqComponent from '../../components/Faq';
 import Feature from '../../components/Feature';
 import cartImages from '../../assets/images/cart';
+import config from '../../config';
 const cx = classNames.bind(styles);
 
 //fake featureList
@@ -33,10 +34,11 @@ const featureList: any[] = [
     },
 ];
 
+
 const Faq = () => {
     return (
         <div className={cx('faq', { 'container-spacing': true })}>
-            <Breadcrumb title="Faq" links={['home', 'faq']}></Breadcrumb>
+            <Breadcrumb title="Faq" links={[{ to: config.routes.home, name: 'home' }, { name: 'Faq' }]}></Breadcrumb>
             <div className={cx('faq__content')}>
                 <FaqComponent></FaqComponent>
             </div>

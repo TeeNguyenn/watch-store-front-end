@@ -25,3 +25,22 @@ export const getAllScreenSize = async (): Promise<ScreenSizeModel[]> => {
         throw (error)
     }
 };
+
+
+export const postScreenSize = async (screenSize: any) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.post('screen-sizes', screenSize, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return response;
+
+    } catch (error) {
+        throw (error);
+
+    }
+};

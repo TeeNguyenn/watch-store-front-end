@@ -24,3 +24,22 @@ export const getAllCategory = async (): Promise<CategoryModel[]> => {
         throw (error)
     }
 };
+
+
+export const postCategory = async (category: any) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.post('categories', category, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return response;
+
+    } catch (error) {
+        throw (error);
+
+    }
+};

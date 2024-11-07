@@ -23,6 +23,9 @@ import * as favoriteServices from '../../services/favoriteServices';
 import { CartContext } from '../../contexts/CartContext';
 import * as cartItemServices from '../../services/cartItemServices';
 import PreLoader from '../PreLoader';
+import { RootState, useAppDispatch, useAppSelector } from '../../redux/store';
+import { deleteWishlistItem } from './wishlistSlice';
+import { getCart, postCart } from '../../layouts/components/Cart/cartSlice';
 
 const cx = classNames.bind(styles);
 
@@ -68,6 +71,10 @@ const WishlistItem = ({
     const [loadingCart, setLoadingCart] = useState(false);
     const context = useContext(CartContext);
     const [loading, setLoading] = useState(false);
+
+    const dispatch = useAppDispatch()
+    const cartStatus = useAppSelector((state: RootState) => state.cartList.status);
+
 
     // Get customerId from url
     const { customerId } = useParams();
@@ -318,116 +325,35 @@ const WishlistItem = ({
         handleSelectColor(Number(parseInt(activeColor + '')), true);
     };
 
-    const handleRemoveCartItem = () => {
-        if (!currentUser) {
-            const wishlist: any[] =
-                JSON.parse(localStorage.getItem('wishlist') + '') || [];
+    const handleRemoveItem = async () => {
+        await dispatch(deleteWishlistItem({
+            userId: Number.parseInt(currentUser + ''),
+            productId: wishlistItem?.productId,
+            colorId: wishlistItem?.colorId,
+            screenSizeId: wishlistItem.screenSizeId,
+            materialId: wishlistItem.materialId,
+        }));
+        handleChangeWishlist();
 
-            const index = wishlist.findIndex(
-                (item) =>
-                    item.product_id === wishlistItem?.productId &&
-                    item.color_id === wishlistItem?.colorId &&
-                    item.screen_size_id === wishlistItem.screenSizeId &&
-                    item.material_id === wishlistItem.materialId
-            );
-            if (index !== -1) {
-                wishlist.splice(index, 1);
-            }
-            handleChangeWishlist(wishlist);
-            // window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
-        } else {
-            const fetchApi = async () => {
-                const res = await favoriteServices.deleteFavorite({
-                    userId: Number.parseInt(currentUser + ''),
-                    productId: wishlistItem?.productId,
-                    colorId: wishlistItem?.colorId,
-                    screenSizeId: wishlistItem.screenSizeId,
-                    materialId: wishlistItem.materialId,
-                });
-            };
-            fetchApi();
-            handleChangeWishlist([], true);
-        }
     };
 
     const handleAddToCart = () => {
-        const cartList: any[] =
-            JSON.parse(localStorage.getItem('cart_list') + '') || [];
 
-        if (!currentUser) {
-            setLoadingCart(true);
-            let isExist = false;
-            const newArr = cartList.map((item) => {
-                if (
-                    item.product_id === productDetail?.productId &&
-                    item.color_id === activeColor &&
-                    item.screen_size_id === activeSize &&
-                    item.material_id === activeMaterial
-                ) {
-                    item.quantity++;
-                    isExist = true;
-                }
-                return item;
-            });
-            if (isExist) {
-                localStorage.setItem('cart_list', JSON.stringify(newArr));
-            } else {
-                const newCartList = [
-                    {
-                        product_id: productDetail?.productId,
-                        color_id: activeColor,
-                        screen_size_id: activeSize,
-                        material_id: activeMaterial,
-                        quantity: 1,
-                    },
-                    ...cartList,
-                ];
-                localStorage.setItem('cart_list', JSON.stringify(newCartList));
+        const fetchData = async () => {
+            await dispatch(postCart({
+                productId: productDetail?.productId,
+                colorId: activeColor,
+                screenSizeId: activeSize,
+                materialId: activeMaterial
+            }))
+            await dispatch(getCart());
+            if (cartStatus === 'fulfilled') {
+                context?.handleCart();
             }
-            window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
-            setTimeout(() => {
-                setLoadingCart(false);
-                context?.handleCart();
-            }, 300);
-        } else {
-            setLoadingCart(true);
-            const fetchApi = async () => {
-                const resData = await cartItemServices.getCartItemByUserId();
-                const cartItem = resData.filter(
-                    (item: any) =>
-                        item.product_id === productDetail?.productId &&
-                        item.color_id === activeColor &&
-                        item.screen_size_id === activeSize &&
-                        item.material_id === activeMaterial
-                );
-                if (cartItem.length > 0) {
-                    const res = await cartItemServices.putCartItem({
-                        productId: productDetail?.productId,
-                        colorId: activeColor,
-                        screenSizeId: activeSize,
-                        materialId: activeMaterial,
-                        quantity: cartItem.at(0).quantity + 1,
-                        id: cartItem.at(0).id,
-                    });
-                } else {
-                    const res = await cartItemServices.postCartItem({
-                        product_id: productDetail?.productId,
-                        color_id: activeColor,
-                        screen_size_id: activeSize,
-                        material_id: activeMaterial,
-                        quantity: 1,
-                    });
-                }
-                window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
-            };
-            fetchApi();
 
-            setTimeout(() => {
-                context?.handleCart();
-                setLoadingCart(false);
-                return;
-            }, 500);
         }
+
+        fetchData();
     };
 
     if (loading) {
@@ -644,7 +570,7 @@ const WishlistItem = ({
                 <div className={cx('wishlist__option-wrapper')}>
                     <Button
                         className={cx('wishlist__trash-can')}
-                        onClick={handleRemoveCartItem}
+                        onClick={handleRemoveItem}
                     >
                         <RemoveIcon width="1.8rem" height="1.8rem"></RemoveIcon>
                     </Button>

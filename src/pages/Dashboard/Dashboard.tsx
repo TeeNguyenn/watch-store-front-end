@@ -14,6 +14,13 @@ import PreLoader from '../../components/PreLoader';
 
 const cx = classNames.bind(styles);
 
+interface ITopCustomerList {
+    avatar: string | undefined;
+    name: string;
+    email: string;
+    totalOrder: number;
+}
+
 const Dashboard = () => {
 
     const [loading, setLoading] = useState(true);
@@ -22,11 +29,13 @@ const Dashboard = () => {
     const [totalUsers, setTotalUsers] = useState(0);
     const [earnings, setEarnings] = useState(0);
     const [totalSaleToday, setTotalSaleToday] = useState(0);
+    const [topCustomerList, setTopCustomerList] = useState<ITopCustomerList[]>([]);
 
     // get all orders
     useEffect(() => {
         const fetchApi = async () => {
             setLoading(true);
+
             const res = await orderServices.getAllOrder(1, 1);
             setTotalOrders(res.totalPage);
 
@@ -36,13 +45,23 @@ const Dashboard = () => {
             let totalEarning = 0;
             let totalSaleNow = 0;
             let count = 0;
+            let topCustomers: ITopCustomerList[] = [];
 
             const fetchApi1 = async (userItem: UserModel) => {
                 const res = await orderServices.getAllOrderByUserId(userItem.userId + '');
 
+                // Top customer
+
                 count++
                 if (res.totalOrders > 0) {
                     const resData = await orderServices.getAllOrderByUserId(userItem.userId + '', 1, res.totalOrders);
+                    topCustomers.push({
+                        avatar: userItem.avatar,
+                        name: userItem.firstName + ' ' + userItem.lastName,
+                        email: userItem.email,
+                        totalOrder: res.totalOrders
+
+                    })
 
                     const totalSpent = resData.result.reduce((accumulator: any, currentItem: any) => {
                         if (isToday(currentItem.order_date)) {
@@ -56,6 +75,13 @@ const Dashboard = () => {
                 }
 
                 if (count === responseData.result.length) {
+                    if (topCustomers.length > 6) {
+                        setTopCustomerList(topCustomers.sort((a: ITopCustomerList, b: ITopCustomerList) => b.totalOrder - a.totalOrder).slice(0, 6))
+                    } else {
+                        setTopCustomerList(topCustomers.sort((a: ITopCustomerList, b: ITopCustomerList) => b.totalOrder - a.totalOrder))
+
+                    }
+
                     setTotalSaleToday(totalSaleNow);
                     setEarnings(totalEarning);
                     setLoading(false);
@@ -101,171 +127,41 @@ const Dashboard = () => {
                                     Top Customers
                                 </h2>
                                 <div className={cx('block__list')}>
-                                    <div className={cx('block__item')}>
-                                        <div
-                                            className={cx('block__img-wrapper')}
-                                        >
-                                            <Image
-                                                src={images.defaultAvatar}
-                                                alt="avatar"
-                                            ></Image>
-                                        </div>
-                                        <div className={cx('block__body')}>
-                                            <div>
-                                                <div
-                                                    className={cx(
-                                                        'block__name'
-                                                    )}
-                                                >
-                                                    Leonel Tee
-                                                </div>
-                                                <div
-                                                    className={cx(
-                                                        'block__email'
-                                                    )}
-                                                >
-                                                    tee0805@gmail.com
-                                                </div>
-                                            </div>
+                                    {topCustomerList.map(customerItem =>
+                                        <div className={cx('block__item')}>
                                             <div
-                                                className={cx('block__counter')}
+                                                className={cx('block__img-wrapper')}
                                             >
-                                                5 orders
+                                                <Image
+                                                    src={customerItem.avatar || images.defaultAvatar}
+                                                    alt="avatar"
+                                                    className={cx('block__avatar')}
+                                                ></Image>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div className={cx('block__item')}>
-                                        <div
-                                            className={cx('block__img-wrapper')}
-                                        >
-                                            <Image
-                                                src={images.defaultAvatar}
-                                                alt="avatar"
-                                            ></Image>
-                                        </div>
-                                        <div className={cx('block__body')}>
-                                            <div>
-                                                <div
-                                                    className={cx(
-                                                        'block__name'
-                                                    )}
-                                                >
-                                                    Tee{' '}
+                                            <div className={cx('block__body')}>
+                                                <div>
+                                                    <div
+                                                        className={cx(
+                                                            'block__name'
+                                                        )}
+                                                    >
+                                                        {customerItem.name}
+                                                    </div>
+                                                    <div
+                                                        className={cx(
+                                                            'block__email'
+                                                        )}
+                                                    >
+                                                        {customerItem.email}
+                                                    </div>
                                                 </div>
                                                 <div
-                                                    className={cx(
-                                                        'block__email'
-                                                    )}
+                                                    className={cx('block__counter')}
                                                 >
-                                                    tee0805@gmail.com
+                                                    {customerItem.totalOrder} orders
                                                 </div>
                                             </div>
-                                            <div
-                                                className={cx('block__counter')}
-                                            >
-                                                89 orders
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className={cx('block__item')}>
-                                        <div
-                                            className={cx('block__img-wrapper')}
-                                        >
-                                            <Image
-                                                src={images.defaultAvatar}
-                                                alt="avatar"
-                                            ></Image>
-                                        </div>
-                                        <div className={cx('block__body')}>
-                                            <div>
-                                                <div
-                                                    className={cx(
-                                                        'block__name'
-                                                    )}
-                                                >
-                                                    Nguyen Duc Thiep
-                                                </div>
-                                                <div
-                                                    className={cx(
-                                                        'block__email'
-                                                    )}
-                                                >
-                                                    jully23032003@gmail.com
-                                                </div>
-                                            </div>
-                                            <div
-                                                className={cx('block__counter')}
-                                            >
-                                                89 orders
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className={cx('block__item')}>
-                                        <div
-                                            className={cx('block__img-wrapper')}
-                                        >
-                                            <Image
-                                                src={images.defaultAvatar}
-                                                alt="avatar"
-                                            ></Image>
-                                        </div>
-                                        <div className={cx('block__body')}>
-                                            <div>
-                                                <div
-                                                    className={cx(
-                                                        'block__name'
-                                                    )}
-                                                >
-                                                    Tee{' '}
-                                                </div>
-                                                <div
-                                                    className={cx(
-                                                        'block__email'
-                                                    )}
-                                                >
-                                                    tee0805@gmail.com
-                                                </div>
-                                            </div>
-                                            <div
-                                                className={cx('block__counter')}
-                                            >
-                                                89 orders
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className={cx('block__item')}>
-                                        <div
-                                            className={cx('block__img-wrapper')}
-                                        >
-                                            <Image
-                                                src={images.defaultAvatar}
-                                                alt="avatar"
-                                            ></Image>
-                                        </div>
-                                        <div className={cx('block__body')}>
-                                            <div>
-                                                <div
-                                                    className={cx(
-                                                        'block__name'
-                                                    )}
-                                                >
-                                                    Nguyen Minh Tien
-                                                </div>
-                                                <div
-                                                    className={cx(
-                                                        'block__email'
-                                                    )}
-                                                >
-                                                    tien10102024@gmail.com
-                                                </div>
-                                            </div>
-                                            <div
-                                                className={cx('block__counter')}
-                                            >
-                                                89 orders
-                                            </div>
-                                        </div>
-                                    </div>
+                                        </div>)}
                                 </div>
                             </div>
                         </div>

@@ -135,6 +135,12 @@ const ProductTable = (props: ProductTableProps) => {
                                             >
                                                 Delete
                                             </Button>
+                                            <Button
+                                                className={cx('table__modifier-btn')}
+                                                to={`/admin/product/edit/${productItem.productId}`}
+                                            >
+                                                Edit
+                                            </Button>
                                         </div>
                                     </TableCell>
                                     {/* <TableCell className={cx('table__cell')}>

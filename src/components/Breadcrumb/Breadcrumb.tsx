@@ -7,9 +7,11 @@ import { BreadcrumbSepIcon } from '../Icons';
 
 const cx = classNames.bind(styles);
 
+
+
 interface BreadcrumbProps {
     title?: string;
-    links: string[];
+    links: any[];
 }
 
 const Breadcrumb = ({ title, links }: BreadcrumbProps) => {
@@ -17,11 +19,18 @@ const Breadcrumb = ({ title, links }: BreadcrumbProps) => {
         <div className={cx('breadcrumb')}>
             <h1 className={cx('title')}>{title}</h1>
             <div className={cx('links')}>
-                <Link to={links[0]} className={cx('link')}>
-                    {links[0]}
-                </Link>
-                <BreadcrumbSepIcon className={cx('sep')}></BreadcrumbSepIcon>
-                <span className={cx('link')}>{links[1]}</span>
+                {
+                    links.map((link, index) =>
+                        index !== links.length - 1 ? <>
+                            <Link to={links[index].to} className={cx('link')}>
+                                {links[index].name}
+                            </Link>
+                            <BreadcrumbSepIcon className={cx('sep')}></BreadcrumbSepIcon>
+                        </> : <span className={cx('link')}>{links[links.length - 1].name}</span>
+
+                    )
+                }
+
             </div>
         </div>
     );

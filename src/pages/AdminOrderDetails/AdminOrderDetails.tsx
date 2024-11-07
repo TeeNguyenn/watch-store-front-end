@@ -1,7 +1,6 @@
 import classNames from 'classnames/bind';
 
 import styles from './AdminOrderDetails.module.scss';
-import Navbar from '../Dashboard/components/navbar';
 import OrderDetails from '../OrderDetails';
 
 const cx = classNames.bind(styles);

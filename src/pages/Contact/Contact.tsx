@@ -7,6 +7,7 @@ import { AddressIcon, MailIcon, PhoneIcon } from '../../components/Icons';
 import { Link } from 'react-router-dom';
 import Feature from '../../components/Feature';
 import cartImages from '../../assets/images/cart';
+import config from '../../config';
 
 const cx = classNames.bind(styles);
 
@@ -40,7 +41,7 @@ const Contact = () => {
         <div className={cx('contact', { 'container-spacing': true })}>
             <Breadcrumb
                 title="Contact"
-                links={['home', 'contact']}
+                links={[{ to: config.routes.home, name: 'home' }, { name: 'Contact' }]}
             ></Breadcrumb>
             <div className={cx('contact__content')}>
                 <div className={cx('contact__inner')}>

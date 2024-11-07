@@ -41,6 +41,9 @@ import { CartContext } from './../../contexts/CartContext';
 import * as favoriteServices from '.././../services/favoriteServices';
 import * as cartItemServices from '../../services/cartItemServices';
 import Pagination from '../../components/Pagination';
+import { RootState, useAppDispatch, useAppSelector } from '../../redux/store';
+import { postWishlistItem } from '../../components/Wishlist/wishlistSlice';
+import { getCart, postCart } from '../../layouts/components/Cart/cartSlice';
 
 const cx = classNames.bind(styles);
 
@@ -61,6 +64,11 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
     const context = useContext(CartContext);
     const navigate = useNavigate();
     const location = useLocation();
+
+    const dispatch = useAppDispatch()
+    const wishlistStatus = useAppSelector((state: RootState) => state.wishlists.status);
+    const cartStatus = useAppSelector((state: RootState) => state.cartList.status);
+
 
     const settings = {
         slidesToShow: 5,
@@ -112,7 +120,6 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
     >([]);
     const [liked, setLiked] = useState(false);
     const currentUser = localStorage.getItem('user_id');
-    const [loadingFavorite, setLoadingFavorite] = useState(false);
     const [loadingCart, setLoadingCart] = useState(false);
     const [quantityProduct, setQuantityProduct] = useState(1);
 
@@ -144,31 +151,6 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
         console.log('Error:', error);
     }
 
-    // re-render component when remove wishlist-item
-    useEffect(() => {
-        const handleStorageChange = () => {
-            const fetchApi = async () => {
-                const feedbackData =
-                    await feedbackServices.getAllFeedbackByProductId(
-                        productIdNumber
-                    );
-                setFeedbackList(feedbackData.result);
-            };
-
-            setTimeout(() => {
-                fetchApi();
-            }, 10000);
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-
-        // Lắng nghe sự kiện tùy chỉnh "storageChanged" trong cùng tab
-        window.addEventListener('storageChanged', handleStorageChange);
-        return () => {
-            window.removeEventListener('storage', handleStorageChange);
-            window.removeEventListener('storageChanged', handleStorageChange);
-        };
-    }, []);
 
     useEffect(() => {
         if (!quickBuy) {
@@ -272,20 +254,22 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                 setProductList(recommendProducts.result);
             }
 
-            const res = await favoriteServices.getFavoriteByUserId(
-                customerId || currentUser + ''
-            );
+            if (currentUser) {
+                const res = await favoriteServices.getFavoriteByUserId(
+                    customerId || currentUser + ''
+                );
 
-            res.result.forEach((item) => {
-                if (
-                    item.productId === Number(productId + '') ||
-                    item.productId === productItem?.productId
-                ) {
-                    setLiked(true);
-                    setLoading(false);
-                    return;
-                }
-            });
+                res.result.forEach((item) => {
+                    if (
+                        item.productId === Number(productId + '') ||
+                        item.productId === productItem?.productId
+                    ) {
+                        setLiked(true);
+                        setLoading(false);
+                        return;
+                    }
+                });
+            }
             setLoading(false);
         };
         if (productIdNumber) {
@@ -403,30 +387,6 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
 
     const handleAddWishlist = () => {
         if (!currentUser) {
-            // setLoadingFavorite(true);
-            // if (liked) {
-            //     return;
-            // } else {
-            //     const wishlist: any[] =
-            //         JSON.parse(localStorage.getItem('wishlist') + '') || [];
-
-            //     const newWishlist = [
-            //         {
-            //             product_id: productDetail?.productId,
-            //             color_id: activeColor,
-            //             screen_size_id: activeSize,
-            //             material_id: activeMaterial,
-            //         },
-            //         ...wishlist,
-            //     ];
-            //     setLiked(true);
-            //     localStorage.setItem('wishlist', JSON.stringify(newWishlist));
-            // }
-
-            // setTimeout(() => {
-            //     setLoadingFavorite(false);
-            // }, 300);
-
             // Force login
             setLoading(true);
             localStorage.setItem('previousPage', location.pathname);
@@ -437,70 +397,28 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                 navigate(config.routes.login);
             }, 300);
         } else {
-            setLoadingFavorite(true);
             if (liked) {
                 return;
             } else {
-                const fetchApi = async () => {
-                    const res = await favoriteServices.postFavorite({
-                        userId: currentUser,
-                        productId: productDetail?.productId,
-                        colorId: activeColor,
-                        screenSizeId: activeSize,
-                        materialId: activeMaterial,
-                    });
-                };
-                fetchApi();
+                dispatch(postWishlistItem({
+                    userId: currentUser,
+                    productId: productDetail?.productId,
+                    colorId: activeColor,
+                    screenSizeId: activeSize,
+                    materialId: activeMaterial,
+                }))
                 setLiked(true);
+                // if (wishlistStatus === 'fulfilled') {    no work=))
+                //     setTimeout(() => {
+                //         notifySuccess('Product added to wishlist successfully')
+                //     }, 200);
+                // }
             }
-            setTimeout(() => {
-                setLoadingFavorite(false);
-            }, 300);
         }
-        window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
     };
 
     const handleAddToCart = () => {
-        // const cartList: any[] =
-        //     JSON.parse(localStorage.getItem('cart_list') + '') || [];
-
         if (!currentUser) {
-            // setLoadingFavorite(true);
-            // setLoading(true);
-            // let isExist = false;
-            // const newArr = cartList.map((item) => {
-            //     if (
-            //         item.product_id === productDetail?.productId &&
-            //         item.color_id === activeColor &&
-            //         item.screen_size_id === activeSize &&
-            //         item.material_id === activeMaterial
-            //     ) {
-            //         item.quantity = quantityProduct;
-            //         isExist = true;
-            //     }
-            //     return item;
-            // });
-            // if (isExist) {
-            //     localStorage.setItem('cart_list', JSON.stringify(newArr));
-            // } else {
-            //     const newCartList = [
-            //         {
-            //             product_id: productDetail?.productId,
-            //             color_id: activeColor,
-            //             screen_size_id: activeSize,
-            //             material_id: activeMaterial,
-            //             quantity: quantityProduct,
-            //         },
-            //         ...cartList,
-            //     ];
-            //     localStorage.setItem('cart_list', JSON.stringify(newCartList));
-            // }
-            // window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
-            // setLoading(false);
-            // setTimeout(() => {
-            //     setLoadingFavorite(false);
-            // }, 300);
-            // context?.handleCart();
             setLoading(true);
             localStorage.setItem('previousPage', location.pathname);
             window.scrollTo(0, 0);
@@ -510,44 +428,25 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                 navigate(config.routes.login);
             }, 300);
         } else {
-            setLoadingCart(true);
-            const fetchApi = async () => {
-                const resData = await cartItemServices.getCartItemByUserId();
-                const cartItem = resData.filter(
-                    (item: any) =>
-                        item.product_id === productDetail?.productId &&
-                        item.color_id === activeColor &&
-                        item.screen_size_id === activeSize &&
-                        item.material_id === activeMaterial
-                );
 
-                if (cartItem.length > 0) {
-                    const res = await cartItemServices.putCartItem({
-                        productId: productDetail?.productId,
-                        colorId: activeColor,
-                        screenSizeId: activeSize,
-                        materialId: activeMaterial,
-                        quantity: quantityProduct,
-                        id: cartItem.at(0).id,
-                    });
-                    window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
-                } else {
-                    const res = await cartItemServices.postCartItem({
-                        product_id: productDetail?.productId,
-                        color_id: activeColor,
-                        screen_size_id: activeSize,
-                        material_id: activeMaterial,
-                        quantity: quantityProduct,
-                    });
-                    window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
+            const fetchData = async () => {
+                await dispatch(postCart({
+                    productId: productDetail?.productId,
+                    colorId: activeColor,
+                    screenSizeId: activeSize,
+                    materialId: activeMaterial,
+                    quantity: quantityProduct
+                }))
+                await dispatch(getCart());
+                if (cartStatus === 'fulfilled') {
+                    context?.handleCart();
                 }
-            };
-            fetchApi();
-            setTimeout(() => {
-                context?.handleCart();
-                setLoadingCart(false);
-                return;
-            }, 1000);
+
+            }
+
+            fetchData();
+
+
         }
     };
 
@@ -590,7 +489,9 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
             {!quickBuy && (
                 <Breadcrumb
                     title={productDetail?.title}
-                    links={['All', `${productDetail?.title}`]}
+                    links={[
+                        { to: config.routes.shop, name: 'All' }, { name: `${productDetail?.title}` }
+                    ]}
                 ></Breadcrumb>
             )}
             <div className={cx('product-detail__container')}>
@@ -1045,7 +946,7 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                                 )}
                                                 onClick={handleAddToCart}
                                             >
-                                                {loadingCart ? (
+                                                {cartStatus === 'loading' ? (
                                                     <Button
                                                         className={cx(
                                                             'loading'
@@ -1060,7 +961,7 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                                 )}
                                             </Button>
 
-                                            {loadingFavorite ? (
+                                            {wishlistStatus === 'loading' ? (
                                                 <div
                                                     className={cx(
                                                         'product-detail__btn'

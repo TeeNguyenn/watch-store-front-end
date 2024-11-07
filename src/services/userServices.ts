@@ -28,6 +28,8 @@ export const getUserDetail = async (): Promise<UserModel> => {
             firstName: response.data.first_name,
             phoneNumber: response.data.phone_number,
             email: response.data.email,
+            avatar: response.data.avatar,
+            address: response.data.address,
             role
 
         };
@@ -63,7 +65,9 @@ export const getAllUser = async (): Promise<IResult> => {
                 firstName: item.first_name,
                 phoneNumber: item.phone_number,
                 email: item.email,
-
+                isActive: item.is_active,
+                address: item.address,
+                avatar: item.avatar
             }
         ))
 
@@ -77,3 +81,63 @@ export const getAllUser = async (): Promise<IResult> => {
 
     }
 }
+
+
+export const deleteUser = async (userId: string) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.put(`users/block/${userId}`, {}, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return response;
+
+    } catch (error) {
+        throw (error);
+
+    }
+};
+
+export const putUser = async (data: any) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.put(`users/${data.userId}`, data.infos, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return response;
+
+    } catch (error) {
+        throw (error);
+
+    }
+};
+
+export const putAvatarUser = async (userId: string, avatar: any) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.put(`users/avatar/${userId}`, avatar, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return response;
+
+    } catch (error: any) {
+        // throw (error);
+        return {
+            errorMessage: error.response.data.message
+        }
+
+
+    }
+};

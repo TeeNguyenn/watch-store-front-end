@@ -1,3 +1,4 @@
+import CollectionModel from '../models/CollectionModel';
 import ColorModel from '../models/ColorModel';
 import MaterialModel from '../models/MaterialModel';
 import ProductImageModel from '../models/ProductImageModel';
@@ -127,6 +128,7 @@ export const getProduct = async (path: string): Promise<ResultInterface> => {
                 title: responseData[key].title,
                 price: responseData[key].price,
                 desc: responseData[key].description,
+                specification: responseData[key].specification,
                 discount: responseData[key].discount,
                 thumbnail: responseData[key].thumbnail,
                 averageRate: responseData[key].average_rate,
@@ -159,7 +161,7 @@ export const getProduct = async (path: string): Promise<ResultInterface> => {
 
 export const getAllProduct = async (currentPage = 1, limit: number = 12, collectionId?: string, categoryId?: string, colorId?: string, materialId?: string, keyword?: string, sort?: string): Promise<ResultInterface> => {
 
-    const path = `products?page=${currentPage - 1}&limit=${limit}&collection-ids=${collectionId || ''}&category-ids=${categoryId || ''}&color-ids=${colorId || ''}&material-ids=${materialId || ''}&keyword=${keyword || ''}&sort=${sort || ''}`;
+    const path = `products?page=${currentPage - 1}&limit=${limit}&collection-ids=${collectionId || ''}&category-ids=${categoryId || ''}&color-ids=${colorId || ''}&material-ids=${materialId || ''}&keyword=${keyword || ''}&sort=${sort || 'latest'}`;
     return getProduct(path);
 };
 
@@ -273,12 +275,20 @@ export const getProductById = async (productId: number): Promise<ProductModel> =
             quantity: variant.quantity,
         }))
 
+        const collectionList: CollectionModel[] = [];
+
+        responseData.collections.forEach((collection: any) => collectionList.push({
+            name: collection.name,
+            collectionId: collection.id,
+        }))
+
 
         return {
             productId: responseData.id,
             title: responseData.title,
             price: responseData.price,
             desc: responseData.description,
+            specification: responseData.specification,
             discount: responseData.discount,
             thumbnail: responseData.thumbnail,
             averageRate: responseData.average_rate,
@@ -298,7 +308,7 @@ export const getProductById = async (productId: number): Promise<ProductModel> =
             ),
             productImages: productImages,
             variants: variantList,
-            collections: responseData.collections,
+            collections: collectionList,
 
         };
 
@@ -333,6 +343,23 @@ export const postProduct = async (product: any) => {
 
     try {
         const response = await request.post('products', product, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return response;
+    } catch (error) {
+        throw (error);
+
+    }
+};
+
+export const putProduct = async (product: any, productId: number) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.put(`products/${productId}`, product, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }

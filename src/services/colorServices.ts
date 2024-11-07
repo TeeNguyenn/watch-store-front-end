@@ -28,3 +28,22 @@ export const getAllColor = async (): Promise<ColorModel[]> => {
         throw (error)
     }
 };
+
+
+export const postColor = async (color: any) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.post('colors', color, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return response;
+
+    } catch (error) {
+        throw (error);
+
+    }
+};

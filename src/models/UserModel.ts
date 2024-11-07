@@ -9,7 +9,9 @@ class UserModel {
     lastName: string;
     email: string;
     phoneNumber: string;
+    avatar?: string;
     address?: string;
+    isActive?: boolean;
     role?: IRole[];
 
 
@@ -18,7 +20,10 @@ class UserModel {
         lastName: string,
         email: string,
         phoneNumber: string,
+        avatar: string,
         address: string,
+        isActive: boolean,
+
         role: IRole[],
     ) {
         this.userId = userId;
@@ -26,7 +31,9 @@ class UserModel {
         this.lastName = lastName;
         this.email = email;
         this.phoneNumber = phoneNumber;
+        this.avatar = avatar;
         this.address = address;
+        this.isActive = isActive;
         this.role = role;
 
     }

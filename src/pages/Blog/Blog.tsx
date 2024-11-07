@@ -14,6 +14,7 @@ import images from '../../assets/images';
 import Price from '../../components/Price';
 import Pagination from '../../components/Pagination';
 import { CloseIcon, FilterIcon } from '../../components/Icons';
+import config from '../../config';
 
 const cx = classNames.bind(styles);
 
@@ -24,7 +25,9 @@ const blogList = [1, 2, 3, 4, 5, 6];
 const searchResult = [1, 2, 3, 4, 5];
 
 const Blog = () => {
-    const links: any = ['home', 'news'];
+    const links = [{ to: config.routes.home, name: 'home' }, { name: 'News' }];
+
+
     const [currentPage, setCurrentPage] = useState(1);
     const [showFilter, setShowFilter] = useState(false);
 
@@ -277,7 +280,7 @@ const Blog = () => {
                             <p className={cx('blog__title')}>Hot Deals</p>
                             <CardItem
                                 className={cx('blog-sidebar__deals-item')}
-                                // soldOut
+                            // soldOut
                             ></CardItem>
                         </div>
                         {/* Latest Products */}

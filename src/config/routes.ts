@@ -24,9 +24,11 @@ const routes = {
     adminDashboard: '/admin/dashboard',
     adminCustomers: '/admin/customers',
     adminNewCustomer: '/admin/customer/new',
+    adminEditCustomer: '/admin/customer/edit/:customerId',
     adminDetailCustomer: '/admin/customer/detail/:customerId',
     adminProducts: '/admin/products',
     adminNewProduct: '/admin/product/new',
+    adminEditProduct: '/admin/product/edit/:productId',
     adminOrders: '/admin/orders',
     adminOrderDetails: '/admin/order-details/:orderId',
 };

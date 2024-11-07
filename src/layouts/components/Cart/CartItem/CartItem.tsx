@@ -13,15 +13,17 @@ import ProductModel from '../../../../models/ProductModel';
 import VariantModel from '../../../../models/VariantModel';
 import * as cartItemServices from '../../../../services/cartItemServices';
 import ProductImageModel from '../../../../models/ProductImageModel';
+import { useAppDispatch } from '../../../../redux/store';
+import { deleteCart, getCart } from '../cartSlice';
 
 const cx = classNames.bind(styles);
 
 interface CartItemProps {
     cartItem?: any;
-    handleChangeCartList?: any;
+
 }
 
-const CartItem = ({ cartItem, handleChangeCartList }: CartItemProps) => {
+const CartItem = ({ cartItem }: CartItemProps) => {
     const [isErrorQuantity, setIsErrorQuantity] = useState(false);
     // const [loading, setLoading] = useState(false);
     const [productDetail, setProductDetail] = useState<ProductModel>();
@@ -31,6 +33,8 @@ const CartItem = ({ cartItem, handleChangeCartList }: CartItemProps) => {
     const [materialList, setMaterialList] = useState<
         VariantModel[] | undefined
     >([]);
+
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
         const fetchApi = async () => {
@@ -104,34 +108,20 @@ const CartItem = ({ cartItem, handleChangeCartList }: CartItemProps) => {
     };
 
     const handleRemoveCartItem = () => {
-        if (!currentUser) {
-            const cartList: any[] =
-                JSON.parse(localStorage.getItem('cart_list') + '') || [];
+        const fetchData = async () => {
+            await dispatch(deleteCart({
+                userId: Number.parseInt(currentUser + ''),
+                productId: cartItem?.product_id,
+                colorId: cartItem?.color_id,
+                screenSizeId: cartItem?.screen_size_id,
+                materialId: cartItem?.material_id,
+            }))
+            await dispatch(getCart());
 
-            const index = cartList.findIndex(
-                (item) =>
-                    item.product_id === cartItem?.product_id &&
-                    item.color_id === cartItem?.color_id &&
-                    item.screen_size_id === cartItem?.screen_size_id &&
-                    item.material_id === cartItem?.material_id
-            );
-            if (index !== -1) {
-                cartList.splice(index, 1);
-            }
-            handleChangeCartList(cartList);
-        } else {
-            const fetchApi = async () => {
-                const res = await cartItemServices.deleteCartItem({
-                    userId: Number.parseInt(currentUser),
-                    productId: cartItem?.product_id,
-                    colorId: cartItem?.color_id,
-                    screenSizeId: cartItem?.screen_size_id,
-                    materialId: cartItem?.material_id,
-                });
-                window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
-            };
-            fetchApi();
         }
+
+        fetchData();
+
     };
 
     return (
@@ -176,7 +166,7 @@ const CartItem = ({ cartItem, handleChangeCartList }: CartItemProps) => {
                         {sizeList?.map(
                             (sizeItem) =>
                                 sizeItem.screenSize.sizeId ===
-                                    cartItem.screen_size_id &&
+                                cartItem.screen_size_id &&
                                 `${sizeItem.screenSize.size} Inches`
                         )}
                     </p>
@@ -184,7 +174,7 @@ const CartItem = ({ cartItem, handleChangeCartList }: CartItemProps) => {
                         {materialList?.map(
                             (materialItem) =>
                                 materialItem.material.materialId ===
-                                    cartItem.material_id &&
+                                cartItem.material_id &&
                                 materialItem.material.name
                         )}
                     </p>

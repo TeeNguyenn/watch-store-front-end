@@ -24,6 +24,8 @@ import ProductModel from '../../models/ProductModel';
 import CartItem from './CartItem';
 import PreLoader from '../../components/PreLoader';
 import { formatPrice } from '../../utils/Functions';
+import { RootState, useAppDispatch, useAppSelector } from '../../redux/store';
+import { getCart } from '../../layouts/components/Cart/cartSlice';
 
 const cx = classNames.bind(styles);
 
@@ -56,109 +58,33 @@ const featureList: any[] = [
 ];
 
 const Cart = () => {
-    const links = ['Home', 'Your Shopping Cart'];
+    const links = [{ to: config.routes.home, name: 'home' }, { name: 'Your Shopping Cart' }];
+
     const navigate = useNavigate();
 
     const currentUser = localStorage.getItem('user_id');
-    const [subtotal, setSubtotal] = useState(0);
     const location = useLocation();
     const pathName = location.pathname;
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        if (currentUser) {
-            if (pathName === '/cart') {
-                setLoading(true);
-            }
-        }
-    }, [pathName, currentUser]);
-
-    //re-render component when remove cart-item
-    const [cartList, setCartList] = useState<any[]>(
-        JSON.parse(localStorage.getItem('cart_list') + '') || []
-    );
-
-    useEffect(() => {
-        const handleStorageChange = () => {
-            if (!currentUser) {
-                setCartList(
-                    JSON.parse(localStorage.getItem('cart_list') + '') || []
-                );
-            } else {
-                const fetchApi = async () => {
-                    if (currentUser) {
-                        const res =
-                            await cartItemServices.getCartItemByUserId();
-                        setCartList(res.reverse());
-                        // localStorage.setItem(
-                        //     'products',
-                        //     JSON.stringify(res.reverse())
-                        // );
-                    }
-                };
-                fetchApi();
-            }
-        };
-
-        // Lắng nghe sự kiện "storage" từ các tab khác
-        window.addEventListener('storage', handleStorageChange);
-
-        // Lắng nghe sự kiện tùy chỉnh "storageChanged" trong cùng tab
-        window.addEventListener('storageChanged', handleStorageChange);
-
-        // window.addEventListener('quantityChanged', handleIncreaseQuantity);
-
-        return () => {
-            window.removeEventListener('storage', handleStorageChange);
-            window.removeEventListener('storageChanged', handleStorageChange);
-        };
-    }, []);
+    // useEffect(() => {
+    //     if (currentUser) {
+    //         if (pathName === '/cart') {
+    //             setLoading(true);
+    //         }
+    //     }
+    // }, [pathName, currentUser]);
+    const dispatch = useAppDispatch();
+    const cartList = useAppSelector((state: RootState) => state.cartList.cart);
+    const subtotal = useAppSelector((state: RootState) => state.cartList.subtotal);
+    const cartStatus = useAppSelector((state: RootState) => state.cartList.status);
 
     // Get cart item from db
     useEffect(() => {
-        const fetchApi = async () => {
-            if (currentUser) {
-                const res = await cartItemServices.getCartItemByUserId();
-                setCartList(res.reverse());
-                setLoading(false);
-            }
-        };
-        fetchApi();
+        if (currentUser) {
+            dispatch(getCart());
+        }
     }, [currentUser]);
-
-    // calculate subtotal
-    useEffect(() => {
-        let result = 0;
-        const fetchApi = async (cartItem: any) => {
-            // setLoading(true);
-
-            const responseData = await productServices.getProductById(
-                cartItem.product_id
-            );
-
-            if (responseData.discount) {
-                result =
-                    result +
-                    responseData.price *
-                        (1 - responseData.discount / 100) *
-                        cartItem.quantity;
-            } else {
-                result = subtotal + responseData.price * cartItem.quantity;
-            }
-
-            setSubtotal(result);
-
-            // setLoading(false);
-        };
-        cartList.forEach((cartItem) => {
-            fetchApi(cartItem);
-        });
-    }, [cartList]);
-
-    const handleChangeCartList: any = (newArr: any) => {
-        setCartList(newArr);
-        localStorage.setItem('cart_list', JSON.stringify(newArr));
-    };
 
     const handleCheckout = () => {
         // Remove key "id" for matches CartItemDTO
@@ -170,7 +96,7 @@ const Cart = () => {
         navigate(config.routes.checkout);
     };
 
-    if (loading) {
+    if (loading || cartStatus === 'loading') {
         return <PreLoader show></PreLoader>;
     }
 
@@ -260,9 +186,6 @@ const Cart = () => {
                                         {cartList.map((cartItem) => (
                                             <CartItem
                                                 cartItem={cartItem}
-                                                handleChangeCartList={
-                                                    handleChangeCartList
-                                                }
                                             ></CartItem>
                                         ))}
                                     </tbody>
@@ -359,7 +282,7 @@ const Cart = () => {
                 </div>
             </div>
             {/* Cart empty */}
-            {cartList.length === 0 && (
+            {cartList.length === 0 && cartStatus !== 'loading' && (
                 <div className={cx('cart-empty')}>
                     <h2 className={cx('cart-empty__title')}>
                         Your cart is empty

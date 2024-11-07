@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { ToastContainer, toast } from 'react-toastify';
+
 
 import Button from '../../../../components/Button';
 import styles from './DataTable.module.scss';
@@ -10,7 +12,7 @@ import * as userServices from '../../../../services/userServices';
 import images from '../../../../assets/images';
 import * as orderServices from '../../../../services/orderServices';
 import UserModel from '../../../../models/UserModel';
-import { getCurrentDateWithHour } from '../../../../utils/Functions';
+import { getCurrentDateWithHour, notifyError, notifySuccess } from '../../../../utils/Functions';
 import PreLoader from '../../../../components/PreLoader';
 
 const cx = classNames.bind(styles);
@@ -100,9 +102,9 @@ export default function DataTable() {
                 rows.push({
                     id: userItem.userId,
                     user: userItem.firstName + ' ' + userItem.lastName,
-                    img: images.defaultAvatar,  //temp
+                    img: userItem.avatar || images.defaultAvatar,  //temp
                     email: userItem.email,
-                    status: 'active',   //temp - wrong: chua active van hien active
+                    status: userItem.isActive ? 'active' : 'passive',
                     orders: res.totalOrders,
                     lastOrder: res.totalOrders > 0 ? getCurrentDateWithHour(res.result.at(0).order_date) : 'No orders',
                 })
@@ -130,9 +132,28 @@ export default function DataTable() {
 
 
 
-    const handleDelete = (id: any) => {
+    const handleDelete = (params: any) => {
         // temp
-        setData(data.filter((item: any) => item.id !== id));
+        // setData(data.filter((item: any) => item.id !== id));
+
+        if (params.row.status === 'passive') {
+            notifyError('Unable to delete user.');
+            return;
+        }
+
+        const fetchApi = async () => {
+            setLoading(true);
+            const res = await userServices.deleteUser(params.row.id);
+
+            if (res.status === 'OK') {
+                setLoading(false);
+                params.row.status = 'passive';
+                setTimeout(() => {
+                    notifySuccess('User deleted successfully.')
+                }, 100);
+            }
+        };
+        fetchApi();
     };
 
     const actionColumn = [
@@ -149,12 +170,13 @@ export default function DataTable() {
                         </Button>
                         <Button
                             className={cx('delete-btn')}
-                            onClick={() => handleDelete(params.row.id)}
+                            onClick={() => handleDelete(params)}
                         >
                             Delete
                         </Button>
-                        <Button className={cx('modifier-btn')}>
+                        <Button to={`/admin/customer/edit/${params.row.id}`} className={cx('modifier-btn')}>
                             {/* <ModifierIcon width='1.2rem' height='1.2rem' /> */}
+
                             Edit
                         </Button>
                     </div>
@@ -171,6 +193,7 @@ export default function DataTable() {
 
     return (
         <div className={cx('data-table')}>
+            <ToastContainer />
             <div className={cx('data-title')}>
                 <span>Users</span>
                 <Button

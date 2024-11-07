@@ -7,6 +7,7 @@ const images = {
     noProductImg: require('./no-product-image.png'),
     noImg: require('./No_Image_Available.jpg'),
     productImg: require('./recommend-product/product-01.webp'),
+    logoGoogle: require('./logo-google.png'),
     cartItem: require('./drawer-cart/cart-item-01.avif'),
     slider1: require('./slide-show/Slider1.webp'),
     slider2: require('./slide-show/Slider2.webp'),

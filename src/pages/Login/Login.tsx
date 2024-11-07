@@ -11,6 +11,10 @@ import config from '../../config';
 import * as authServices from '../../services/authServices';
 import UserLoginDTO from '../../dtos/UserLoginDTO';
 import PreLoader from '../../components/PreLoader';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFacebook } from '@fortawesome/free-brands-svg-icons';
+import Image from '../../components/Image';
+import images from '../../assets/images';
 
 const cx = classNames.bind(styles);
 
@@ -174,7 +178,16 @@ const Login = () => {
             >
                 Sign in
             </Button>
-        </form>
+            <div className={cx('form__others')}>
+                <span className={cx('form__separate')}></span>
+                <span className={cx('form__text')}>OR</span>
+                <span className={cx('form__separate')}></span>
+            </div>
+            <div className={cx('form__bottom')}>
+                <Button className={cx('form__btn')} type='button' leftIcon={<FontAwesomeIcon icon={faFacebook} style={{ color: "#084ca3", }} />}>Facebook</Button>
+                <Button className={cx('form__btn')} type='button' leftIcon={<Image src={images.logoGoogle}></Image>}>Google</Button>
+            </div>
+        </form >
     );
 };
 

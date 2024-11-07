@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
 import { Link, useParams } from 'react-router-dom';
+import Tippy from '@tippyjs/react/headless';
+
 
 import styles from './OrderDetails.module.scss';
 import Image from '../../components/Image';
 import images from '../../assets/images';
-import { CheckNoCircleIcon } from '../../components/Icons';
+import { CheckNoCircleIcon, UpArrowIcon } from '../../components/Icons';
 import * as orderDetailServices from '../../services/orderDetailServices';
 import ProductModel from '../../models/ProductModel';
 import * as productServices from '../../services/productServices';
@@ -18,6 +20,10 @@ import {
 } from '../../utils/Functions';
 import PreLoader from '../../components/PreLoader';
 import * as orderServices from '../../services/orderServices';
+import Button from '../../components/Button';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowRotateLeft, faArrowRotateRight, faChevronDown, faPrint } from '@fortawesome/free-solid-svg-icons';
+import config from '../../config';
 
 const cx = classNames.bind(styles);
 
@@ -37,6 +43,8 @@ const OrderDetails = ({ modifier }: OrderDetailsProps) => {
     const [loading, setLoading] = useState(true);
     const [orderProducts, setOrderProducts] = useState<any>([]);
     const [orderDetail, setOrderDetail] = useState<any>({});
+    const [showDropdown, setShowDropdown] = useState(false);
+
 
 
 
@@ -188,6 +196,82 @@ const OrderDetails = ({ modifier }: OrderDetailsProps) => {
                     <h2 className={cx('order-details__title')}>
                         {`Order #OID${orderIdNumber}`}
                     </h2>
+                    <div className={cx('order-details__actions', { 'd-none': !modifier })}>
+                        <Button className={cx('order-details__action')} leftIcon={<FontAwesomeIcon icon={faPrint} />}>Print</Button>
+                        <Button className={cx('order-details__action')} leftIcon={<FontAwesomeIcon icon={faArrowRotateLeft} />}>Refund</Button>
+                        <Tippy
+                            visible={showDropdown}
+                            interactive
+                            delay={[0, 300]}
+                            offset={[0, 10]}
+                            placement="bottom-end"
+                            onClickOutside={() => setShowDropdown(false)}
+                            render={(attrs) => (
+                                <div className={cx('dropdown-profile')}>
+                                    <div
+                                        className={cx('dropdown-profile__menu')}
+                                    >
+                                        <Link
+                                            to={config.routes.profile}
+                                            className={cx(
+                                                'dropdown-profile__group'
+                                            )}
+                                            onClick={() =>
+                                                setShowDropdown(false)
+                                            }
+                                        >
+                                            <span
+                                                className={cx(
+                                                    'dropdown-profile__text'
+                                                )}
+                                            >
+                                                Action
+                                            </span>
+                                        </Link>
+                                        <Link
+                                            to={config.routes.profile}
+                                            className={cx(
+                                                'dropdown-profile__group'
+                                            )}
+                                            onClick={() =>
+                                                setShowDropdown(false)
+                                            }
+                                        >
+                                            <span
+                                                className={cx(
+                                                    'dropdown-profile__text'
+                                                )}
+                                            >
+                                                Another action
+                                            </span>
+                                        </Link>
+                                        <Link
+                                            to={config.routes.profile}
+                                            className={cx(
+                                                'dropdown-profile__group'
+                                            )}
+                                            onClick={() =>
+                                                setShowDropdown(false)
+                                            }
+                                        >
+                                            <span
+                                                className={cx(
+                                                    'dropdown-profile__text'
+                                                )}
+                                            >
+                                                Something else
+                                            </span>
+                                        </Link>
+
+                                    </div>
+
+                                </div>
+                            )}
+                        >
+                            <Button className={cx('order-details__action')} rightIcon={<FontAwesomeIcon icon={faChevronDown} />} onClick={() => setShowDropdown(!showDropdown)}>More action</Button>
+
+                        </Tippy>
+                    </div>
                 </div>
                 <div className="row g-0">
                     <div className="col col-8 col-xl-12">
@@ -635,7 +719,7 @@ const OrderDetails = ({ modifier }: OrderDetailsProps) => {
                                 </p>
                             </div>
                         </div>
-                        <div className={cx('timeline')}>
+                        <div className={cx('timeline', { 'd-none': modifier })}>
                             <h3 className={cx('timeline__heading')}>
                                 Order Status
                             </h3>
@@ -1233,6 +1317,59 @@ const OrderDetails = ({ modifier }: OrderDetailsProps) => {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div className={cx('organize', { 'd-none': !modifier })}>
+                            <h4 className={cx('organize__label')} style={{ marginBottom: '24px' }}>Order Status</h4>
+
+                            {/* Payment status */}
+                            <div className={cx('organize__group')}>
+                                <div className={cx('organize__top')}>
+                                    <h5 className={cx('organize__title')}>Payment status</h5>
+                                </div>
+                                <select
+                                    name="paymentStatus"
+                                    id="paymentStatus"
+                                    className={cx(
+                                        'organize__select'
+                                    )}
+                                >
+                                    <option value="Processing">
+                                        Processing
+                                    </option>
+                                    <option value="Canceled">
+                                        Canceled
+                                    </option>
+                                    <option value="Completed">
+                                        Completed
+                                    </option>
+                                </select>
+
+                            </div>
+                            {/* Fulfillment status */}
+                            <div className={cx('organize__group')}>
+                                <div className={cx('organize__top')}>
+                                    <h5 className={cx('organize__title')}>Payment status</h5>
+                                </div>
+                                <select
+                                    name="fulfillmentStatus"
+                                    id="fulfillmentStatus"
+                                    className={cx(
+                                        'organize__select'
+                                    )}
+                                >
+                                    <option value="Unfulfilled">
+                                        Unfulfilled
+                                    </option>
+                                    <option value="Fulfilled">
+                                        Fulfilled
+                                    </option>
+                                    <option value="Pending">
+                                        Pending
+                                    </option>
+                                </select>
+
+                            </div>
+
                         </div>
                     </div>
                 </div>

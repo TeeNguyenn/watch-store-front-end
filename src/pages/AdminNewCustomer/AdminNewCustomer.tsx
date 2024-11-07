@@ -8,12 +8,18 @@ import Image from '../../components/Image';
 import images from '../../assets/images';
 import { DriveFolderUploadOutlined } from '@mui/icons-material';
 import Navbar from '../Dashboard/components/navbar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as authServices from '../../services/authServices';
 import UserDTO from '../../dtos/UserDTO';
 import { ErrorIcon } from '../../components/Icons';
 import { ToastContainer, toast } from 'react-toastify';
 import PreLoader from '../../components/PreLoader';
+import { useParams } from 'react-router-dom';
+import UserModel from '../../models/UserModel';
+import * as userServices from '../../services/userServices';
+import { notifyError, notifySuccess } from '../../utils/Functions';
+
+// component use for new & edit customer
 
 
 const cx = classNames.bind(styles);
@@ -21,6 +27,52 @@ const cx = classNames.bind(styles);
 const AdminNewCustomer = () => {
     const [file, setFile] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+    const [avatar, setAvatar] = useState('')
+
+
+    // Get customerId from url
+    const { customerId } = useParams();
+
+    let customerIdNumber = 0;
+    try {
+        customerIdNumber = parseInt(customerId + '');
+        if (Number.isNaN(customerIdNumber)) {
+            customerIdNumber = 0;
+        }
+    } catch (error) {
+        customerIdNumber = 0;
+        console.log('Error:', error);
+    }
+
+    // get all users
+    useEffect(() => {
+        if (customerIdNumber) {
+            const fetchApi = async () => {
+                setLoading(true);
+                const responseData = await userServices.getAllUser();
+
+                responseData.result.forEach(userItem => {
+                    if (customerIdNumber === userItem.userId) {
+                        formik.setValues({
+                            firstName: userItem.firstName,
+                            lastName: userItem.lastName,
+                            email: userItem.email,
+                            phoneNumber: userItem.phoneNumber,
+                            password: 'Tee080503@', //temp
+                            country: '',
+                            address: userItem?.address || '',
+                        })
+                        setAvatar(userItem.avatar || '');
+                        setLoading(false);
+                        return;
+                    }
+                });
+            };
+
+            fetchApi();
+        }
+
+    }, [customerIdNumber]);
 
 
     const notifyNewCustomerSuccess = () => {
@@ -61,6 +113,7 @@ const AdminNewCustomer = () => {
                     'checkEmailExists',
                     'Email already existed.',
                     async (value) => {
+                        if (customerIdNumber) return true;
                         if (!value) return true;
                         const res = await authServices.checkExistEmail(value);
                         return !res; // res trả về true nếu email đã được sử dụng, phủ định res thành false để hiển thị lỗi
@@ -84,6 +137,7 @@ const AdminNewCustomer = () => {
             //     .required('You must fill in this section.'),
         }),
         onSubmit: (values) => {
+
             const data: UserDTO = {
                 first_name: values.firstName,
                 last_name: values.lastName,
@@ -93,18 +147,73 @@ const AdminNewCustomer = () => {
                 retype_password: values.password,
                 role_ids: [2], //temp
             };
-            const fetchApi = async () => {
-                setLoading(true);
-                const res = await authServices.register(data);
-                if (res) {
-                    formik.resetForm();
+            if (customerIdNumber) {
+
+                const data: any = {
+                    userId: customerIdNumber + '',
+                    infos: {
+                        first_name: values.firstName,
+                        last_name: values.lastName,
+                        phone_number: values.phoneNumber,
+                        address: values.address,
+                        email: values.email
+                    }
+                };
+                const fetchApi = async () => {
+                    setLoading(true);
+
+                    // Tạo form data và thêm file
+                    const formData = new FormData();
+                    formData.append("file", file);
+
+                    if (file) {
+                        const resData = await userServices.putAvatarUser(customerIdNumber + '', formData);
+
+                        if (resData.errorMessage) {
+
+                            setTimeout(() => {
+                                setLoading(false);
+                            }, 200);
+                            setTimeout(() => {
+                                notifyError(resData.errorMessage)
+                            }, 300);
+                            return;
+                        }
+                    }
+
+                    const res = await userServices.putUser(data);
+
+                    if (res.status !== 'OK') {
+                        setTimeout(() => {
+                            setLoading(false);
+                        }, 200);
+                        setTimeout(() => {
+                            notifyError('An error occurred.')
+                        }, 300);
+                        return;
+                    }
+
                     setLoading(false);
                     setTimeout(() => {
-                        notifyNewCustomerSuccess();
+                        notifySuccess('Change user information successfully');
                     }, 100);
                 }
-            };
-            fetchApi();
+
+                fetchApi();
+            } else {
+                const fetchApi = async () => {
+                    setLoading(true);
+                    const res = await authServices.register(data);
+                    if (res) {
+                        formik.resetForm();
+                        setLoading(false);
+                        setTimeout(() => {
+                            notifyNewCustomerSuccess();
+                        }, 100);
+                    }
+                };
+                fetchApi();
+            }
         },
     });
 
@@ -117,15 +226,15 @@ const AdminNewCustomer = () => {
         <div className={cx('new')}>
             <ToastContainer />
             <div className={cx('new__top')}>
-                <h1 className={cx('new__title')}>Add New User</h1>
+                <h1 className={cx('new__title')}>{!customerIdNumber ? 'Add New User' : 'Edit User'}</h1>
             </div>
             <div className={cx('new__bottom')}>
-                <div className={cx('new__left')}>
+                <div className={cx('new__left', { 'd-none': !customerIdNumber })}>
                     <Image
                         src={
                             file
                                 ? URL.createObjectURL(file)
-                                : images.defaultAvatar
+                                : avatar || images.defaultAvatar
                         }
                         alt="avatar"
                         className={cx('new__avatar')}
@@ -133,7 +242,7 @@ const AdminNewCustomer = () => {
                 </div>
                 <div className={cx('new__right')}>
                     <form action="" className={cx('form')} onSubmit={formik.handleSubmit}>
-                        <div className={cx('form__input')}>
+                        <div className={cx('form__input', { 'd-none': !customerIdNumber })}>
                             <label htmlFor="file">
                                 Image:{' '}
                                 <DriveFolderUploadOutlined
@@ -143,6 +252,7 @@ const AdminNewCustomer = () => {
                             <input
                                 type="file"
                                 id="file"
+                                accept="image/jpeg, image/png, image/gif, image/bmp"
                                 style={{
                                     display: 'none',
                                 }}
@@ -172,7 +282,7 @@ const AdminNewCustomer = () => {
                                 </div>
                             )}
                         </div>
-                        <div className={cx('form__input')}>
+                        <div className={cx('form__input', { 'd-none': true })}>
                             <label htmlFor="country">Country</label>
                             <input
                                 value={formik.values.country}
@@ -238,6 +348,7 @@ const AdminNewCustomer = () => {
                                 type="email"
                                 name="email"
                                 id="email"
+                                disabled={!!customerIdNumber}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
                                 placeholder="Enter your email"
@@ -271,7 +382,7 @@ const AdminNewCustomer = () => {
                                 </div>
                             )}
                         </div>
-                        <div className={cx('form__input')}>
+                        <div className={cx('form__input', { 'd-none': customerIdNumber })}>
                             <label htmlFor="password">Password</label>
                             <input
                                 value={formik.values.password}
@@ -296,7 +407,7 @@ const AdminNewCustomer = () => {
                             type="submit"
                             className={cx('form__btn')}
                         >
-                            Send
+                            {customerIdNumber ? 'Change' : 'Send'}
                         </Button>
                     </form>
                 </div>

@@ -174,6 +174,7 @@
     &__file-wrapper {
         width: calc(10% - 9px);
         position: relative;
+        background-color: var(--white-color);
 
     }
 
@@ -181,7 +182,7 @@
         width: 100%;
         aspect-ratio: 1 /1;
         border-radius: 8px;
-        object-fit: cover;
+        object-fit: contain;
     }
 
     &__close-btn {
@@ -546,4 +547,142 @@
         background-color: #e3e6ed;
     }
     }
+
+    &__news {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px 20px ;
+        // border-top: 1px dashed rgb(204, 204, 204) ;
+        border-bottom: 1px dashed rgb(204, 204, 204) ;
+        padding: 8px 0 16px;
+    }
+
+    &__new-btn {
+        width: calc(50% - 10px);
+        justify-content: flex-start;
+        padding: 2px 0;
+        font-size: 1.5rem;
+        font-weight: 500;
+
+        &:hover {
+            text-decoration: underline;
+            color: var(--primary-second-color);
+
+        }
+
+        & + & {
+            margin-left: 0;
+        }
+
+        & > svg {
+            width: 14px;
+            height: 14px;
+            color: var(--primary-color);
+        }
+    }
+}
+
+
+.new-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    // transition: var(--transition-config);
+
+    &.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    &__overlay {
+        position: absolute;
+        inset: 0;
+        background-color: rgba($color: #000000, $alpha: 0.6);
+    }
+
+    &__inner {
+        position: absolute;
+        z-index: 1;
+        background-color: var(--background-color);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        border-radius: 8px;
+        min-width: 500px;
+        
+    }
+
+    &__heading {
+        font-size: 1.8rem;
+        line-height: normal;
+        font-weight: 600;
+        margin-bottom: 24px;
+        color: var(--primary-color);
+    }
+
+    &__input {
+        width: 100%;
+
+        & + & {
+            margin-top: 10px;
+        }
+
+        input:focus {
+            border-color: var(--primary-second-color);
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+            font-size: 1.6rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 5px;
+            border: none;
+            outline: none;
+            border-bottom: 1.5px solid gray;
+            background-color: transparent;
+            transition: var(--transition-config);
+
+            &::placeholder {
+                font-size: 1.4rem;
+        
+            @include abstracts.screen(md) {
+                font-size: 1.2rem;
+            }
+            }
+        }
+    }
+
+    &__cancel-btn , &__add-btn {
+        padding: 8px 24px;
+        font-weight: 500;
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+        margin-top: 24px;
+    }
+
+    &__cancel-btn {
+        margin-right: 8px;
+
+        &:hover {
+            border-color: var(--primary-color);
+        }
+    }
+
+    &__add-btn:hover {
+        background-color: var(--primary-second-color);
+    }
+
+    
 }

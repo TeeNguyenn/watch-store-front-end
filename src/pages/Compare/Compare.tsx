@@ -121,7 +121,7 @@ const Compare = () => {
         <div className={cx('compare', { 'container-spacing': true })}>
             <Breadcrumb
                 title="Compare"
-                links={['home', 'compare']}
+                links={[{ to: config.routes.home, name: 'home' }, { name: 'Compare' }]}
             ></Breadcrumb>
             <div
                 className={cx('compare__list', {
@@ -169,12 +169,12 @@ const Compare = () => {
                                     <p className={cx('product__price')}>
                                         {compareItem!.discount
                                             ? formatPrice(
-                                                  compareItem!.price *
-                                                      (1 -
-                                                          compareItem!
-                                                              .discount /
-                                                              100)
-                                              )
+                                                compareItem!.price *
+                                                (1 -
+                                                    compareItem!
+                                                        .discount /
+                                                    100)
+                                            )
                                             : formatPrice(compareItem!.price)}
                                     </p>
                                     <Button
