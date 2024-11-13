@@ -141,3 +141,120 @@ export const putAvatarUser = async (userId: string, avatar: any) => {
 
     }
 };
+
+export const resetPassword = async (userId: string) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.put(`users/reset-password/${userId}`, {}, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return response;
+
+    } catch (error: any) {
+        // throw (error);
+        return {
+            errorMessage: error.response.data.message
+        }
+
+
+    }
+};
+
+export const generateOTP = async (email: string) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.put('users/generate-otp', {}, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            params: {
+                email
+            }
+        });
+
+        return response;
+
+    } catch (error: any) {
+        // throw (error);
+        return {
+            errorMessage: error.response.data.message
+        }
+
+
+    }
+};
+
+export const checkOTP = async (email: string, otp: string) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.put('users/check-otp', {}, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            params: {
+                email,
+                otp
+            }
+        });
+
+        return response;
+
+    } catch (error: any) {
+        // throw (error);
+        return {
+            errorMessage: error.response.data.message
+        }
+
+
+    }
+};
+
+export const forgotPassword = async (data: any) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.put('users/forgot-password', data, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return response;
+
+    } catch (error: any) {
+        // throw (error);
+        return {
+            errorMessage: error.response.data.message
+        }
+
+
+    }
+};
+
+export const changePassword = async (data: any) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await request.put('users/change-password', data, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return response;
+
+    } catch (error: any) {
+        // throw (error);
+        return {
+            errorMessage: error.response.data.message
+        }
+
+
+    }
+};

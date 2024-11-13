@@ -15,6 +15,10 @@ import { formatPrice, getCurrentDateWithHour, notifyError, notifySuccess, timeAg
 import * as orderServices from '../../services/orderServices';
 import PreLoader from '../PreLoader';
 import { ToastContainer, toast } from 'react-toastify';
+import ModalConfirm from '../ModalConfirm/ModalConfirm';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import config from '../../config';
 
 
 const cx = classNames.bind(styles);
@@ -32,6 +36,7 @@ interface ICustomerDetail {
     phone: string;
     address: string | undefined;
     totalSpent: number;
+    roles: any[] | undefined;
 
 }
 
@@ -42,7 +47,8 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
     const currentUser = localStorage.getItem('user_id');
     const [showChange, setShowChange] = useState(false);
     const [address, setAddress] = useState<string | undefined>('');
-    const [avatar, setAvatar] = useState<string | undefined>('')
+    const [avatar, setAvatar] = useState<string | undefined>('');
+    const [showModal, setShowModal] = useState(false);
 
     const refInput = useRef<HTMLInputElement | null>(null);
 
@@ -144,7 +150,6 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
             setLoading(true);
             const responseData = await userServices.getAllUser();
 
-
             const fetchApi1 = async (userItem: UserModel) => {
                 const res = await orderServices.getAllOrderByUserId(userItem.userId + '');
 
@@ -160,6 +165,7 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                         }, 0)
                     }
 
+
                     setCustomerDetail({
                         id: userItem.userId,
                         name: userItem.firstName + ' ' + userItem.lastName,
@@ -168,7 +174,8 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                         lastOrder: res.totalOrders > 0 ? timeAgo(res.result.at(0).order_date) : 'No orders',
                         phone: userItem.phoneNumber,
                         address: userItem.address, //temp
-                        totalSpent
+                        totalSpent,
+                        roles: userItem.role
 
                     })
 
@@ -221,7 +228,8 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                     lastOrder: resData.totalOrders > 0 ? timeAgo(resData.result.at(0).order_date) : 'No orders',
                     phone: res.phoneNumber,
                     address: res.address, //temp
-                    totalSpent
+                    totalSpent,
+                    roles: res.role
 
                 })
 
@@ -236,6 +244,29 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
         }
 
     }, [customerIdNumber]);
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+    }
+
+    const handleResetPassword = async () => {
+        setLoading(true);
+        const res = await userServices.resetPassword(customerIdNumber + '');
+        if (res.status === 'OK') {
+            setShowModal(false);
+            setLoading(false);
+            setTimeout(() => {
+                notifySuccess('Reset password successfully. Please check Gmail inbox for a new password')
+            }, 100);
+        } else {
+            setShowModal(false);
+            setLoading(false);
+            setTimeout(() => {
+                notifyError('An error occurred.')
+            }, 100);
+
+        }
+    }
 
 
 
@@ -259,7 +290,7 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                     {/* admin */}
                     <Button
                         type='button'
-                        className={cx('btn', 'delete-btn', { 'd-none': !modifier })}
+                        className={cx('btn', 'delete-btn', { 'd-none': true })}
                         leftIcon={
                             <RemoveIcon
                                 width="1.28rem"
@@ -272,10 +303,20 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                     <Button
                         type='button'
 
-                        className={cx('btn', 'reset-btn')}
+                        className={cx('btn', 'reset-btn', {
+                            'd-none': !modifier
+                        })}
                         leftIcon={<ResetIcon></ResetIcon>}
+                        onClick={() => setShowModal(!showModal)}
                     >
                         Reset password
+                    </Button>
+                    <Button
+                        to={`/change-password/${customerDetail?.email}`}
+                        className={cx('btn', 'reset-btn')}
+                        leftIcon={<FontAwesomeIcon icon={faPenToSquare} />}
+                    >
+                        Change password
                     </Button>
                 </div>
             </div>
@@ -530,6 +571,9 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                     </div>
                 </div>
             </div>
+
+            {/* Modal confirm */}
+            <ModalConfirm show={showModal} title='Reset Password' handleCloseModal={handleCloseModal} handleConfirm={handleResetPassword}>An email will be sent to your registered email address with instructions to reset your password. Please check your inbox for a new password. If you do not see the email, please check your spam or unwanted email folder.</ModalConfirm>
         </form>
     );
 };

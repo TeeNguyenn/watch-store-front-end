@@ -24,7 +24,7 @@ import { CartContext } from '../../contexts/CartContext';
 import * as cartItemServices from '../../services/cartItemServices';
 import PreLoader from '../PreLoader';
 import { RootState, useAppDispatch, useAppSelector } from '../../redux/store';
-import { deleteWishlistItem } from './wishlistSlice';
+import { deleteWishlistItem, putWishlistItem } from './wishlistSlice';
 import { getCart, postCart } from '../../layouts/components/Cart/cartSlice';
 
 const cx = classNames.bind(styles);
@@ -74,6 +74,7 @@ const WishlistItem = ({
 
     const dispatch = useAppDispatch()
     const cartStatus = useAppSelector((state: RootState) => state.cartList.status);
+    const wishlistStatus = useAppSelector((state: RootState) => state.wishlists.status);
 
 
     // Get customerId from url
@@ -134,17 +135,8 @@ const WishlistItem = ({
             const output: VariantModel[] | undefined = [];
 
             Arr?.forEach((materialItem) => {
-                let count = 0;
-                for (let index = 0; index < output.length; index++) {
-                    if (
-                        materialItem.material.materialId ===
-                        output[index].material.materialId
-                    ) {
-                        count++;
-                        break;
-                    }
-                }
-                if (count === 0) {
+
+                if (materialItem.screenSize.sizeId === wishlistItem.screenSizeId) {
                     output.push(materialItem);
                 }
             });
@@ -205,17 +197,8 @@ const WishlistItem = ({
         const output: VariantModel[] | undefined = [];
 
         Arr?.forEach((materialItem) => {
-            let count = 0;
-            for (let index = 0; index < output.length; index++) {
-                if (
-                    materialItem.material.materialId ===
-                    output[index].material.materialId
-                ) {
-                    count++;
-                    break;
-                }
-            }
-            if (count === 0) {
+
+            if (materialItem.screenSize.sizeId === sortResult.at(0)?.screenSize.sizeId) {
                 output.push(materialItem);
             }
         });
@@ -231,69 +214,67 @@ const WishlistItem = ({
         }
     };
 
+
+    const handleSelectSize = (sizeId: number, isConfirm: boolean = false, isCancel: boolean = false) => {
+        const Arr: VariantModel[] | undefined = productDetail?.variants?.filter(
+            (variant) => variant.color.colorId === (isCancel ? activeColor : tempColor)
+        );
+
+        const output: VariantModel[] | undefined = [];
+
+        Arr?.forEach((materialItem) => {
+
+            if (materialItem.screenSize.sizeId === sizeId) {
+                output.push(materialItem);
+            }
+        });
+
+        const sortOutput = output.sort(
+            (a: any, b: any) => a.material.materialId - b.material.materialId
+        );
+
+        setTempMaterialList(sortOutput);
+
+        if (!isConfirm) {
+            setTempMaterial(sortOutput.at(0)?.material.materialId);
+        }
+
+    }
+
     const handleConfirm = () => {
         const newArr = productDetail?.productImages.filter(
             (item: ProductImageModel) => item.colorId === tempColor
         );
         setImageList(newArr);
 
-        const wishlist: any[] =
-            JSON.parse(localStorage.getItem('wishlist') + '') || [];
 
-        if (!currentUser) {
-            setLoading(true);
-            const newArr = wishlist.map((item) => {
-                if (
-                    item.product_id === productDetail?.productId &&
-                    item.color_id === activeColor &&
-                    item.screen_size_id === activeSize &&
-                    item.material_id === activeMaterial
-                ) {
-                    item.product_id = productDetail?.productId;
-                    item.color_id = tempColor;
-                    item.screen_size_id = tempSize;
-                    item.material_id = tempMaterial;
-                }
-                return item;
-            });
-            localStorage.setItem('wishlist', JSON.stringify(newArr));
-            window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
-            setTimeout(() => {
-                setLoading(false);
-            }, 300);
-        } else {
-            const fetchApi = async () => {
-                setLoading(true);
-                const resData = await favoriteServices.getFavoriteByUserId(
-                    customerId || currentUser
+        const fetchApi = async () => {
+            const resData = await favoriteServices.getFavoriteByUserId(
+                customerId || currentUser + ''
+            );
+
+            // Lay ra item mà đang có variant giống variant đang active de lay ra favoriteId
+            const putFavoriteItem = resData.result.find((item) => {
+                return (
+                    item.productId === productDetail?.productId &&
+                    item.colorId === activeColor &&
+                    item.screenSizeId === activeSize &&
+                    item.materialId === activeMaterial
                 );
+            });
 
-                // Lay ra item mà đang có variant giống variant đang active
-                const putFavoriteItem = resData.result.filter((item) => {
-                    return (
-                        item.productId === productDetail?.productId &&
-                        item.colorId === activeColor &&
-                        item.screenSizeId === activeSize &&
-                        item.materialId === activeMaterial
-                    );
-                });
+            if (putFavoriteItem) {
+                dispatch(putWishlistItem({
+                    productId: productDetail?.productId,
+                    colorId: tempColor,
+                    screenSizeId: tempSize,
+                    materialId: tempMaterial,
+                    id: putFavoriteItem?.favoriteId,
+                }))
+            }
+        };
+        fetchApi();
 
-                if (putFavoriteItem.length > 0) {
-                    const res = await favoriteServices.putFavorite({
-                        productId: productDetail?.productId,
-                        colorId: tempColor,
-                        screenSizeId: tempSize,
-                        materialId: tempMaterial,
-                        id: putFavoriteItem?.at(0)?.favoriteId,
-                    });
-                }
-                window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
-            };
-            fetchApi();
-            setTimeout(() => {
-                setLoading(false);
-            }, 300);
-        }
 
         setActiveColor(tempColor);
         setActiveSize(tempSize);
@@ -301,6 +282,8 @@ const WishlistItem = ({
         setShowDropdownVariant(false);
         // setShowMobileDropdownVariant(false);
         handleSelectColor(Number(parseInt(tempColor + '')), true);
+        handleSelectSize(Number(parseInt(tempSize + '')), true);
+
     };
 
     const handleCancel = () => {
@@ -314,6 +297,8 @@ const WishlistItem = ({
         setShowDropdownVariant(false);
         // setShowMobileDropdownVariant(false);
         handleSelectColor(Number(parseInt(activeColor + '')), true);
+        handleSelectSize(Number(parseInt(activeSize + '')), true, true);
+
     };
 
     const handleOutSide = () => {
@@ -323,6 +308,8 @@ const WishlistItem = ({
         setShowDropdownVariant(false);
         // setShowMobileDropdownVariant(false);
         handleSelectColor(Number(parseInt(activeColor + '')), true);
+        handleSelectSize(Number(parseInt(activeSize + '')), true, true);
+
     };
 
     const handleRemoveItem = async () => {
@@ -356,7 +343,7 @@ const WishlistItem = ({
         fetchData();
     };
 
-    if (loading) {
+    if (wishlistStatus === 'loading') {
         return <PreLoader show></PreLoader>;
     }
 
@@ -436,10 +423,13 @@ const WishlistItem = ({
                                                 sizeItem.screenSize.sizeId ===
                                                 tempSize,
                                         })}
-                                        onClick={() =>
+                                        onClick={() => {
+
                                             setTempSize(
                                                 sizeItem.screenSize.sizeId
-                                            )
+                                            );
+                                            handleSelectSize(sizeItem.screenSize.sizeId)
+                                        }
                                         }
                                     >
                                         {`${sizeItem.screenSize.size} Inches`}

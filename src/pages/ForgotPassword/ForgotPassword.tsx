@@ -1,17 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames/bind';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+
 
 import Button from '../../components/Button';
 import { CheckIcon, ErrorIcon } from '../../components/Icons';
 import styles from './ForgotPassword.module.scss';
 import config from '../../config';
+import * as authServices from '../../services/authServices';
+import * as userServices from '../../services/userServices';
+import { notifyError, notifySuccess } from '../../utils/Functions';
+import PreLoader from '../../components/PreLoader';
 
 const cx = classNames.bind(styles);
 
 const ForgotPassword = () => {
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+
     const formik = useFormik({
         initialValues: {
             email: '',
@@ -19,16 +28,58 @@ const ForgotPassword = () => {
         validationSchema: Yup.object({
             email: Yup.string()
                 .email('Invalid email.')
-                .required('You must fill in this section.'),
+                .required('You must fill in this section.')
+            // .test(
+            //     'checkEmailExists',
+            //     'This email is not in use. Please re-enter your email.',
+            //     async (value) => {
+            //         if (!value) return true;
+            //         const res = await authServices.checkExistEmail(value);
+            //         return res; // res trả về true nếu email đã được sử dụng, false nếu chưa được sử dụng => để hiển thị lỗi
+            //     }
+            // ),
         }),
         onSubmit: (values) => {
-            //call api
-            console.log(values);
+            setLoading(true);
+            const fetchApi = async () => {
+                const res = await authServices.checkExistEmail(values.email);
+                if (res) {
+                    const res = await userServices.generateOTP(values.email);
+                    if (res.status === "OK") {
+                        navigate(`/forgot-password/otp/${values.email}`)
+                        setLoading(false);
+                    } else {
+                        setLoading(false);
+                        setTimeout(() => {
+                            notifyError(res.errorMessage)
+                        }, 100);
+                    }
+                } else {
+                    // formik.resetForm();
+                    setTimeout(() => {
+                        setLoading(false);
+                    }, 200);
+                    setTimeout(() => {
+                        notifyError('This email is not in use. Please re-enter your email.')
+                    }, 300);
+                }
+            };
+            fetchApi();
+
         },
     });
 
+    const handleCancel = () => {
+        navigate(config.routes.login)
+    }
+
+    if (loading) {
+        return <PreLoader show />
+    }
+
     return (
         <div className={cx('forgot-password')}>
+            <ToastContainer />
             <form className={cx('form')} onSubmit={formik.handleSubmit}>
                 <div className={cx('form__heading')}>
                     <h1 className={cx('form__title', 'forgot-password__title')}>
@@ -81,6 +132,7 @@ const ForgotPassword = () => {
                         className={cx('forgot-password__cancel-btn', {
                             'primary-hover': true,
                         })}
+                        onClick={handleCancel}
                     >
                         Cancel
                     </Button>

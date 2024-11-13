@@ -38,13 +38,13 @@ export const postCartItem = async (cartItem: any) => {
                 'Authorization': `Bearer ${token}`
             }
         });
-
-        return response.data;
-
-    } catch (error) {
+        return response;
+    } catch (error: any) {
         throw (error);
 
+
     }
+
 }
 
 

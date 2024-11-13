@@ -7,11 +7,13 @@ import styles from './Detail.module.scss';
 import Breadcrumb from '../../components/Breadcrumb';
 import images from '../../assets/images/home';
 import Image from '../../components/Image';
-import { renderRating } from '../../utils/Functions';
+import { notifyError, renderRating } from '../../utils/Functions';
 import Price from '../../components/Price';
 import Quantity from '../../components/Quantity';
 import {
     ActiveHeartIcon,
+    CloseIcon,
+    CompareFillIcon,
     CompareIcon,
     DeliveryIcon,
     HeartIcon,
@@ -42,8 +44,9 @@ import * as favoriteServices from '.././../services/favoriteServices';
 import * as cartItemServices from '../../services/cartItemServices';
 import Pagination from '../../components/Pagination';
 import { RootState, useAppDispatch, useAppSelector } from '../../redux/store';
-import { postWishlistItem } from '../../components/Wishlist/wishlistSlice';
+import { getWishlist, postWishlistItem } from '../../components/Wishlist/wishlistSlice';
 import { getCart, postCart } from '../../layouts/components/Cart/cartSlice';
+import { ToastContainer } from 'react-toastify';
 
 const cx = classNames.bind(styles);
 
@@ -68,6 +71,7 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
     const dispatch = useAppDispatch()
     const wishlistStatus = useAppSelector((state: RootState) => state.wishlists.status);
     const cartStatus = useAppSelector((state: RootState) => state.cartList.status);
+    const wishlist = useAppSelector((state: RootState) => state.wishlists.wishlist);
 
 
     const settings = {
@@ -120,8 +124,12 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
     >([]);
     const [liked, setLiked] = useState(false);
     const currentUser = localStorage.getItem('user_id');
-    const [loadingCart, setLoadingCart] = useState(false);
     const [quantityProduct, setQuantityProduct] = useState(1);
+    const [compared, setCompared] = useState(false);
+    const [loadingWishlist, setLoadingWishlist] = useState(false);
+    const [loadingCompare, setLoadingCompare] = useState(false);
+    const [showCompareModal, setShowCompareModal] = useState(false);
+
 
     // Get productId from url
     const { productId } = useParams();
@@ -151,6 +159,45 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
         console.log('Error:', error);
     }
 
+    // // get wishlist from db
+    useEffect(() => {
+        const fetchApi = async () => {
+            const res = await favoriteServices.getFavoriteByUserId(currentUser + '');
+
+            await dispatch(getWishlist({
+                id: customerId || currentUser + '',
+                currentPage: 1,
+                limit: res.totalProduct
+            }))
+        }
+
+        if (currentUser) {
+            fetchApi();
+        }
+
+    }, [currentUser]);
+
+    // get compareList
+    useEffect(() => {
+        const compareList: any[] =
+            JSON.parse(localStorage.getItem('compare_list') + '') || [];
+
+        let isCompared = false;
+        compareList.forEach((compareItem) => {
+            if (compareItem.product_id === (quickBuy
+                ? productItem?.productId
+                : productIdNumber)) {
+                isCompared = true;
+                return;
+            }
+        });
+
+        if (isCompared) {
+            setCompared(true);
+            return;
+        }
+    }, [productIdNumber, quickBuy, productItem]);
+
 
     useEffect(() => {
         if (!quickBuy) {
@@ -161,6 +208,7 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
         }
     }, [imageList, quickBuy]);
 
+
     useEffect(() => {
         const fetchApi = async () => {
             setLoading(true);
@@ -168,7 +216,7 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
 
             const responseData = await productServices.getProductById(
                 quickBuy
-                    ? Number.parseInt(productItem?.productId + '')
+                    ? Number(productItem?.productId + '')
                     : productIdNumber
             );
 
@@ -184,6 +232,7 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
 
             const result: VariantModel[] | undefined = [];
 
+            // filter sizeList from variants
             Arr?.forEach((sizeItem) => {
                 let count = 0;
                 for (let index = 0; index < result.length; index++) {
@@ -206,21 +255,12 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
             setSizeList(sortResult);
             setActiveSize(sortResult?.at(0)?.screenSize.sizeId);
 
+            // materialList
             const output: VariantModel[] | undefined = [];
 
             Arr?.forEach((materialItem) => {
-                let count = 0;
-                for (let index = 0; index < output.length; index++) {
-                    if (
-                        materialItem.material.materialId ===
-                        output[index].material.materialId
-                    ) {
-                        count++;
-                        break;
-                    }
-                }
-                if (count === 0) {
-                    output.push(materialItem);
+                if (materialItem.screenSize.sizeId === sortResult?.at(0)?.screenSize.sizeId) {
+                    output.push(materialItem)
                 }
             });
 
@@ -237,6 +277,7 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                         item.colorId === responseData?.colors.at(0)?.colorId
                 )
             );
+
             // const feedbackData =
             //     await feedbackServices.getAllFeedbackByProductId(
             //         productIdNumber,
@@ -254,28 +295,13 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                 setProductList(recommendProducts.result);
             }
 
-            if (currentUser) {
-                const res = await favoriteServices.getFavoriteByUserId(
-                    customerId || currentUser + ''
-                );
 
-                res.result.forEach((item) => {
-                    if (
-                        item.productId === Number(productId + '') ||
-                        item.productId === productItem?.productId
-                    ) {
-                        setLiked(true);
-                        setLoading(false);
-                        return;
-                    }
-                });
-            }
             setLoading(false);
         };
-        if (productIdNumber) {
-            fetchApi();
-        }
-    }, [productIdNumber]);
+
+        fetchApi();
+
+    }, [productIdNumber, quickBuy, productItem]);
 
     useEffect(() => {
         const fetchApi = async () => {
@@ -351,17 +377,7 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
         const output: VariantModel[] | undefined = [];
 
         Arr?.forEach((materialItem) => {
-            let count = 0;
-            for (let index = 0; index < output.length; index++) {
-                if (
-                    materialItem.material.materialId ===
-                    output[index].material.materialId
-                ) {
-                    count++;
-                    break;
-                }
-            }
-            if (count === 0) {
+            if (materialItem.screenSize.sizeId === sortResult.at(0)?.screenSize.sizeId) {
                 output.push(materialItem);
             }
         });
@@ -373,6 +389,28 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
         setMaterialList(sortOutput);
         setActiveMaterial(sortOutput.at(0)?.material.materialId);
     };
+
+    const handleSelectSize = (sizeId: number) => {
+
+        const Arr: VariantModel[] | undefined = productDetail?.variants?.filter(
+            (variant) => variant.color.colorId === activeColor
+        );
+
+        const output: VariantModel[] | undefined = [];
+
+        Arr?.forEach((materialItem) => {
+            if (materialItem.screenSize.sizeId === sizeId) {
+                output.push(materialItem);
+            }
+        });
+
+        const sortOutput = output.sort(
+            (a: any, b: any) => a.material.materialId - b.material.materialId
+        );
+
+        setMaterialList(sortOutput);
+        setActiveMaterial(sortOutput.at(0)?.material.materialId);
+    }
 
     const handleShowProductDetail = (num: number) => {
         if (showProductDetail.includes(num)) {
@@ -397,6 +435,8 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                 navigate(config.routes.login);
             }, 300);
         } else {
+            setLoadingWishlist(true);
+
             if (liked) {
                 return;
             } else {
@@ -414,10 +454,13 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                 //     }, 200);
                 // }
             }
+            setTimeout(() => {
+                setLoadingWishlist(false);
+            }, 500);
         }
     };
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
         if (!currentUser) {
             setLoading(true);
             localStorage.setItem('previousPage', location.pathname);
@@ -437,18 +480,54 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                     materialId: activeMaterial,
                     quantity: quantityProduct
                 }))
+
                 await dispatch(getCart());
-                if (cartStatus === 'fulfilled') {
-                    context?.handleCart();
-                }
+
+                context?.handleCart();
 
             }
 
             fetchData();
 
-
         }
+
+
     };
+
+    const handleAddCompare = () => {
+        setLoadingCompare(true);
+        if (compared) {
+            return;
+        } else {
+            const compareList: any[] =
+                JSON.parse(localStorage.getItem('compare_list') + '') || [];
+            if (compareList.length === 4) {
+                setShowCompareModal(true);
+                setLoadingCompare(false);
+                return;
+            }
+            const newCompareList = [
+                {
+                    product_id: quickBuy
+                        ? productItem?.productId
+                        : productIdNumber,
+                },
+                ...compareList,
+            ];
+            setCompared(true);
+            window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
+            localStorage.setItem(
+                'compare_list',
+                JSON.stringify(newCompareList)
+            );
+        }
+
+        setTimeout(() => {
+            setLoadingCompare(false);
+        }, 300);
+    };
+
+
 
     const handleCheckout = () => {
         // Remove key "id" for matches CartItemDTO
@@ -485,6 +564,7 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                 'product-detail-slider': true,
             })}
         >
+            {/* <ToastContainer /> */}
             {loading && !quickBuy && <PreLoader show></PreLoader>}
             {!quickBuy && (
                 <Breadcrumb
@@ -814,10 +894,12 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                                             activeSize,
                                                     }
                                                 )}
-                                                onClick={() =>
+                                                onClick={() => {
                                                     setActiveSize(
                                                         item.screenSize.sizeId
-                                                    )
+                                                    );
+                                                    handleSelectSize(item.screenSize.sizeId);
+                                                }
                                                 }
                                                 onMouseEnter={() =>
                                                     setTempSize(
@@ -961,7 +1043,7 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                                 )}
                                             </Button>
 
-                                            {wishlistStatus === 'loading' ? (
+                                            {loadingWishlist ? (
                                                 <div
                                                     className={cx(
                                                         'product-detail__btn'
@@ -979,7 +1061,9 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                                 </div>
                                             ) : (
                                                 <>
-                                                    {liked ? (
+                                                    {wishlist.some(item => item.productId === (quickBuy
+                                                        ? productItem?.productId
+                                                        : productIdNumber)) ? (
                                                         <Link
                                                             to={
                                                                 config.routes
@@ -1009,15 +1093,44 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                                     )}
                                                 </>
                                             )}
+                                            {loadingCompare ? (
+                                                <div
+                                                    className={cx(
+                                                        'product-detail__btn'
+                                                    )}
+                                                >
+                                                    <Button
+                                                        className={cx(
+                                                            'loading'
+                                                        )}
+                                                    >
+                                                        <FontAwesomeIcon
+                                                            icon={faSpinner}
+                                                        />
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    {compared ? <Button
+                                                        to={config.routes.compare}
+                                                        className={cx('product-detail__btn')}
+                                                    >
+                                                        <CompareFillIcon
+                                                            className={cx('icon')}
+                                                        ></CompareFillIcon>
+                                                    </Button> :
+                                                        <Button
+                                                            className={cx(
+                                                                'product-detail__btn',
+                                                                { 'primary-hover': true }
+                                                            )}
+                                                            onClick={handleAddCompare}
+                                                        >
+                                                            <CompareIcon></CompareIcon>
+                                                        </Button>}
+                                                </>
+                                            )}
 
-                                            <Button
-                                                className={cx(
-                                                    'product-detail__btn',
-                                                    { 'primary-hover': true }
-                                                )}
-                                            >
-                                                <CompareIcon></CompareIcon>
-                                            </Button>
                                         </div>
                                         <Button
                                             to={config.routes.checkout}
@@ -2046,6 +2159,36 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                     </div>
                 </div>
             )}
+            <div
+                className={cx('compare-modal', {
+                    show: showCompareModal,
+                })}
+            >
+                <div
+                    className={cx('compare-modal__overlay')}
+                    onClick={() => setShowCompareModal(false)}
+                ></div>
+                <div className={cx('compare-modal__inner')}>
+                    <Button
+                        className={cx('compare-modal__close-btn')}
+                        onClick={() => setShowCompareModal(false)}
+                    >
+                        <CloseIcon width="1.4rem" height="1.4rem"></CloseIcon>
+                    </Button>
+                    <p className={cx('compare-modal__desc')}>
+                        You will not be allowed to compare more than 4 products
+                        at a time
+                    </p>
+                    <Button
+                        to={config.routes.compare}
+                        rounded
+                        primary
+                        className={cx('compare-modal__view-btn')}
+                    >
+                        View compare
+                    </Button>
+                </div>
+            </div>
         </div>
     );
 };

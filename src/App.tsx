@@ -10,7 +10,7 @@ import PrivateRoute from './routes/PrivateRoute';
 import { useAppDispatch } from './redux/store';
 import { getWishlist } from './components/Wishlist/wishlistSlice';
 import { getCart } from './layouts/components/Cart/cartSlice';
-
+import * as favoriteServices from './services/favoriteServices';
 
 
 function App() {
@@ -33,15 +33,21 @@ function App() {
         console.log('Error:', error);
     }
 
-    // get wishlist from db
-    useEffect(() => {
-        dispatch(getWishlist({
-            id: customerId || currentUser + '',
-            currentPage: 1,
-            limit: 6
-        }))
+    // // // get wishlist from db
+    // useEffect(() => {
+    //     const fetchApi = async () => {
+    //         const res = await favoriteServices.getFavoriteByUserId(currentUser + '');
 
-    }, []);
+    //         await dispatch(getWishlist({
+    //             id: customerId || currentUser + '',
+    //             currentPage: 1,
+    //             limit: res.totalProduct
+    //         }))
+    //     }
+
+    //     fetchApi();
+
+    // }, []);
 
     return (
         <Router>

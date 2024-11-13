@@ -161,7 +161,7 @@ export const getProduct = async (path: string): Promise<ResultInterface> => {
 
 export const getAllProduct = async (currentPage = 1, limit: number = 12, collectionId?: string, categoryId?: string, colorId?: string, materialId?: string, keyword?: string, sort?: string): Promise<ResultInterface> => {
 
-    const path = `products?page=${currentPage - 1}&limit=${limit}&collection-ids=${collectionId || ''}&category-ids=${categoryId || ''}&color-ids=${colorId || ''}&material-ids=${materialId || ''}&keyword=${keyword || ''}&sort=${sort || 'latest'}`;
+    const path = `products?page=${currentPage - 1}&limit=${limit}&collection-ids=${collectionId || ''}&category-ids=${categoryId || ''}&color-ids=${colorId || ''}&material-ids=${materialId || ''}&keyword=${keyword || ''}&sort=${sort || ''}`;
     return getProduct(path);
 };
 

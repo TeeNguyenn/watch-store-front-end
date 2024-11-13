@@ -51,6 +51,11 @@ export const wishlistSlice = createSlice({
                 state.totalProduct++;
                 state.totalPage = Math.ceil(state.totalProduct / 6);
 
+            }).addCase(putWishlistItem.pending, (state, action) => {
+                state.status = 'loading';
+            }).addCase(putWishlistItem.fulfilled, (state, action) => {
+                state.status = 'fulfilled';
+                state.wishlist = state.wishlist.map(item => item.favoriteId === action.payload.favoriteId ? action.payload : item)
             })
     }
 })
@@ -77,11 +82,23 @@ export const deleteWishlistItem = createAsyncThunk('wishlist/deleteWishlistItem'
 
 export const postWishlistItem = createAsyncThunk('wishlist/postWishlistItem', async (data: any) => {
     const res = await favoriteServices.postFavorite(data);
-    console.log(res);
 
     return {
         favoriteId: res.id,
         ...data
+    }
+})
+
+export const putWishlistItem = createAsyncThunk('wishlist/putWishlistItem', async (data: any) => {
+    const res = await favoriteServices.putFavorite(data);
+
+    return {
+        favoriteId: res.id,
+        userId: res.user_id,
+        productId: res.product_id,
+        colorId: res.color_id,
+        screenSizeId: res.screen_size_id,
+        materialId: res.material_id,
     }
 })
 

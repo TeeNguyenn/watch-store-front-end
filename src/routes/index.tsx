@@ -29,6 +29,9 @@ import AdminDetailCustomer from '../pages/AdminDetailCustomer';
 import AdminOrders from '../pages/AdminOrders';
 import AdminOrderDetails from '../pages/AdminOrderDetails';
 import AdminNewProduct from '../pages/AdminNewProduct';
+import OTPAuthentication from '../pages/OTPAuthentication';
+import NewPassword from '../pages/NewPassword';
+import ChangePassword from '../pages/ChangePassword';
 
 const publicRoutes: Array<any> = [
     {
@@ -99,6 +102,18 @@ const publicRoutes: Array<any> = [
     {
         path: config.routes.forgotPassword,
         component: ForgotPassword,
+    },
+    {
+        path: config.routes.forgotPasswordOTP,
+        component: OTPAuthentication,
+    },
+    {
+        path: config.routes.forgotPasswordNew,
+        component: NewPassword,
+    },
+    {
+        path: config.routes.changePassword,
+        component: ChangePassword,
     },
     {
         path: config.routes.profile,

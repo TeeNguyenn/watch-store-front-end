@@ -32,6 +32,9 @@ import * as materialServices from '../../services/materialServices';
 import MobileFilter from './components/MobileFilter';
 import MobileFilterList from './components/MobileFilterList';
 import config from '../../config';
+import { RootState, useAppDispatch, useAppSelector } from '../../redux/store';
+import * as favoriteServices from '../../services/favoriteServices';
+import { getWishlist } from '../../components/Wishlist/wishlistSlice';
 
 const cx = classNames.bind(styles);
 
@@ -77,6 +80,12 @@ const Shop = () => {
     // api
     const [loading, setLoading] = useState(false);
     const [productList, setProductList] = useState<any[]>([]);
+    const currentUser = localStorage.getItem('user_id');
+
+
+    const dispatch = useAppDispatch();
+    // const wishlistStatus = useAppSelector((state: RootState) => state.wishlists.status);
+
 
     const handleSortBy = (name: string) => {
         if (name === sortBy) {
@@ -127,6 +136,16 @@ const Shop = () => {
     useEffect(() => {
         const fetchApi = async () => {
             setLoading(true);
+            if (currentUser) {
+                const res = await favoriteServices.getFavoriteByUserId(currentUser + '');
+
+                await dispatch(getWishlist({
+                    id: currentUser + '',
+                    currentPage: 1,
+                    limit: res.totalProduct
+                }))
+            }
+
             const responseData = await productServices.getAllProduct(
                 currentPage,
                 12,
@@ -152,11 +171,14 @@ const Shop = () => {
             const materialData = await materialServices.getAllMaterial();
             setMaterialList(materialData);
 
+
+
             setLoading(false);
         };
 
         fetchApi();
     }, [
+        currentUser,
         currentPage,
         collectionId,
         categoryFilter,

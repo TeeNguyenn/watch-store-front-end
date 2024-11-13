@@ -27,7 +27,7 @@ import * as favoriteServices from '../../services/favoriteServices';
 import QuickBuy from '../QuickBuy';
 import PreLoader from '../PreLoader';
 import { RootState, useAppDispatch, useAppSelector } from '../../redux/store';
-import { postWishlistItem } from '../Wishlist/wishlistSlice';
+import { getWishlist, postWishlistItem } from '../Wishlist/wishlistSlice';
 import { notifySuccess, notifyWarning } from '../../utils/Functions';
 import { getCart, postCart } from '../../layouts/components/Cart/cartSlice';
 
@@ -58,6 +58,7 @@ const ProductIcons = ({
     const [isWishlist, setIsWishlist] = useState(false);
     const [showQuickBuyModal, setShowQuickBuyModal] = useState(false);
     const [showCompareModal, setShowCompareModal] = useState(false);
+    const [loadingWishlist, setLoadingWishlist] = useState(false);
 
     const dispatch = useAppDispatch()
     const wishlistStatus = useAppSelector((state: RootState) => state.wishlists.status);
@@ -125,22 +126,8 @@ const ProductIcons = ({
     }, [pathName]);
 
     // get wishlist
-    // const wishlist = useAppSelector((state: RootState) => state.wishlists.wishlist);
-    useEffect(() => {
-        const fetchApi = async () => {
-            const res = await favoriteServices.getFavoriteByUserId(
-                customerId || currentUser + ''
-            );
+    const wishlist = useAppSelector((state: RootState) => state.wishlists.wishlist);
 
-            res.result.forEach((item) => {
-                if (item.productId === productItem?.productId) {
-                    setLiked(true);
-                    return;
-                }
-            });
-        };
-        fetchApi();
-    }, [])
 
 
     // get compareList
@@ -202,6 +189,7 @@ const ProductIcons = ({
                 navigate(config.routes.login);
             }, 300);
         } else {
+            setLoadingWishlist(true);
             if (liked) {
                 return;
             } else {
@@ -219,6 +207,9 @@ const ProductIcons = ({
                 //     }, 200);
                 // }
             }
+            setTimeout(() => {
+                setLoadingWishlist(false);
+            }, 500);
         }
     };
 
@@ -341,7 +332,7 @@ const ProductIcons = ({
                     'custom-wishlist': isWishlist,
                 })}
             >
-                {wishlistStatus === 'loading' ? (
+                {loadingWishlist ? (
                     <Button className={cx('loading')}>
                         <FontAwesomeIcon icon={faSpinner} />
                     </Button>
@@ -353,7 +344,7 @@ const ProductIcons = ({
                             })}
                             onClick={handleAddWishlist}
                         >
-                            {liked ? (
+                            {wishlist.some(item => item.productId === productItem?.productId) ? (
                                 <Button
                                     to={config.routes.wishlist}
                                     className={cx('btn')}

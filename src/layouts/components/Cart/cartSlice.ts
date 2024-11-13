@@ -28,7 +28,13 @@ export const cartSlice = createSlice({
         }).addCase(postCart.pending, (state, action) => { state.status = 'loading' })
             .addCase(postCart.fulfilled, (state, action) => {
                 state.status = 'fulfilled';
-            }).addCase(deleteCart.pending, (state, action) => {
+
+
+            }).addCase(postCart.rejected, (state, action) => {
+                state.status = 'rejected';
+
+            })
+            .addCase(deleteCart.pending, (state, action) => {
                 state.status = 'loading'
             }).addCase(deleteCart.fulfilled, (state, action) => {
                 state.status = 'fulfilled'
@@ -94,6 +100,7 @@ export const postCart = createAsyncThunk('cart/postCart', async (data: any) => {
             quantity: data.quantity || cartItem.quantity + 1,
             id: cartItem.id,
         });
+
     } else {
         const res = await cartItemServices.postCartItem({
             user_id: currentUser,
@@ -103,6 +110,8 @@ export const postCart = createAsyncThunk('cart/postCart', async (data: any) => {
             material_id: data.materialId,
             quantity: data.quantity || 1,
         });
+
+
     }
 })
 
