@@ -48,7 +48,7 @@ const Search = ({
         const fetchApi = async () => {
             setLoading(true);
             const responseData = await productServices.getAllProduct(
-                0,
+                1,
                 3,
                 '',
                 '',
@@ -79,6 +79,10 @@ const Search = ({
     };
 
     const handleSubmit = () => {
+        if (!debounced) {
+            return;
+        }
+
         if (adminSearch) {
             return; //temp
         }

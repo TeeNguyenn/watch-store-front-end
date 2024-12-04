@@ -15,6 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebook } from '@fortawesome/free-brands-svg-icons';
 import Image from '../../components/Image';
 import images from '../../assets/images';
+import { notifyError, notifySuccess } from '../../utils/Functions';
 
 const cx = classNames.bind(styles);
 
@@ -65,12 +66,18 @@ const Login = () => {
                 if (!res.token) {
                     setError(true);
                     setLoading(false);
+                    setTimeout(() => {
+                        notifyError('Login failed.', 2000);
+                    }, 0);
                     return;
+                } else {
+                    navigate(previousPage);
+                    localStorage.removeItem('wishlist');
+                    // setLoading(false);
+                    setTimeout(() => {
+                        notifySuccess('Login successful.', 2000);
+                    }, 100);
                 }
-
-                navigate(previousPage);
-                localStorage.removeItem('wishlist');
-                setLoading(false);
             };
             fetchApi();
         },
@@ -184,10 +191,27 @@ const Login = () => {
                 <span className={cx('form__separate')}></span>
             </div>
             <div className={cx('form__bottom')}>
-                <Button className={cx('form__btn')} type='button' leftIcon={<FontAwesomeIcon icon={faFacebook} style={{ color: "#084ca3", }} />}>Facebook</Button>
-                <Button className={cx('form__btn')} type='button' leftIcon={<Image src={images.logoGoogle}></Image>}>Google</Button>
+                <Button
+                    className={cx('form__btn')}
+                    type="button"
+                    leftIcon={
+                        <FontAwesomeIcon
+                            icon={faFacebook}
+                            style={{ color: '#084ca3' }}
+                        />
+                    }
+                >
+                    Facebook
+                </Button>
+                <Button
+                    className={cx('form__btn')}
+                    type="button"
+                    leftIcon={<Image src={images.logoGoogle}></Image>}
+                >
+                    Google
+                </Button>
             </div>
-        </form >
+        </form>
     );
 };
 

@@ -30,8 +30,8 @@ const NewPassword = () => {
     const { email, otp } = useParams();
     // const [isVerify, setIsVerify] = useState(false);
 
-    const otpLocal = localStorage.getItem('otpLocal');  //temp
-    const [loading, setLoading] = useState(false);  // temp default true
+    const otpLocal = localStorage.getItem('otpLocal'); //temp
+    const [loading, setLoading] = useState(false); // temp default true
 
     const formik = useFormik({
         initialValues: {
@@ -56,14 +56,16 @@ const NewPassword = () => {
                 const res = await userServices.forgotPassword({
                     email,
                     password: values.password,
-                    retype_password: values.confirmPassword
-                })
+                    retype_password: values.confirmPassword,
+                });
 
-                if (res.status === "OK") {
+                if (res.status === 'OK') {
                     formik.resetForm();
                     setLoading(false);
                     setTimeout(() => {
-                        notifySuccess('Your password has been successfully reset.');
+                        notifySuccess(
+                            'Your password has been successfully reset.'
+                        );
                         localStorage.removeItem('otpLocal'); //temp
                     }, 100);
                     setTimeout(() => {
@@ -81,7 +83,6 @@ const NewPassword = () => {
             //     fetchApi();
             // }
             fetchApi();
-
         },
     });
 
@@ -105,9 +106,8 @@ const NewPassword = () => {
     // }
 
     if (!otp || !email || otp !== otpLocal || !otpLocal) {
-        return <PageNotFound />
+        return <PageNotFound />;
     }
-
 
     if (loading) {
         return <PreLoader show></PreLoader>;
@@ -115,7 +115,6 @@ const NewPassword = () => {
 
     return (
         <form className={cx('form')} onSubmit={formik.handleSubmit}>
-            <ToastContainer />
             <div className={cx('form__heading')}>
                 <h1 className={cx('form__title')}>👋 New Password !</h1>
             </div>
@@ -145,7 +144,6 @@ const NewPassword = () => {
                         </span>
                     </div>
                 )}
-
             </div>
             {/* Confirm password */}
             <div className={cx('form__group')}>

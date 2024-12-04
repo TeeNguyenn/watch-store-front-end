@@ -44,7 +44,10 @@ import * as favoriteServices from '.././../services/favoriteServices';
 import * as cartItemServices from '../../services/cartItemServices';
 import Pagination from '../../components/Pagination';
 import { RootState, useAppDispatch, useAppSelector } from '../../redux/store';
-import { getWishlist, postWishlistItem } from '../../components/Wishlist/wishlistSlice';
+import {
+    getWishlist,
+    postWishlistItem,
+} from '../../components/Wishlist/wishlistSlice';
 import { getCart, postCart } from '../../layouts/components/Cart/cartSlice';
 import { ToastContainer } from 'react-toastify';
 
@@ -68,11 +71,16 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const dispatch = useAppDispatch()
-    const wishlistStatus = useAppSelector((state: RootState) => state.wishlists.status);
-    const cartStatus = useAppSelector((state: RootState) => state.cartList.status);
-    const wishlist = useAppSelector((state: RootState) => state.wishlists.wishlist);
-
+    const dispatch = useAppDispatch();
+    const wishlistStatus = useAppSelector(
+        (state: RootState) => state.wishlists.status
+    );
+    const cartStatus = useAppSelector(
+        (state: RootState) => state.cartList.status
+    );
+    const wishlist = useAppSelector(
+        (state: RootState) => state.wishlists.wishlist
+    );
 
     const settings = {
         slidesToShow: 5,
@@ -130,7 +138,6 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
     const [loadingCompare, setLoadingCompare] = useState(false);
     const [showCompareModal, setShowCompareModal] = useState(false);
 
-
     // Get productId from url
     const { productId } = useParams();
 
@@ -162,19 +169,22 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
     // // get wishlist from db
     useEffect(() => {
         const fetchApi = async () => {
-            const res = await favoriteServices.getFavoriteByUserId(currentUser + '');
+            const res = await favoriteServices.getFavoriteByUserId(
+                currentUser + ''
+            );
 
-            await dispatch(getWishlist({
-                id: customerId || currentUser + '',
-                currentPage: 1,
-                limit: res.totalProduct
-            }))
-        }
+            await dispatch(
+                getWishlist({
+                    id: customerId || currentUser + '',
+                    currentPage: 1,
+                    limit: res.totalProduct,
+                })
+            );
+        };
 
         if (currentUser) {
             fetchApi();
         }
-
     }, [currentUser]);
 
     // get compareList
@@ -184,9 +194,10 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
 
         let isCompared = false;
         compareList.forEach((compareItem) => {
-            if (compareItem.product_id === (quickBuy
-                ? productItem?.productId
-                : productIdNumber)) {
+            if (
+                compareItem.product_id ===
+                (quickBuy ? productItem?.productId : productIdNumber)
+            ) {
                 isCompared = true;
                 return;
             }
@@ -198,7 +209,6 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
         }
     }, [productIdNumber, quickBuy, productItem]);
 
-
     useEffect(() => {
         if (!quickBuy) {
             imageMagnifier(
@@ -208,16 +218,13 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
         }
     }, [imageList, quickBuy]);
 
-
     useEffect(() => {
         const fetchApi = async () => {
             setLoading(true);
             window.scrollTo(0, 0);
 
             const responseData = await productServices.getProductById(
-                quickBuy
-                    ? Number(productItem?.productId + '')
-                    : productIdNumber
+                quickBuy ? Number(productItem?.productId + '') : productIdNumber
             );
 
             setProductDetail(responseData);
@@ -259,8 +266,11 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
             const output: VariantModel[] | undefined = [];
 
             Arr?.forEach((materialItem) => {
-                if (materialItem.screenSize.sizeId === sortResult?.at(0)?.screenSize.sizeId) {
-                    output.push(materialItem)
+                if (
+                    materialItem.screenSize.sizeId ===
+                    sortResult?.at(0)?.screenSize.sizeId
+                ) {
+                    output.push(materialItem);
                 }
             });
 
@@ -289,18 +299,21 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
             // setTotalPage(feedbackData.totalPage);
             // setTotalFeedbacks(feedbackData.totalFeedbacks);
 
-            const recommendProducts = await productServices.getAllProduct(1, 5, '', responseData.category.categoryId + '');
+            const recommendProducts = await productServices.getAllProduct(
+                1,
+                5,
+                '',
+                responseData.category.categoryId + ''
+            );
 
             if (recommendProducts) {
                 setProductList(recommendProducts.result);
             }
 
-
             setLoading(false);
         };
 
         fetchApi();
-
     }, [productIdNumber, quickBuy, productItem]);
 
     useEffect(() => {
@@ -377,7 +390,10 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
         const output: VariantModel[] | undefined = [];
 
         Arr?.forEach((materialItem) => {
-            if (materialItem.screenSize.sizeId === sortResult.at(0)?.screenSize.sizeId) {
+            if (
+                materialItem.screenSize.sizeId ===
+                sortResult.at(0)?.screenSize.sizeId
+            ) {
                 output.push(materialItem);
             }
         });
@@ -391,7 +407,6 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
     };
 
     const handleSelectSize = (sizeId: number) => {
-
         const Arr: VariantModel[] | undefined = productDetail?.variants?.filter(
             (variant) => variant.color.colorId === activeColor
         );
@@ -410,7 +425,7 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
 
         setMaterialList(sortOutput);
         setActiveMaterial(sortOutput.at(0)?.material.materialId);
-    }
+    };
 
     const handleShowProductDetail = (num: number) => {
         if (showProductDetail.includes(num)) {
@@ -440,13 +455,15 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
             if (liked) {
                 return;
             } else {
-                dispatch(postWishlistItem({
-                    userId: currentUser,
-                    productId: productDetail?.productId,
-                    colorId: activeColor,
-                    screenSizeId: activeSize,
-                    materialId: activeMaterial,
-                }))
+                dispatch(
+                    postWishlistItem({
+                        userId: currentUser,
+                        productId: productDetail?.productId,
+                        colorId: activeColor,
+                        screenSizeId: activeSize,
+                        materialId: activeMaterial,
+                    })
+                );
                 setLiked(true);
                 // if (wishlistStatus === 'fulfilled') {    no work=))
                 //     setTimeout(() => {
@@ -471,27 +488,24 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                 navigate(config.routes.login);
             }, 300);
         } else {
-
             const fetchData = async () => {
-                await dispatch(postCart({
-                    productId: productDetail?.productId,
-                    colorId: activeColor,
-                    screenSizeId: activeSize,
-                    materialId: activeMaterial,
-                    quantity: quantityProduct
-                }))
+                await dispatch(
+                    postCart({
+                        productId: productDetail?.productId,
+                        colorId: activeColor,
+                        screenSizeId: activeSize,
+                        materialId: activeMaterial,
+                        quantity: quantityProduct,
+                    })
+                );
 
                 await dispatch(getCart());
 
                 context?.handleCart();
-
-            }
+            };
 
             fetchData();
-
         }
-
-
     };
 
     const handleAddCompare = () => {
@@ -527,25 +541,34 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
         }, 300);
     };
 
-
-
     const handleCheckout = () => {
         // Remove key "id" for matches CartItemDTO
 
-        localStorage.setItem(
-            'products',
-            JSON.stringify([
-                {
-                    product_id: productDetail?.productId,
-                    color_id: activeColor,
-                    screen_size_id: activeSize,
-                    material_id: activeMaterial,
-                    quantity: quantityProduct,
-                },
-            ])
-        );
-        document.body.classList.remove('hide-scroll');
-        navigate(config.routes.checkout);
+        if (!currentUser) {
+            setLoading(true);
+            localStorage.setItem('previousPage', location.pathname);
+            window.scrollTo(0, 0);
+
+            setTimeout(() => {
+                setLoading(false);
+                navigate(config.routes.login);
+            }, 300);
+        } else {
+            localStorage.setItem(
+                'products',
+                JSON.stringify([
+                    {
+                        product_id: productDetail?.productId,
+                        color_id: activeColor,
+                        screen_size_id: activeSize,
+                        material_id: activeMaterial,
+                        quantity: quantityProduct,
+                    },
+                ])
+            );
+            document.body.classList.remove('hide-scroll');
+            navigate(config.routes.checkout);
+        }
     };
 
     const handleQuantityProduct = (quantity: number) => {
@@ -564,13 +587,13 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                 'product-detail-slider': true,
             })}
         >
-            {/* <ToastContainer /> */}
             {loading && !quickBuy && <PreLoader show></PreLoader>}
             {!quickBuy && (
                 <Breadcrumb
                     title={productDetail?.title}
                     links={[
-                        { to: config.routes.shop, name: 'All' }, { name: `${productDetail?.title}` }
+                        { to: config.routes.shop, name: 'All' },
+                        { name: `${productDetail?.title}` },
                     ]}
                 ></Breadcrumb>
             )}
@@ -601,6 +624,7 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                             ref={(slider) => setNav1(slider)}
                                             arrows={true}
                                             speed={0}
+                                            infinite={false} //prevent copy image
                                         >
                                             {imageList.map(
                                                 (
@@ -619,7 +643,7 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                                     >
                                                         <Image
                                                             src={img.imageUrl}
-                                                            alt={img.imageUrl}
+                                                            alt={index + ''}
                                                             className={cx(
                                                                 'product-detail__img'
                                                             )}
@@ -632,10 +656,11 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                         <Slider
                                             asNavFor={nav1!}
                                             ref={(slider) => setNav2(slider)}
-                                            slidesToShow={imageList.length}
+                                            slidesToShow={6}
                                             swipeToSlide={true}
                                             focusOnSelect={true}
                                             arrows={false}
+                                            infinite={false} //prevent copy image
                                         >
                                             {imageList.map(
                                                 (
@@ -737,8 +762,11 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                 })}
                             >
                                 <div className={cx('product-detail__stars')}>
-                                    {productDetail?.averageRate &&
-                                        renderRating(productDetail.averageRate)}
+                                    {productDetail?.averageRate
+                                        ? renderRating(
+                                              productDetail?.averageRate
+                                          )
+                                        : renderRating(0)}
                                 </div>
                                 <span
                                     className={cx(
@@ -785,17 +813,17 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                         >
                                             {tempColor
                                                 ? productDetail?.colors.map(
-                                                    (item) =>
-                                                        item.colorId ===
-                                                        tempColor &&
-                                                        item.name
-                                                )
+                                                      (item) =>
+                                                          item.colorId ===
+                                                              tempColor &&
+                                                          item.name
+                                                  )
                                                 : productDetail?.colors.map(
-                                                    (item) =>
-                                                        item.colorId ===
-                                                        activeColor &&
-                                                        item.name
-                                                )}
+                                                      (item) =>
+                                                          item.colorId ===
+                                                              activeColor &&
+                                                          item.name
+                                                  )}
                                         </p>
                                     </div>
                                     <div
@@ -862,19 +890,19 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                         >
                                             {tempSize
                                                 ? sizeList?.map(
-                                                    (item) =>
-                                                        item.screenSize
-                                                            .sizeId ===
-                                                        tempSize &&
-                                                        `${item.screenSize.size} inches`
-                                                )
+                                                      (item) =>
+                                                          item.screenSize
+                                                              .sizeId ===
+                                                              tempSize &&
+                                                          `${item.screenSize.size} inches`
+                                                  )
                                                 : sizeList?.map(
-                                                    (item) =>
-                                                        item.screenSize
-                                                            .sizeId ===
-                                                        activeSize &&
-                                                        `${item.screenSize.size} inches`
-                                                )}
+                                                      (item) =>
+                                                          item.screenSize
+                                                              .sizeId ===
+                                                              activeSize &&
+                                                          `${item.screenSize.size} inches`
+                                                  )}
                                         </p>
                                     </div>
                                     <div
@@ -898,9 +926,10 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                                     setActiveSize(
                                                         item.screenSize.sizeId
                                                     );
-                                                    handleSelectSize(item.screenSize.sizeId);
-                                                }
-                                                }
+                                                    handleSelectSize(
+                                                        item.screenSize.sizeId
+                                                    );
+                                                }}
                                                 onMouseEnter={() =>
                                                     setTempSize(
                                                         item.screenSize.sizeId
@@ -934,19 +963,19 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                         >
                                             {tempMaterial
                                                 ? materialList?.map(
-                                                    (item) =>
-                                                        item.material
-                                                            .materialId ===
-                                                        tempMaterial &&
-                                                        `${item.material.name}`
-                                                )
+                                                      (item) =>
+                                                          item.material
+                                                              .materialId ===
+                                                              tempMaterial &&
+                                                          `${item.material.name}`
+                                                  )
                                                 : materialList?.map(
-                                                    (item) =>
-                                                        item.material
-                                                            .materialId ===
-                                                        activeMaterial &&
-                                                        `${item.material.name}`
-                                                )}
+                                                      (item) =>
+                                                          item.material
+                                                              .materialId ===
+                                                              activeMaterial &&
+                                                          `${item.material.name}`
+                                                  )}
                                         </p>
                                     </div>
                                     <div
@@ -1061,9 +1090,13 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                                 </div>
                                             ) : (
                                                 <>
-                                                    {wishlist.some(item => item.productId === (quickBuy
-                                                        ? productItem?.productId
-                                                        : productIdNumber)) ? (
+                                                    {wishlist.some(
+                                                        (item) =>
+                                                            item.productId ===
+                                                            (quickBuy
+                                                                ? productItem?.productId
+                                                                : productIdNumber)
+                                                    ) ? (
                                                         <Link
                                                             to={
                                                                 config.routes
@@ -1111,26 +1144,40 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                                 </div>
                                             ) : (
                                                 <>
-                                                    {compared ? <Button
-                                                        to={config.routes.compare}
-                                                        className={cx('product-detail__btn')}
-                                                    >
-                                                        <CompareFillIcon
-                                                            className={cx('icon')}
-                                                        ></CompareFillIcon>
-                                                    </Button> :
+                                                    {compared ? (
+                                                        <Button
+                                                            to={
+                                                                config.routes
+                                                                    .compare
+                                                            }
+                                                            className={cx(
+                                                                'product-detail__btn'
+                                                            )}
+                                                        >
+                                                            <CompareFillIcon
+                                                                className={cx(
+                                                                    'icon'
+                                                                )}
+                                                            ></CompareFillIcon>
+                                                        </Button>
+                                                    ) : (
                                                         <Button
                                                             className={cx(
                                                                 'product-detail__btn',
-                                                                { 'primary-hover': true }
+                                                                {
+                                                                    'primary-hover':
+                                                                        true,
+                                                                }
                                                             )}
-                                                            onClick={handleAddCompare}
+                                                            onClick={
+                                                                handleAddCompare
+                                                            }
                                                         >
                                                             <CompareIcon></CompareIcon>
-                                                        </Button>}
+                                                        </Button>
+                                                    )}
                                                 </>
                                             )}
-
                                         </div>
                                         <Button
                                             to={config.routes.checkout}
@@ -1603,118 +1650,12 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                                     className={cx(
                                                         'product-detail__body'
                                                     )}
-                                                >
-                                                    <p>
-                                                        <strong>
-                                                            Key Features:{' '}
-                                                        </strong>
-                                                    </p>
-                                                    <p>
-                                                        <strong>
-                                                            Sleek Design:
-                                                        </strong>
-                                                        Modern and sleek style
-                                                        that easily blends in
-                                                        with your daily outfit,
-                                                        whether you're at the
-                                                        office, the gym, or a
-                                                        night out.
-                                                    </p>
-                                                    <p>
-                                                        <strong>
-                                                            Bright Touchscreen
-                                                            Display:
-                                                        </strong>
-                                                        With the brilliant
-                                                        touchscreen display, you
-                                                        may enjoy incredibly
-                                                        clear images and simple
-                                                        navigation.
-                                                    </p>
-                                                    <p>
-                                                        <strong>
-                                                            Fitness Tracking:
-                                                        </strong>
-                                                        To stay motivated and on
-                                                        track, track your heart
-                                                        rate, your steps, your
-                                                        sleep habits, and create
-                                                        customized fitness
-                                                        goals.
-                                                    </p>
-                                                    <p>
-                                                        <strong>
-                                                            Multi-Sport Modes:
-                                                        </strong>
-                                                        Improve your performance
-                                                        like never before by
-                                                        getting real-time
-                                                        information into your
-                                                        training.
-                                                    </p>
-                                                    <p>
-                                                        <strong>
-                                                            Notification:
-                                                        </strong>
-                                                        With smart
-                                                        notifications, you can
-                                                        never reach for your
-                                                        phone to get updates
-                                                        about calls, texts,
-                                                        emails, and apps.
-                                                    </p>
-                                                    <p>
-                                                        <strong>
-                                                            Music Control:{' '}
-                                                        </strong>
-                                                        With only a twist of
-                                                        your wrist, you can
-                                                        effortlessly skip
-                                                        tracks, change the
-                                                        volume, and play or
-                                                        pause music.
-                                                    </p>
-                                                    <p>&nbsp;</p>
-                                                    <p>
-                                                        <strong>
-                                                            Specifications:
-                                                        </strong>
-                                                    </p>
-                                                    <ul>
-                                                        <li>
-                                                            1.2-inch HD
-                                                            touchscreen display
-                                                        </li>
-                                                        <li>
-                                                            Works with both
-                                                            Android and iOS
-                                                            devices
-                                                        </li>
-                                                        <li>
-                                                            Bluetooth 5.0
-                                                            connectivity
-                                                        </li>
-                                                        <li>
-                                                            Battery Life last up
-                                                            to seven days
-                                                        </li>
-                                                        <li>
-                                                            IP68-rated
-                                                            resistance to dust
-                                                            and water
-                                                        </li>
-                                                        <li>
-                                                            Gyroscope,
-                                                            accelerometer, and
-                                                            heart rate sensor
-                                                        </li>
-                                                        <li>
-                                                            Lightweight and
-                                                            sturdy aluminum
-                                                            alloy casing
-                                                        </li>
-                                                    </ul>
-                                                </div>
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: productDetail?.specification
+                                                            ? productDetail.specification
+                                                            : '',
+                                                    }}
+                                                ></div>
                                             </div>
                                         </div>
                                     </div>
@@ -2044,9 +1985,9 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                                                 'd-none':
                                                                     currentUser
                                                                         ? totalPage ===
-                                                                        1 &&
-                                                                        feedbackList.length <=
-                                                                        6
+                                                                              1 &&
+                                                                          feedbackList.length <=
+                                                                              6
                                                                         : false,
                                                             }
                                                         )}
@@ -2071,17 +2012,19 @@ const Detail = ({ quickBuy = false, productItem }: DetailProps) => {
                                                             >
                                                                 {viewAll
                                                                     ? `1 to ${totalFeedbacks} items of ${totalFeedbacks}`
-                                                                    : `${limit *
-                                                                    (currentPage -
-                                                                        1) +
-                                                                    1
-                                                                    } to ${currentPage *
-                                                                        6 >=
-                                                                        totalFeedbacks
-                                                                        ? totalFeedbacks
-                                                                        : currentPage *
-                                                                        6
-                                                                    } items of ${totalFeedbacks}`}
+                                                                    : `${
+                                                                          limit *
+                                                                              (currentPage -
+                                                                                  1) +
+                                                                          1
+                                                                      } to ${
+                                                                          currentPage *
+                                                                              6 >=
+                                                                          totalFeedbacks
+                                                                              ? totalFeedbacks
+                                                                              : currentPage *
+                                                                                6
+                                                                      } items of ${totalFeedbacks}`}
                                                             </p>
                                                             <Button
                                                                 className={cx(

@@ -3,7 +3,6 @@ import classNames from 'classnames/bind';
 import { Link, useParams } from 'react-router-dom';
 import Tippy from '@tippyjs/react/headless';
 
-
 import styles from './OrderDetails.module.scss';
 import Image from '../../components/Image';
 import images from '../../assets/images';
@@ -17,12 +16,18 @@ import {
     getCurrentDateWithHour,
     getCurrentHour,
     getMonth,
+    notifySuccess,
 } from '../../utils/Functions';
 import PreLoader from '../../components/PreLoader';
 import * as orderServices from '../../services/orderServices';
 import Button from '../../components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowRotateLeft, faArrowRotateRight, faChevronDown, faPrint } from '@fortawesome/free-solid-svg-icons';
+import {
+    faArrowRotateLeft,
+    faArrowRotateRight,
+    faChevronDown,
+    faPrint,
+} from '@fortawesome/free-solid-svg-icons';
 import config from '../../config';
 
 const cx = classNames.bind(styles);
@@ -44,9 +49,8 @@ const OrderDetails = ({ modifier }: OrderDetailsProps) => {
     const [orderProducts, setOrderProducts] = useState<any>([]);
     const [orderDetail, setOrderDetail] = useState<any>({});
     const [showDropdown, setShowDropdown] = useState(false);
-
-
-
+    const [paymentStatus, setPaymentStatus] = useState('');
+    const [fulfillmentStatus, setFulfillmentStatus] = useState('');
 
     // Get productId from url
     const { orderId } = useParams();
@@ -73,6 +77,7 @@ const OrderDetails = ({ modifier }: OrderDetailsProps) => {
                     );
                 setOrderProducts(orderProducts);
                 let result: ProductModel[] = [];
+
                 const fetchApi = async (productId: any) => {
                     const res = await productServices.getProductById(
                         productId.product_id
@@ -102,11 +107,15 @@ const OrderDetails = ({ modifier }: OrderDetailsProps) => {
                         setLoading(false);
                     }
                 };
-                orderProducts.forEach((item: any, index: number) => {
-                    setTimeout(() => {
-                        fetchApi(item);
-                    }, index * 500);
-                });
+
+                const fetchApis = async (orderProducts: any) => {
+                    for await (const item of orderProducts) {
+                        await fetchApi(item);
+                    }
+                };
+                fetchApis(orderProducts);
+
+
             };
 
             fetchApi();
@@ -120,40 +129,51 @@ const OrderDetails = ({ modifier }: OrderDetailsProps) => {
                     orderIdNumber + ''
                 );
 
+                // VNPay
+                if (res.payment_method_id === 1) {
+                    setPaymentStatus(res.payment_status ? 'Completed' : 'Canceled');
+                } else {
+                    setPaymentStatus('Processing');
+                }
+
+                setFulfillmentStatus(res.status);
+
                 setOrderDetail(res);
+
+
+                // Trang thai thanh cong gan nhat
+                // ready : initialValue = 0
+                // pending: initialValue = -1
+                // InitialValue = - 1 =>> PENDING
+
+                switch (res.status) {
+                    // case 'Is ready':
+                    //     setOrderStatus(0);
+                    //     break;
+                    // case 'Order is processing':
+                    //     setOrderStatus(1);
+                    //     break;
+                    // InitialValue = 2 =>> PENDING
+                    case 'PENDING':
+                        setOrderStatus(2);
+                        break;
+                    case 'PROCESSING':
+                        setOrderStatus(3);
+                        break;
+                    case 'SHIPPED':
+                        console.log('cc');
+
+                        setOrderStatus(4);
+                        break;
+                    case 'DELIVERY':
+                        setOrderStatus(5);
+                        break;
+                    default:
+                        break;
+                }
             };
 
             fetchApi();
-        }
-    }, []);
-
-    // Trang thai thanh cong gan nhat
-    // ready : initialValue = 0
-    // pending: initialValue = -1
-    // InitialValue = - 1 =>> PENDING
-    useEffect(() => {
-        switch (orderDetail.status) {
-            // case 'Is ready':
-            //     setOrderStatus(0);
-            //     break;
-            // case 'Order is processing':
-            //     setOrderStatus(1);
-            //     break;
-            // InitialValue = 2 =>> PENDING
-            case 'PENDING':
-                setOrderStatus(2);
-                break;
-            case 'Ready to Ship':
-                setOrderStatus(3);
-                break;
-            case 'Shipped':
-                setOrderStatus(4);
-                break;
-            case 'Delivered':
-                setOrderStatus(5);
-                break;
-            default:
-                break;
         }
     }, []);
 
@@ -166,7 +186,11 @@ const OrderDetails = ({ modifier }: OrderDetailsProps) => {
             } else if (orderStatus + 1 < index) {
                 return 'Estimated time';
             }
-            // Còn trường hợp index < orderStatus
+            else {
+                // Còn trường hợp index < orderStatus
+                // temp
+                return getCurrentDate(orderDetail.order_date);
+            }
         } else {
             if (orderStatus === index) {
                 return getCurrentHour(orderDetail.order_date);
@@ -178,9 +202,114 @@ const OrderDetails = ({ modifier }: OrderDetailsProps) => {
                     104400000 +
                     (index - orderStatus) * 24 * 60 * 60 * 1000 // (index - orderStatus) days
                 );
+            } else {
+                // Còn trường hợp index < orderStatus
+                // temp
+                return getCurrentHour(orderDetail.order_date);
             }
-            // Còn trường hợp index < orderStatus
         }
+    };
+
+    const handlePaymentStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setPaymentStatus(e.target.value);
+
+        const fetchApi = async () => {
+            setLoading(true);
+            const orderDetailData = await orderDetailServices.getOrderDetailByOrderId(orderDetail.id)
+
+            let cartItems = [];
+            if (orderDetailData) {
+                cartItems = orderDetailData.map((item: any) => ({
+                    "user_id": orderDetail.user_id,
+                    "product_id": item.product_id,
+                    "quantity": item.quantity,
+                    "color_id": item.color_id,
+                    "material_id": item.material_id,
+                    "screen_size_id": item.screen_size_id
+                }))
+            }
+
+            const data = {
+                user_id: orderDetail.user_id,
+                first_name: orderDetail.first_name,
+                last_name: orderDetail.last_name,
+                email: orderDetail.email,
+                phone_number: orderDetail.phone_number,
+                address: orderDetail.address,
+                note: orderDetail.note,
+                total_money: orderDetail.total_money,
+                sub_total: orderDetail.sub_total,
+                shipping_method_id: orderDetail.shipping_method_id,
+                payment_method_id: orderDetail.payment_method_id,
+                payment_status: !!e.target.value,
+                shipping_address: orderDetail.shipping_address,
+                cart_items: cartItems,
+                status: orderDetail.status
+            };
+
+            const res = await orderServices.putOrder(orderDetail.id, data)
+
+            if (res.status === 'OK') {
+                setLoading(false);
+                setTimeout(() => {
+                    notifySuccess('Order updated successfully');
+                }, 0);
+            }
+        };
+
+        fetchApi();
+
+    };
+
+    const handleFulfillmentStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setFulfillmentStatus(e.target.value);
+
+        const fetchApi = async () => {
+            setLoading(true);
+            const orderDetailData = await orderDetailServices.getOrderDetailByOrderId(orderDetail.id)
+
+            let cartItems = [];
+            if (orderDetailData) {
+                cartItems = orderDetailData.map((item: any) => ({
+                    "user_id": orderDetail.user_id,
+                    "product_id": item.product_id,
+                    "quantity": item.quantity,
+                    "color_id": item.color_id,
+                    "material_id": item.material_id,
+                    "screen_size_id": item.screen_size_id
+                }))
+            }
+
+            const data = {
+                user_id: orderDetail.user_id,
+                first_name: orderDetail.first_name,
+                last_name: orderDetail.last_name,
+                email: orderDetail.email,
+                phone_number: orderDetail.phone_number,
+                address: orderDetail.address,
+                note: orderDetail.note,
+                total_money: orderDetail.total_money,
+                sub_total: orderDetail.sub_total,
+                shipping_method_id: orderDetail.shipping_method_id,
+                payment_method_id: orderDetail.payment_method_id,
+                payment_status: orderDetail.payment_status,
+                shipping_address: orderDetail.shipping_address,
+                cart_items: cartItems,
+                status: e.target.value
+            };
+
+            const res = await orderServices.putOrder(orderDetail.id, data)
+
+            if (res.status === 'OK') {
+                setLoading(false);
+                setTimeout(() => {
+                    notifySuccess('Order updated successfully');
+                }, 0);
+            }
+        };
+
+        fetchApi();
+
     };
 
     if (loading) {
@@ -189,16 +318,34 @@ const OrderDetails = ({ modifier }: OrderDetailsProps) => {
 
     return (
         <div className="container-spacing">
-            <div className={cx('order-details', {
-                modifier,
-            })}>
+            <div
+                className={cx('order-details', {
+                    modifier,
+                })}
+            >
                 <div className={cx('order-details__top')}>
                     <h2 className={cx('order-details__title')}>
                         {`Order #OID${orderIdNumber}`}
                     </h2>
-                    <div className={cx('order-details__actions', { 'd-none': !modifier })}>
-                        <Button className={cx('order-details__action')} leftIcon={<FontAwesomeIcon icon={faPrint} />}>Print</Button>
-                        <Button className={cx('order-details__action')} leftIcon={<FontAwesomeIcon icon={faArrowRotateLeft} />}>Refund</Button>
+                    <div
+                        className={cx('order-details__actions', {
+                            'd-none': !modifier,
+                        })}
+                    >
+                        <Button
+                            className={cx('order-details__action')}
+                            leftIcon={<FontAwesomeIcon icon={faPrint} />}
+                        >
+                            Print
+                        </Button>
+                        <Button
+                            className={cx('order-details__action')}
+                            leftIcon={
+                                <FontAwesomeIcon icon={faArrowRotateLeft} />
+                            }
+                        >
+                            Refund
+                        </Button>
                         <Tippy
                             visible={showDropdown}
                             interactive
@@ -262,23 +409,30 @@ const OrderDetails = ({ modifier }: OrderDetailsProps) => {
                                                 Something else
                                             </span>
                                         </Link>
-
                                     </div>
-
                                 </div>
                             )}
                         >
-                            <Button className={cx('order-details__action')} rightIcon={<FontAwesomeIcon icon={faChevronDown} />} onClick={() => setShowDropdown(!showDropdown)}>More action</Button>
-
+                            <Button
+                                className={cx('order-details__action')}
+                                rightIcon={
+                                    <FontAwesomeIcon icon={faChevronDown} />
+                                }
+                                onClick={() => setShowDropdown(!showDropdown)}
+                            >
+                                More action
+                            </Button>
                         </Tippy>
                     </div>
                 </div>
                 <div className="row g-0">
                     <div className="col col-8 col-xl-12">
                         <div className={cx('order-details__left')}>
-                            <div className={cx('products', {
-                                modifier
-                            })}>
+                            <div
+                                className={cx('products', {
+                                    modifier,
+                                })}
+                            >
                                 <div className={cx('products__container')}>
                                     <table className={cx('products__table')}>
                                         <thead>
@@ -1067,9 +1221,9 @@ const OrderDetails = ({ modifier }: OrderDetailsProps) => {
                                             </h4>
                                             <p className={cx('timeline__desc')}>
                                                 {orderStatus >= 3 &&
-                                                    'Your package is ready for the ship.'}
+                                                    'Your package is ready for the shipped.'}
                                                 {orderStatus === 2 &&
-                                                    'Your package is now ready to be shipped.'}
+                                                    'Your package is now ready to be shipp.'}
                                                 {orderStatus <= 1 && 'Pending'}
                                             </p>
                                         </div>
@@ -1195,9 +1349,9 @@ const OrderDetails = ({ modifier }: OrderDetailsProps) => {
                                             </h4>
                                             <p className={cx('timeline__desc')}>
                                                 {orderStatus >= 4 &&
-                                                    'Your package is ready for the seller to prepare.'}
+                                                    'Your package is shipped.'}
                                                 {orderStatus === 3 &&
-                                                    'Your package is now ready to be shipped.'}
+                                                    'Your package is now ready to be ship.'}
                                                 {orderStatus <= 2 && 'Pending'}
                                             </p>
                                         </div>
@@ -1308,9 +1462,9 @@ const OrderDetails = ({ modifier }: OrderDetailsProps) => {
                                             </h4>
                                             <p className={cx('timeline__desc')}>
                                                 {orderStatus >= 5 &&
-                                                    'Your package is ready for the seller to prepare.'}
+                                                    'Your package is delivered.'}
                                                 {orderStatus === 4 &&
-                                                    'Your package is now ready to be shipped.'}
+                                                    'Your package is now ready to be delivery.'}
                                                 {orderStatus <= 3 && 'Pending'}
                                             </p>
                                         </div>
@@ -1318,58 +1472,62 @@ const OrderDetails = ({ modifier }: OrderDetailsProps) => {
                                 </div>
                             </div>
                         </div>
-                        <div className={cx('organize', { 'd-none': !modifier })}>
-                            <h4 className={cx('organize__label')} style={{ marginBottom: '24px' }}>Order Status</h4>
+                        <div
+                            className={cx('organize', { 'd-none': !modifier })}
+                        >
+                            <h4
+                                className={cx('organize__label')}
+                                style={{ marginBottom: '24px' }}
+                            >
+                                Order Status
+                            </h4>
 
                             {/* Payment status */}
                             <div className={cx('organize__group')}>
                                 <div className={cx('organize__top')}>
-                                    <h5 className={cx('organize__title')}>Payment status</h5>
+                                    <h5 className={cx('organize__title')}>
+                                        Payment status
+                                    </h5>
                                 </div>
                                 <select
                                     name="paymentStatus"
                                     id="paymentStatus"
-                                    className={cx(
-                                        'organize__select'
-                                    )}
+                                    className={cx('organize__select')}
+                                    value={paymentStatus}
+                                    onChange={handlePaymentStatusChange}
                                 >
-                                    <option value="Processing">
-                                        Processing
-                                    </option>
-                                    <option value="Canceled">
-                                        Canceled
-                                    </option>
-                                    <option value="Completed">
-                                        Completed
-                                    </option>
+                                    {
+                                        orderDetail.payment_method_id === 2 && <option value="Processing">
+                                            Processing
+                                        </option>
+                                    }
+                                    {
+                                        orderDetail.payment_method_id === 1 && <option value="">Canceled</option>   // vnpay
+                                    }
+                                    <option value="Completed">Completed</option>
                                 </select>
-
                             </div>
                             {/* Fulfillment status */}
                             <div className={cx('organize__group')}>
                                 <div className={cx('organize__top')}>
-                                    <h5 className={cx('organize__title')}>Payment status</h5>
+                                    <h5 className={cx('organize__title')}>
+                                        Fulfillment status
+                                    </h5>
                                 </div>
                                 <select
                                     name="fulfillmentStatus"
                                     id="fulfillmentStatus"
-                                    className={cx(
-                                        'organize__select'
-                                    )}
+                                    className={cx('organize__select')}
+                                    value={fulfillmentStatus}
+                                    onChange={handleFulfillmentStatusChange}
                                 >
-                                    <option value="Unfulfilled">
-                                        Unfulfilled
-                                    </option>
-                                    <option value="Fulfilled">
-                                        Fulfilled
-                                    </option>
-                                    <option value="Pending">
-                                        Pending
-                                    </option>
+
+                                    <option value="PENDING">Pending</option>
+                                    <option value="PROCESSING">Processing</option>
+                                    <option value="SHIPPED">Shipped</option>
+                                    <option value="DELIVERY">Delivered</option>
                                 </select>
-
                             </div>
-
                         </div>
                     </div>
                 </div>

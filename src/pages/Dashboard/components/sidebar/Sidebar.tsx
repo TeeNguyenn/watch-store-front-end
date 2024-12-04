@@ -17,38 +17,41 @@ import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlin
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined';
 import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
+import { notifySuccess } from '../../../../utils/Functions';
+import { putAvatarCustomer } from '../../../../components/CustomerInfo/CustomerInfoSlice';
+import { useAppDispatch } from '../../../../redux/store';
 
 const cx = classNames.bind(styles);
 
 interface SidebarProps {
     show: boolean;
-    handleShow: () => void
+    handleShow: () => void;
 }
 
 const Sidebar = (props: SidebarProps) => {
-
-    const location = useLocation();
-    const pathName = location.pathname;
     const navigate = useNavigate();
-
+    const dispatch = useAppDispatch();
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user_id');
-        localStorage.removeItem('refresh_token');
+        // localStorage.removeItem('token');
+        // localStorage.removeItem('user_id');
+        // localStorage.removeItem('refresh_token');
 
-        if (pathName === '/') {
-            navigate(0); //reload
-        } else {
-            navigate(config.routes.home);
-            navigate(0); //reload
-        }
+        dispatch(putAvatarCustomer(''));
+        localStorage.clear();
+
+        navigate(config.routes.login);
+        setTimeout(() => {
+            notifySuccess('Logout successful.', 3000);
+        }, 0);
     };
 
     return (
-        <div className={cx('sidebar', {
-            show: props.show
-        })}>
+        <div
+            className={cx('sidebar', {
+                show: props.show,
+            })}
+        >
             <div className={cx('sidebar__top')}>
                 <Link to={config.routes.home} style={{ outline: 'none' }}>
                     <LogoIcon height="3rem"></LogoIcon>
@@ -200,15 +203,15 @@ const Sidebar = (props: SidebarProps) => {
                             </Link>
                         </li>
                         <li>
-                            <Link
-                                to={config.routes.adminCustomers}
+                            <div
                                 className={cx('sidebar__item')}
+                                onClick={handleLogout}
                             >
                                 <ExitToAppOutlinedIcon
                                     className={cx('sidebar__icon')}
                                 ></ExitToAppOutlinedIcon>
-                                <span onClick={handleLogout}>Logout</span>
-                            </Link>
+                                <span>Logout</span>
+                            </div>
                         </li>
                     </ul>
                 </div>

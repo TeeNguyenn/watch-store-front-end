@@ -39,14 +39,17 @@ import { getWishlist } from '../../components/Wishlist/wishlistSlice';
 const cx = classNames.bind(styles);
 
 // fake breadcrumb
-const links = [{
-    to: config.routes.home,
-    name: 'Home'
-}, { to: '#!', name: 'Shop' }];
+const links = [
+    {
+        to: config.routes.home,
+        name: 'Home',
+    },
+    { to: '#!', name: 'Shop' },
+];
 
 const Shop = () => {
     const [sort, setSort] = useState('');
-    const [sortBy, setSortBy] = useState('Unpopularity'); // Sau khi them product hoan chinh de default sort khac
+    const [sortBy, setSortBy] = useState('Date, new to old'); // Sau khi them product hoan chinh de default sort khac
     const [visible, setVisible] = useState(false);
     const [showOption, setShowOption] = useState(4);
 
@@ -78,14 +81,15 @@ const Shop = () => {
     const [totalPage, setTotalPage] = useState(1);
 
     // api
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [productList, setProductList] = useState<any[]>([]);
     const currentUser = localStorage.getItem('user_id');
-
 
     const dispatch = useAppDispatch();
     // const wishlistStatus = useAppSelector((state: RootState) => state.wishlists.status);
 
+    const [minPrice, setMinPrice] = useState("");
+    const [maxPrice, setMaxPrice] = useState('');
 
     const handleSortBy = (name: string) => {
         if (name === sortBy) {
@@ -137,13 +141,17 @@ const Shop = () => {
         const fetchApi = async () => {
             setLoading(true);
             if (currentUser) {
-                const res = await favoriteServices.getFavoriteByUserId(currentUser + '');
+                const res = await favoriteServices.getFavoriteByUserId(
+                    currentUser + ''
+                );
 
-                await dispatch(getWishlist({
-                    id: currentUser + '',
-                    currentPage: 1,
-                    limit: res.totalProduct
-                }))
+                await dispatch(
+                    getWishlist({
+                        id: currentUser + '',
+                        currentPage: 1,
+                        limit: res.totalProduct,
+                    })
+                );
             }
 
             const responseData = await productServices.getAllProduct(
@@ -154,7 +162,9 @@ const Shop = () => {
                 colorFilter.ids.join(',') + '',
                 materialFilter.ids.join(',') + '',
                 '',
-                sort
+                sort,
+                minPrice,
+                maxPrice
             );
 
             if (responseData) {
@@ -171,8 +181,6 @@ const Shop = () => {
             const materialData = await materialServices.getAllMaterial();
             setMaterialList(materialData);
 
-
-
             setLoading(false);
         };
 
@@ -185,14 +193,25 @@ const Shop = () => {
         colorFilter,
         materialFilter,
         sort,
+        minPrice,
+        maxPrice
     ]);
 
-    // useEffect(() => {}, [loading]);
 
     const handleFilterCollection = (activeCollection: string) => {
         setCurrentPage(1);
         setCollectionId(activeCollection);
     };
+
+    const handleChangeMinPrice = (value: string) => {
+        console.log(value);
+
+        setMinPrice(value);
+    }
+
+    const handleChangeMaxPrice = (value: string) => {
+        setMaxPrice(value);
+    }
 
     const handleFilterCategory = (data: any) => {
         setCurrentPage(1);
@@ -332,10 +351,15 @@ const Shop = () => {
                                 colorList={colorList}
                                 materialFilter={materialFilter}
                                 materialList={materialList}
+                                minPrice={minPrice}
+                                maxPrice={maxPrice}
                                 handleFilterCollection={handleFilterCollection}
                                 handleFilterCategory={handleFilterCategory}
                                 handleFilterColor={handleFilterColor}
                                 handleFilterMaterial={handleFilterMaterial}
+                                handleShowQuickBuy={handleShowQuickBuy}
+                                handleChangeMinPrice={handleChangeMinPrice}
+                                handleChangeMaxPrice={handleChangeMaxPrice}
                             ></Sidebar>
                         )}
                     </div>
@@ -365,7 +389,7 @@ const Shop = () => {
                                 })}
                             >
                                 <h2 className={cx('product__count')}>
-                                    Showing 1-11 of 11 Results
+                                    {/* Showing 1-11 of 11 Results */}
                                 </h2>
                             </div>
 
@@ -379,6 +403,8 @@ const Shop = () => {
                                     colorList={colorList}
                                     materialFilter={materialFilter}
                                     materialList={materialList}
+                                    // minPrice={minPrice}
+                                    // maxPrice={maxPrice}
                                     handleFilterCategory={handleFilterCategory}
                                     handleFilterColor={handleFilterColor}
                                     handleFilterMaterial={handleFilterMaterial}
@@ -453,7 +479,7 @@ const Shop = () => {
                                             <div
                                                 className={cx('sort__options')}
                                             >
-                                                <label
+                                                {/* <label
                                                     htmlFor="option-1"
                                                     className={cx(
                                                         'sort__option'
@@ -522,7 +548,7 @@ const Shop = () => {
                                                     >
                                                         Popularity
                                                     </span>
-                                                </label>
+                                                </label> */}
                                                 {/* <label
                                                     htmlFor="option-3"
                                                     className={cx(

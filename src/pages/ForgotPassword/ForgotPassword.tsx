@@ -5,7 +5,6 @@ import * as Yup from 'yup';
 import { Link, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 
-
 import Button from '../../components/Button';
 import { CheckIcon, ErrorIcon } from '../../components/Icons';
 import styles from './ForgotPassword.module.scss';
@@ -28,7 +27,7 @@ const ForgotPassword = () => {
         validationSchema: Yup.object({
             email: Yup.string()
                 .email('Invalid email.')
-                .required('You must fill in this section.')
+                .required('You must fill in this section.'),
             // .test(
             //     'checkEmailExists',
             //     'This email is not in use. Please re-enter your email.',
@@ -45,13 +44,13 @@ const ForgotPassword = () => {
                 const res = await authServices.checkExistEmail(values.email);
                 if (res) {
                     const res = await userServices.generateOTP(values.email);
-                    if (res.status === "OK") {
-                        navigate(`/forgot-password/otp/${values.email}`)
+                    if (res.status === 'OK') {
+                        navigate(`/forgot-password/otp/${values.email}`);
                         setLoading(false);
                     } else {
                         setLoading(false);
                         setTimeout(() => {
-                            notifyError(res.errorMessage)
+                            notifyError(res.errorMessage);
                         }, 100);
                     }
                 } else {
@@ -60,26 +59,26 @@ const ForgotPassword = () => {
                         setLoading(false);
                     }, 200);
                     setTimeout(() => {
-                        notifyError('This email is not in use. Please re-enter your email.')
+                        notifyError(
+                            'This email is not in use. Please re-enter your email.'
+                        );
                     }, 300);
                 }
             };
             fetchApi();
-
         },
     });
 
     const handleCancel = () => {
-        navigate(config.routes.login)
-    }
+        navigate(config.routes.login);
+    };
 
     if (loading) {
-        return <PreLoader show />
+        return <PreLoader show />;
     }
 
     return (
         <div className={cx('forgot-password')}>
-            <ToastContainer />
             <form className={cx('form')} onSubmit={formik.handleSubmit}>
                 <div className={cx('form__heading')}>
                     <h1 className={cx('form__title', 'forgot-password__title')}>

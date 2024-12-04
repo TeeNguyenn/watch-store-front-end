@@ -88,8 +88,16 @@ const Cart = () => {
 
     const handleCheckout = () => {
         // Remove key "id" for matches CartItemDTO
-        const cartItems = cartList;
-        cartItems.forEach((item) => delete item.id);
+        let cartItems = cartList.map(item => ({
+            "user_id": item.user_id,
+            "product_id": item.product_id,
+            'color_id': item.color_id,
+            "screen_size_id": item.screen_size_id,
+            "material_id": item.material_id,
+            quantity: item.quantity
+
+        }));
+
 
         localStorage.setItem('products', JSON.stringify(cartItems));
         document.body.classList.remove('hide-scroll');

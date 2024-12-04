@@ -9,7 +9,7 @@ import App from './App';
 import { CartProvider } from './contexts/CartContext';
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
-
+import { ToastContainer } from 'react-toastify';
 
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
@@ -17,7 +17,10 @@ const root = ReactDOM.createRoot(
 root.render(
     <React.StrictMode>
         <CartProvider>
-            <Provider store={store}><App /></Provider>
+            <Provider store={store}>
+                <App />
+                <ToastContainer />
+            </Provider>
         </CartProvider>
     </React.StrictMode>
 );

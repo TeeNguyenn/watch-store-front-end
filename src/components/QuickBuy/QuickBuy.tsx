@@ -39,7 +39,7 @@ const QuickBuy = ({
                 >
                     <CloseIcon width="1.6rem" height="1.6rem"></CloseIcon>
                 </button>
-                <Detail quickBuy productItem={productItem}></Detail>
+                {show && <Detail quickBuy productItem={productItem}></Detail>}
             </div>
         </div>
     );

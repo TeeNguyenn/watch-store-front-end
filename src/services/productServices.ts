@@ -143,9 +143,11 @@ export const getProduct = async (path: string): Promise<ResultInterface> => {
                 screenSizes: screenSizeList.sort(
                     (a: any, b: any) => a.sizeId - b.sizeId
                 ),
-                productImages: productImages,
+                productImages: productImages.sort((a: any, b: any) => a.colorId - b.colorId),   //coi chung bug
                 variants: variantList,
             })
+
+
         }
 
         return {
@@ -159,15 +161,15 @@ export const getProduct = async (path: string): Promise<ResultInterface> => {
     }
 };
 
-export const getAllProduct = async (currentPage = 1, limit: number = 12, collectionId?: string, categoryId?: string, colorId?: string, materialId?: string, keyword?: string, sort?: string): Promise<ResultInterface> => {
+export const getAllProduct = async (currentPage = 1, limit: number = 12, collectionId?: string, categoryId?: string, colorId?: string, materialId?: string, keyword?: string, sort?: string, minPrice?: string, maxPrice?: string): Promise<ResultInterface> => {
 
-    const path = `products?page=${currentPage - 1}&limit=${limit}&collection-ids=${collectionId || ''}&category-ids=${categoryId || ''}&color-ids=${colorId || ''}&material-ids=${materialId || ''}&keyword=${keyword || ''}&sort=${sort || ''}`;
+    const path = `products?page=${currentPage - 1}&limit=${limit}&collection-ids=${collectionId || ''}&category-ids=${categoryId || ''}&color-ids=${colorId || ''}&material-ids=${materialId || ''}&keyword=${keyword || ''}&sort=${sort || 'latest'}&min-price=${minPrice || '0'}&max-price=${maxPrice || '10000'}`;
     return getProduct(path);
 };
 
 export const get3ProductBestSeller = async (): Promise<ResultInterface> => {
     // temp
-    const path = `products?page=1&limit=3`;
+    const path = `products?page=1&limit=3&min-price=0&max-price=10000`;
     return getProduct(path);
 };
 
@@ -306,7 +308,7 @@ export const getProductById = async (productId: number): Promise<ProductModel> =
             screenSizes: screenSizeList.sort(
                 (a: any, b: any) => a.sizeId - b.sizeId
             ),
-            productImages: productImages,
+            productImages: productImages.sort((a: any, b: any) => a.colorId - b.colorId),
             variants: variantList,
             collections: collectionList,
 
@@ -349,8 +351,9 @@ export const postProduct = async (product: any) => {
         });
 
         return response;
-    } catch (error) {
-        throw (error);
+    } catch (error: any) {
+        // throw (error);
+        return { errorMessage: error.response.data.message }
 
     }
 };

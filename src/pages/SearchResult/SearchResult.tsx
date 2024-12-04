@@ -78,6 +78,9 @@ const SearchResult = () => {
     const [loading, setLoading] = useState(false);
     const [productList, setProductList] = useState<any[]>([]);
 
+    const [minPrice, setMinPrice] = useState("");
+    const [maxPrice, setMaxPrice] = useState('');
+
     const handleSortBy = (name: string) => {
         if (name === sortBy) {
             return;
@@ -108,8 +111,8 @@ const SearchResult = () => {
 
     // Get keyword from url
     const [searchParams] = useSearchParams();
-    const [keyword, setKeyword] = useState(searchParams.get('keyword') + '');
-    // const keyword = searchParams.get('keyword') || '';
+    // const [keyword, setKeyword] = useState(searchParams.get('keyword') + '');
+    const keyword = searchParams.get('keyword') || '';
 
     const settings = {
         slidesToShow: 4,
@@ -150,14 +153,14 @@ const SearchResult = () => {
         const fetchApi = async () => {
             setLoading(true);
             const responseData = await productServices.getAllProduct(
-                currentPage - 1,
+                currentPage,
                 12,
                 collectionId,
                 categoryFilter.ids.join(',') + '',
                 colorFilter.ids.join(',') + '',
                 materialFilter.ids.join(',') + '',
                 keyword,
-                sort
+                sort, minPrice, maxPrice
             );
 
             if (responseData) {
@@ -175,7 +178,7 @@ const SearchResult = () => {
             setMaterialList(materialData);
 
             const recommendProducts = await productServices.getAllProduct(
-                0,
+                1,
                 10
             );
 
@@ -195,12 +198,24 @@ const SearchResult = () => {
         materialFilter,
         keyword,
         sort,
+        minPrice,
+        maxPrice
     ]);
 
     const handleFilterCollection = (activeCollection: string) => {
         setCurrentPage(1);
         setCollectionId(activeCollection);
     };
+
+    const handleChangeMinPrice = (value: string) => {
+        console.log(value);
+
+        setMinPrice(value);
+    }
+
+    const handleChangeMaxPrice = (value: string) => {
+        setMaxPrice(value);
+    }
 
     const handleFilterCategory = (data: any) => {
         setCurrentPage(1);
@@ -330,9 +345,9 @@ const SearchResult = () => {
                         style={{
                             marginBottom:
                                 isLgScreen &&
-                                (categoryFilter.ids.length > 0 ||
-                                    colorFilter.ids.length > 0 ||
-                                    materialFilter.ids.length > 0)
+                                    (categoryFilter.ids.length > 0 ||
+                                        colorFilter.ids.length > 0 ||
+                                        materialFilter.ids.length > 0)
                                     ? '0px'
                                     : '60px',
                         }}
@@ -563,12 +578,16 @@ const SearchResult = () => {
                                     colorList={colorList}
                                     materialFilter={materialFilter}
                                     materialList={materialList}
+                                    minPrice={minPrice}
+                                    maxPrice={maxPrice}
                                     handleFilterCollection={
                                         handleFilterCollection
                                     }
                                     handleFilterCategory={handleFilterCategory}
                                     handleFilterColor={handleFilterColor}
                                     handleFilterMaterial={handleFilterMaterial}
+                                    handleChangeMinPrice={handleChangeMinPrice}
+                                    handleChangeMaxPrice={handleChangeMaxPrice}
                                 ></Sidebar>
                             )}
                         </div>

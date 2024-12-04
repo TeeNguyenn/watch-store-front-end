@@ -11,6 +11,7 @@ import * as userServices from '../../services/userServices';
 import UserModel from '../../models/UserModel';
 import { isToday } from '../../utils/Functions';
 import PreLoader from '../../components/PreLoader';
+import * as feedbackServices from '../../services/feedbackServices';
 
 const cx = classNames.bind(styles);
 
@@ -30,6 +31,7 @@ const Dashboard = () => {
     const [earnings, setEarnings] = useState(0);
     const [totalSaleToday, setTotalSaleToday] = useState(0);
     const [topCustomerList, setTopCustomerList] = useState<ITopCustomerList[]>([]);
+    const [lastReviewList, setLatestReviewList] = useState([]);
 
     // get all orders
     useEffect(() => {
@@ -47,11 +49,30 @@ const Dashboard = () => {
             let count = 0;
             let topCustomers: ITopCustomerList[] = [];
 
+            // Latest review
+            const reviewList = await feedbackServices.getAllFeedback();
+
+            const latestReviews = reviewList.data.feedback_responses.map((item: any) => {
+                let feedbackItem = {};
+                responseData.result.forEach((user: UserModel) => {
+                    if (item.user_id == user.userId) {
+                        feedbackItem = {
+                            avatar: user.avatar,
+                            comment: item.comment
+                        }
+                    }
+                })
+                return feedbackItem
+            });
+
+            setLatestReviewList(latestReviews);
+
             const fetchApi1 = async (userItem: UserModel) => {
                 const res = await orderServices.getAllOrderByUserId(userItem.userId + '');
 
-                // Top customer
 
+
+                // Top customer
                 count++
                 if (res.totalOrders > 0) {
                     const resData = await orderServices.getAllOrderByUserId(userItem.userId + '', 1, res.totalOrders);
@@ -171,118 +192,31 @@ const Dashboard = () => {
                                     Latest Reviews
                                 </h2>
                                 <div className={cx('block__list')}>
-                                    <div className={cx('block__item')}>
-                                        <div
-                                            className={cx('block__img-wrapper')}
-                                        >
-                                            <Image
-                                                src={images.defaultAvatar}
-                                                alt="avatar"
-                                            ></Image>
-                                        </div>
-                                        <div className={cx('block__body')}>
+                                    {
+                                        lastReviewList.map((item: any, index) => <div key={index} className={cx('block__item')}>
                                             <div
-                                                className={cx('block__name', {
-                                                    'line-clamp': true,
-                                                })}
+                                                className={cx('block__img-wrapper')}
                                             >
-                                                As others mentioned, the team
-                                                behind this theme is super
-                                                responsive.
+                                                <Image
+                                                    src={item.avatar}
+                                                    alt="avatar"
+                                                    className={cx('block__avatar')}
+
+                                                ></Image>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div className={cx('block__item')}>
-                                        <div
-                                            className={cx('block__img-wrapper')}
-                                        >
-                                            <Image
-                                                src={images.defaultAvatar}
-                                                alt="avatar"
-                                            ></Image>
-                                        </div>
-                                        <div className={cx('block__body')}>
-                                            <div
-                                                className={cx('block__name', {
-                                                    'line-clamp': true,
-                                                })}
-                                            >
-                                                As others mentioned, the team
-                                                behind this theme is super
-                                                responsive. I sent a message
-                                                during the weekend, fully
-                                                expecting a response As others
-                                                mentioned, the team behind this
-                                                theme is super responsive. I
-                                                sent a message during the
-                                                weekend, fully expecting a
-                                                response
+                                            <div className={cx('block__body')}>
+                                                <div
+                                                    className={cx('block__name', {
+                                                        'line-clamp': true,
+                                                    })}
+                                                    style={{ fontSize: 14 }}
+                                                >
+                                                    {item.comment}
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div className={cx('block__item')}>
-                                        <div
-                                            className={cx('block__img-wrapper')}
-                                        >
-                                            <Image
-                                                src={images.defaultAvatar}
-                                                alt="avatar"
-                                            ></Image>
-                                        </div>
-                                        <div className={cx('block__body')}>
-                                            <div
-                                                className={cx('block__name', {
-                                                    'line-clamp': true,
-                                                })}
-                                            >
-                                                I sent a message during the
-                                                weekend, fully expecting a
-                                                response As others mentioned,
-                                                the team behind this theme is
-                                                super responsive.
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className={cx('block__item')}>
-                                        <div
-                                            className={cx('block__img-wrapper')}
-                                        >
-                                            <Image
-                                                src={images.defaultAvatar}
-                                                alt="avatar"
-                                            ></Image>
-                                        </div>
-                                        <div className={cx('block__body')}>
-                                            <div
-                                                className={cx('block__name', {
-                                                    'line-clamp': true,
-                                                })}
-                                            >
-                                                I sent a message during the
-                                                weekend, fully expecting a
-                                                response
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className={cx('block__item')}>
-                                        <div
-                                            className={cx('block__img-wrapper')}
-                                        >
-                                            <Image
-                                                src={images.defaultAvatar}
-                                                alt="avatar"
-                                            ></Image>
-                                        </div>
-                                        <div className={cx('block__body')}>
-                                            <div
-                                                className={cx('block__name', {
-                                                    'line-clamp': true,
-                                                })}
-                                            >
-                                                Very good product.
-                                            </div>
-                                        </div>
-                                    </div>
+                                        </div>)
+                                    }
+
                                 </div>
                             </div>
                         </div>

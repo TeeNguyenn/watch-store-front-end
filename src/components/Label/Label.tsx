@@ -23,6 +23,7 @@ interface LabelProps {
     cancel?: boolean;
     modifier?: boolean;
     style?: any;
+    pending?: boolean;
 }
 
 const Label = ({
@@ -37,44 +38,54 @@ const Label = ({
     paymentMethod,
     cancel,
     modifier = false,
+    pending = false,
     style
 }: LabelProps) => {
     if (paymentMethod === 'Payment via VNPay') {
         if (!paymentStatus) {
-            fail = true;
-            title = 'FAILED';
+            cancel = true;
+            title = 'CANCELLED';
         } else {
             switch (status) {
                 case 'PENDING':
-                    processing = true;
+                    pending = true;
                     title = 'PENDING';
                     break;
-                case 'PAID':
-                    success = true;
-                    title = 'PAID';
+                case 'PROCESSING':
+                    processing = true;
+                    title = 'READY TO SHIP';
                     break;
-                case 'FAILED':
-                    fail = true;
-                    title = 'FAILED';
+                case 'SHIPPED':
+                    success = true;
+                    title = 'SHIPPED';
+                    break;
+                case 'DELIVERY':
+                    success = true;
+                    title = 'DELIVERED';
                     break;
                 default:
                     break;
             }
         }
     } else {
-        switch (status?.toUpperCase()) {
+        switch (status) {
             case 'PENDING':
-                processing = true;
+                pending = true;
                 title = 'PENDING';
                 break;
-            case 'PAID':
+            case 'PROCESSING':
+                processing = true;
+                title = 'READY TO SHIP';
+                break;
+            case 'SHIPPED':
                 success = true;
-                title = 'PAID';
+                title = 'SHIPPED';
                 break;
-            case 'FAILED':
-                fail = true;
-                title = 'FAILED';
+            case 'DELIVERY':
+                success = true;
+                title = 'DELIVERED';
                 break;
+
             default:
                 break;
         }
@@ -88,14 +99,16 @@ const Label = ({
                 processing,
                 fail,
                 cancel,
-                modifier
+                modifier,
+                pending
             })}
         >
             <span>{title}</span>
             {success && <CheckNoCircleIcon></CheckNoCircleIcon>}
             {unfulfilled && <CheckNoCircleIcon></CheckNoCircleIcon>}
             {warning && <ErrorLabelIcon></ErrorLabelIcon>}
-            {processing && <ProcessingLabelIcon></ProcessingLabelIcon>}
+            {pending && <ProcessingLabelIcon></ProcessingLabelIcon>}
+            {processing && <ErrorLabelIcon></ErrorLabelIcon>}
             {fail && <ErrorLabelIcon></ErrorLabelIcon>}
             {cancel && <CloseIcon width="0.7rem" height="0.7rem"></CloseIcon>}
         </div>

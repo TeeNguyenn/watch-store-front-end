@@ -35,6 +35,7 @@ import ShippingMethodModel from '../../models/ShippingMethodModel';
 import icons from '../../assets/icons';
 import PageNotFound from '../PageNotFound';
 import * as paymentServices from '../../services/paymentServices';
+import { RootState, useAppDispatch, useAppSelector } from '../../redux/store';
 
 const cx = classNames.bind(styles);
 
@@ -57,7 +58,10 @@ const Checkout = () => {
     const [shippingMethodList, setShippingMethodList] = useState<
         ShippingMethodModel[]
     >([]);
-    const products = JSON.parse(localStorage.getItem('products') + '');
+
+    const checkoutCart = JSON.parse(localStorage.getItem('products') + '');
+
+
     const navigate = useNavigate();
     const [showSelectShippingMethod, setShowSelectShippingMethod] =
         useState(false);
@@ -121,7 +125,7 @@ const Checkout = () => {
     }, [responseCode, orderId]);
 
     useEffect(() => {
-        if (currentUser && products.length > 0) {
+        if (currentUser && checkoutCart) {
             setLoading(true);
             let result: ProductModel[] = [];
             const fetchApi = async (cartItem: any) => {
@@ -131,19 +135,19 @@ const Checkout = () => {
 
                 result.push(res);
 
-                if (result.length === products.length) {
+                if (result.length === checkoutCart.length) {
                     setProductList(result);
                     let totalTemp = 0;
                     result.forEach((productItem, index) => {
                         if (productItem.discount) {
                             totalTemp =
                                 totalTemp +
-                                products.at(index).quantity *
-                                    productItem.price *
-                                    (1 - productItem.discount / 100);
+                                checkoutCart.at(index).quantity *
+                                productItem.price *
+                                (1 - productItem.discount / 100);
                         } else {
                             totalTemp =
-                                products.at(index).quantity * productItem.price;
+                                checkoutCart.at(index).quantity * productItem.price;
                         }
                     });
                     setTotal(totalTemp);
@@ -152,11 +156,20 @@ const Checkout = () => {
                     return;
                 }
             };
-            products.forEach((item: any, index: number) => {
-                setTimeout(() => {
-                    fetchApi(item);
-                }, index * 500);
-            });
+
+            const getCheckoutCart = async (checkoutCart: any) => {
+                for await (const item of checkoutCart) {
+                    await fetchApi(item);
+
+                }
+            };
+
+            getCheckoutCart(checkoutCart);
+            // checkoutCart.forEach((item: any, index: number) => {
+            //     setTimeout(() => {
+            //         fetchApi(item);
+            //     }, index * 500);
+            // });
         }
     }, [currentUser]);
 
@@ -295,7 +308,7 @@ const Checkout = () => {
                 shipping_address: values.apartment
                     ? `${values.apartment}, ${commune[0].full_name}, ${district[0].full_name}, ${province[0].full_name}`
                     : `${commune[0].full_name}, ${district[0].full_name}, ${province[0].full_name}`,
-                cart_items: products,
+                cart_items: checkoutCart,
             };
 
             // Checkout for COD
@@ -318,6 +331,9 @@ const Checkout = () => {
                 fetchApi();
             } else {
                 //VPN PAY
+
+                // console.log(totalMoney);
+
                 const fetchApi = async () => {
                     const res = await orderServices.postOrder(data);
 
@@ -363,7 +379,7 @@ const Checkout = () => {
         setActiveShippingMethod(tempShippingMethod);
     };
 
-    if (products.length === 0 || notFound) {
+    if (!checkoutCart || checkoutCart.length === 0 || notFound) {
         return <PageNotFound></PageNotFound>;
     }
     if (loading) {
@@ -372,7 +388,6 @@ const Checkout = () => {
 
     return (
         <div className={cx('checkout')}>
-            <ToastContainer />
             <header className={cx('banner')}>
                 <div className={cx('banner__inner')}>
                     <Link
@@ -924,7 +939,7 @@ const Checkout = () => {
                                                             {shippingMethodList.map(
                                                                 (item) =>
                                                                     item.shippingMethodId ===
-                                                                        activeShippingMethod &&
+                                                                    activeShippingMethod &&
                                                                     item.name
                                                             )}
                                                         </p>
@@ -947,11 +962,11 @@ const Checkout = () => {
                                                             {shippingMethodList.map(
                                                                 (item) =>
                                                                     item.shippingMethodId ===
-                                                                        activeShippingMethod &&
+                                                                    activeShippingMethod &&
                                                                     formatPrice(
                                                                         Number.parseFloat(
                                                                             item.cost +
-                                                                                ''
+                                                                            ''
                                                                         )
                                                                     )
                                                             )}
@@ -969,7 +984,7 @@ const Checkout = () => {
                                                         {shippingMethodList.map(
                                                             (item) =>
                                                                 item.shippingMethodId ===
-                                                                    activeShippingMethod &&
+                                                                activeShippingMethod &&
                                                                 item.desc
                                                         )}
                                                     </p>
@@ -1078,7 +1093,7 @@ const Checkout = () => {
                                                                             {formatPrice(
                                                                                 Number.parseFloat(
                                                                                     item.cost +
-                                                                                        ''
+                                                                                    ''
                                                                                 )
                                                                             )}
                                                                         </p>
@@ -1169,11 +1184,11 @@ const Checkout = () => {
                                                                 hidden
                                                                 checked={
                                                                     checkRadio ===
-                                                                        paymentMethod.paymentMethodId &&
+                                                                    paymentMethod.paymentMethodId &&
                                                                     formik
                                                                         .values
                                                                         .payment ===
-                                                                        paymentMethod.name
+                                                                    paymentMethod.name
                                                                 }
                                                                 className={cx(
                                                                     'checkout__radio'
@@ -1203,15 +1218,15 @@ const Checkout = () => {
                                                                 }
                                                                 {paymentMethod.name ===
                                                                     'Payment via VNPay' && (
-                                                                    <Image
-                                                                        src={
-                                                                            checkoutImages.vnpay
-                                                                        }
-                                                                        className={cx(
-                                                                            'checkout__radio-img'
-                                                                        )}
-                                                                    ></Image>
-                                                                )}
+                                                                        <Image
+                                                                            src={
+                                                                                checkoutImages.vnpay
+                                                                            }
+                                                                            className={cx(
+                                                                                'checkout__radio-img'
+                                                                            )}
+                                                                        ></Image>
+                                                                    )}
                                                             </label>
                                                         </div>
                                                     )
@@ -1283,10 +1298,10 @@ const Checkout = () => {
                                                             .filter(
                                                                 (item) =>
                                                                     item.colorId ===
-                                                                        products.at(
-                                                                            index
-                                                                        )
-                                                                            .color_id &&
+                                                                    checkoutCart.at(
+                                                                        index
+                                                                    )
+                                                                        .color_id &&
                                                                     item.isMainImage
                                                             )
                                                             .at(0)?.imageUrl ||
@@ -1302,7 +1317,7 @@ const Checkout = () => {
                                                     )}
                                                 >
                                                     {
-                                                        products.at(index)
+                                                        checkoutCart.at(index)
                                                             .quantity
                                                     }
                                                 </p>
@@ -1329,7 +1344,7 @@ const Checkout = () => {
                                                             .filter(
                                                                 (item) =>
                                                                     item.colorId ===
-                                                                    products.at(
+                                                                    checkoutCart.at(
                                                                         index
                                                                     ).color_id
                                                             )
@@ -1340,7 +1355,7 @@ const Checkout = () => {
                                                         ?.filter(
                                                             (item) =>
                                                                 item.sizeId ===
-                                                                products.at(
+                                                                checkoutCart.at(
                                                                     index
                                                                 ).screen_size_id
                                                         )
@@ -1352,7 +1367,7 @@ const Checkout = () => {
                                                             ?.filter(
                                                                 (item) =>
                                                                     item.materialId ===
-                                                                    products.at(
+                                                                    checkoutCart.at(
                                                                         index
                                                                     )
                                                                         .material_id
@@ -1368,18 +1383,18 @@ const Checkout = () => {
                                             >
                                                 {productItem.discount
                                                     ? formatPrice(
-                                                          products.at(index)
-                                                              .quantity *
-                                                              productItem.price *
-                                                              (1 -
-                                                                  productItem.discount /
-                                                                      100)
-                                                      )
+                                                        checkoutCart.at(index)
+                                                            .quantity *
+                                                        productItem.price *
+                                                        (1 -
+                                                            productItem.discount /
+                                                            100)
+                                                    )
                                                     : formatPrice(
-                                                          products.at(index)
-                                                              .quantity *
-                                                              productItem.price
-                                                      )}
+                                                        checkoutCart.at(index)
+                                                            .quantity *
+                                                        productItem.price
+                                                    )}
                                             </div>
                                         </div>
                                     ))}
@@ -1421,7 +1436,7 @@ const Checkout = () => {
                                             {shippingMethodList.map(
                                                 (item) =>
                                                     item.shippingMethodId ===
-                                                        activeShippingMethod &&
+                                                    activeShippingMethod &&
                                                     formatPrice(
                                                         Number.parseFloat(
                                                             item.cost + ''
@@ -1448,7 +1463,7 @@ const Checkout = () => {
                                             {shippingMethodList.map(
                                                 (item) =>
                                                     item.shippingMethodId ===
-                                                        activeShippingMethod &&
+                                                    activeShippingMethod &&
                                                     formatPrice(
                                                         item.cost
                                                             ? item.cost + total

@@ -11,7 +11,13 @@ import Image from '../Image';
 import * as userServices from '../../services/userServices';
 import UserModel from '../../models/UserModel';
 import images from '../../assets/images';
-import { formatPrice, getCurrentDateWithHour, notifyError, notifySuccess, timeAgo } from '../../utils/Functions';
+import {
+    formatPrice,
+    getCurrentDateWithHour,
+    notifyError,
+    notifySuccess,
+    timeAgo,
+} from '../../utils/Functions';
 import * as orderServices from '../../services/orderServices';
 import PreLoader from '../PreLoader';
 import { ToastContainer, toast } from 'react-toastify';
@@ -19,7 +25,8 @@ import ModalConfirm from '../ModalConfirm/ModalConfirm';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import config from '../../config';
-
+import { useAppDispatch } from '../../redux/store';
+import { putAvatarCustomer } from './CustomerInfoSlice';
 
 const cx = classNames.bind(styles);
 
@@ -37,7 +44,6 @@ interface ICustomerDetail {
     address: string | undefined;
     totalSpent: number;
     roles: any[] | undefined;
-
 }
 
 const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
@@ -52,31 +58,27 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
 
     const refInput = useRef<HTMLInputElement | null>(null);
 
+    const dispatch = useAppDispatch();
 
     const formik = useFormik({
         initialValues: {
             fullName: '',
             phoneNumber: '',
-
         },
         validationSchema: Yup.object({
-            fullName: Yup.string().required('You must fill in this section.').max(
-                40,
-                'Your last name must be under 40 characters.'
-            ),
+            fullName: Yup.string()
+                .required('You must fill in this section.')
+                .max(40, 'Your last name must be under 40 characters.'),
             phoneNumber: Yup.string()
                 .matches(/^0\d{9}$/, 'Phone number is invalid.')
                 .required('You must fill in this section.'),
-
         }),
         onSubmit: (values) => {
             const fetchApi = async () => {
-
                 setLoading(true);
 
                 let index = values.fullName.indexOf(' ');
                 if (index === -1) index = 1;
-
 
                 const data: any = {
                     userId: customerDetail?.id + '',
@@ -85,28 +87,10 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                         last_name: values.fullName.slice(index + 1),
                         phone_number: values.phoneNumber,
                         address: address,
-                        email: customerDetail?.email
-                    }
+                        email: customerDetail?.email,
+                    },
                 };
 
-                // Tạo form data và thêm file
-                const formData = new FormData();
-                formData.append("file", file);
-
-                if (file) {
-                    const resData = await userServices.putAvatarUser(customerDetail?.id + '', formData);
-
-                    if (resData.errorMessage) {
-
-                        setTimeout(() => {
-                            setLoading(false);
-                        }, 200);
-                        setTimeout(() => {
-                            notifyError(resData.errorMessage)
-                        }, 300);
-                        return;
-                    }
-                }
                 const res = await userServices.putUser(data);
 
                 if (res.status !== 'OK') {
@@ -114,7 +98,7 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                         setLoading(false);
                     }, 200);
                     setTimeout(() => {
-                        notifyError('An error occurred.')
+                        notifyError('An error occurred.');
                     }, 300);
                     return;
                 }
@@ -124,10 +108,10 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                 setTimeout(() => {
                     notifySuccess('Change user information successfully');
                 }, 100);
-            }
+            };
 
             fetchApi();
-        }
+        },
     });
 
     // Get customerId from url
@@ -151,45 +135,55 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
             const responseData = await userServices.getAllUser();
 
             const fetchApi1 = async (userItem: UserModel) => {
-                const res = await orderServices.getAllOrderByUserId(userItem.userId + '');
+                const res = await orderServices.getAllOrderByUserId(
+                    userItem.userId + ''
+                );
 
                 if (customerIdNumber === userItem.userId) {
-
                     let totalSpent = 0;
 
                     if (res.totalOrders > 0) {
-                        const resData = await orderServices.getAllOrderByUserId(userItem.userId + '', 1, res.totalOrders);
+                        const resData = await orderServices.getAllOrderByUserId(
+                            userItem.userId + '',
+                            1,
+                            res.totalOrders
+                        );
 
-                        totalSpent = resData.result.reduce((accumulator: any, currentItem: any) => {
-                            return accumulator + currentItem.total_money;
-                        }, 0)
+                        totalSpent = resData.result.reduce(
+                            (accumulator: any, currentItem: any) => {
+                                return accumulator + currentItem.total_money;
+                            },
+                            0
+                        );
                     }
-
 
                     setCustomerDetail({
                         id: userItem.userId,
                         name: userItem.firstName + ' ' + userItem.lastName,
                         email: userItem.email,
                         totalOrder: res.totalOrders,
-                        lastOrder: res.totalOrders > 0 ? timeAgo(res.result.at(0).order_date) : 'No orders',
+                        lastOrder:
+                            res.totalOrders > 0
+                                ? timeAgo(res.result.at(0).order_date)
+                                : 'No orders',
                         phone: userItem.phoneNumber,
                         address: userItem.address, //temp
                         totalSpent,
-                        roles: userItem.role
+                        roles: userItem.role,
+                    });
 
-                    })
-
-
-                    setAvatar(userItem.avatar)
+                    setAvatar(userItem.avatar);
                     setAddress(userItem.address || 'No default address set.');
                     formik.setFieldValue('phoneNumber', userItem.phoneNumber);
-                    formik.setFieldValue('fullName', userItem.firstName + ' ' + userItem.lastName);
+                    formik.setFieldValue(
+                        'fullName',
+                        userItem.firstName + ' ' + userItem.lastName
+                    );
 
                     setLoading(false);
                     return;
-
                 }
-            }
+            };
 
             async function fetchSequentially(responseData: any) {
                 for (const userItem of responseData.result) {
@@ -197,27 +191,33 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                 }
             }
             fetchSequentially(responseData);
-
-
         };
 
         if (customerIdNumber) {
-
             fetchApi();
         } else {
             const fetchApi = async () => {
                 setLoading(true);
                 const res = await userServices.getUserDetail();
-                const resData = await orderServices.getAllOrderByUserId(currentUser + '');
+                const resData = await orderServices.getAllOrderByUserId(
+                    currentUser + ''
+                );
 
                 let totalSpent = 0;
 
                 if (resData.totalOrders > 0) {
-                    const ordersData = await orderServices.getAllOrderByUserId(currentUser + '', 1, resData.totalOrders);
+                    const ordersData = await orderServices.getAllOrderByUserId(
+                        currentUser + '',
+                        1,
+                        resData.totalOrders
+                    );
 
-                    totalSpent = ordersData.result.reduce((accumulator: any, currentItem: any) => {
-                        return accumulator + currentItem.total_money;
-                    }, 0)
+                    totalSpent = ordersData.result.reduce(
+                        (accumulator: any, currentItem: any) => {
+                            return accumulator + currentItem.total_money;
+                        },
+                        0
+                    );
                 }
 
                 setCustomerDetail({
@@ -225,29 +225,32 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                     name: res.firstName + ' ' + res.lastName,
                     email: res.email,
                     totalOrder: resData.totalOrders,
-                    lastOrder: resData.totalOrders > 0 ? timeAgo(resData.result.at(0).order_date) : 'No orders',
+                    lastOrder:
+                        resData.totalOrders > 0
+                            ? timeAgo(resData.result.at(0).order_date)
+                            : 'No orders',
                     phone: res.phoneNumber,
                     address: res.address, //temp
                     totalSpent,
-                    roles: res.role
+                    roles: res.role,
+                });
 
-                })
-
-                setAvatar(res.avatar)
-                formik.setFieldValue('fullName', res.firstName + ' ' + res.lastName);
+                setAvatar(res.avatar);
+                formik.setFieldValue(
+                    'fullName',
+                    res.firstName + ' ' + res.lastName
+                );
                 setAddress(res.address || 'No default address set.');
                 formik.setFieldValue('phoneNumber', res.phoneNumber);
                 setLoading(false);
-
             };
             fetchApi();
         }
-
     }, [customerIdNumber]);
 
     const handleCloseModal = () => {
         setShowModal(false);
-    }
+    };
 
     const handleResetPassword = async () => {
         setLoading(true);
@@ -256,32 +259,64 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
             setShowModal(false);
             setLoading(false);
             setTimeout(() => {
-                notifySuccess('Reset password successfully. Please check Gmail inbox for a new password')
+                notifySuccess(
+                    'Reset password successfully. Please check Gmail inbox for a new password'
+                );
             }, 100);
         } else {
             setShowModal(false);
             setLoading(false);
             setTimeout(() => {
-                notifyError('An error occurred.')
+                notifyError('An error occurred.');
             }, 100);
-
         }
-    }
+    };
 
+    const handleUpdateAvatar = async (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        if (e.target.files) {
+            setLoading(true);
+            setFile(e.target.files[0]);
 
+            // Tạo form data và thêm file
+            const formData = new FormData();
+            formData.append('file', e.target.files[0]);
+
+            const resData = await userServices.putAvatarUser(
+                customerDetail?.id + '',
+                formData
+            );
+
+            console.log(resData);
+
+            if (resData.errorMessage) {
+                setLoading(false);
+                setTimeout(() => {
+                    notifyError(resData.errorMessage);
+                }, 0);
+                return;
+            } else {
+                setLoading(false);
+                dispatch(putAvatarCustomer(resData.data.avatar));
+                setTimeout(() => {
+                    notifySuccess('Avatar update successful');
+                }, 10);
+            }
+        }
+    };
 
     if (loading) {
-        return <PreLoader show></PreLoader>
+        return <PreLoader show></PreLoader>;
     }
 
-
     return (
-        <form onSubmit={formik.handleSubmit}
+        <form
+            onSubmit={formik.handleSubmit}
             className={cx('', {
                 modifier,
             })}
         >
-            <ToastContainer />
             <div className={cx('row')}>
                 <h2 className={cx('heading')}>
                     {modifier ? 'User details' : 'Profile'}
@@ -289,7 +324,7 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                 <div className={cx('actions')}>
                     {/* admin */}
                     <Button
-                        type='button'
+                        type="button"
                         className={cx('btn', 'delete-btn', { 'd-none': true })}
                         leftIcon={
                             <RemoveIcon
@@ -301,10 +336,9 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                         Delete user
                     </Button>
                     <Button
-                        type='button'
-
+                        type="button"
                         className={cx('btn', 'reset-btn', {
-                            'd-none': !modifier
+                            'd-none': !modifier,
                         })}
                         leftIcon={<ResetIcon></ResetIcon>}
                         onClick={() => setShowModal(!showModal)}
@@ -330,10 +364,7 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                                     id="avatarFile"
                                     hidden
                                     accept="image/jpeg, image/png, image/gif, image/bmp"
-                                    onChange={(e) =>
-                                        e.target.files &&
-                                        setFile(e.target.files[0])
-                                    }
+                                    onChange={handleUpdateAvatar}
                                 />
                                 <label
                                     htmlFor="avatarFile"
@@ -371,27 +402,36 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                             <div className={cx('info__content')}>
                                 <input
                                     ref={refInput}
-                                    id='fullName'
-                                    name='fullName'
+                                    id="fullName"
+                                    name="fullName"
                                     type="text"
                                     className={cx('info__name')}
                                     value={formik.values.fullName}
                                     disabled={!showChange}
                                     style={{
-                                        borderBottom: showChange ? '1px solid var(--text-color)' : 'none'
+                                        borderBottom: showChange
+                                            ? '1px solid var(--text-color)'
+                                            : 'none',
                                     }}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-
                                 />
-                                {formik.errors.fullName && formik.touched.fullName && (
-                                    <div className={cx('form__error')}>
-                                        <ErrorIcon width="1.4rem" height="1.4rem"></ErrorIcon>
-                                        <span className={cx('form__error-title')}>
-                                            {formik.errors.fullName}
-                                        </span>
-                                    </div>
-                                )}
+                                {formik.errors.fullName &&
+                                    formik.touched.fullName && (
+                                        <div className={cx('form__error')}>
+                                            <ErrorIcon
+                                                width="1.4rem"
+                                                height="1.4rem"
+                                            ></ErrorIcon>
+                                            <span
+                                                className={cx(
+                                                    'form__error-title'
+                                                )}
+                                            >
+                                                {formik.errors.fullName}
+                                            </span>
+                                        </div>
+                                    )}
                                 <p className={cx('info__status')}>
                                     {/* temp */}
                                     Joined {customerDetail?.lastOrder}
@@ -468,19 +508,27 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                                 <h6 className={cx('info__label')}>
                                     Total Spent
                                 </h6>
-                                <h4 className={cx('info__text')}>{formatPrice(customerDetail?.totalSpent || 0)}</h4>
+                                <h4 className={cx('info__text')}>
+                                    {formatPrice(
+                                        customerDetail?.totalSpent || 0
+                                    )}
+                                </h4>
                             </div>
                             <div className={cx('info__group')}>
                                 <h6 className={cx('info__label')}>
                                     Last Order
                                 </h6>
-                                <h4 className={cx('info__text')}>{customerDetail?.lastOrder}</h4>
+                                <h4 className={cx('info__text')}>
+                                    {customerDetail?.lastOrder}
+                                </h4>
                             </div>
                             <div className={cx('info__group')}>
                                 <h6 className={cx('info__label')}>
                                     Total Orders
                                 </h6>
-                                <h4 className={cx('info__text')}>{customerDetail?.totalOrder}</h4>
+                                <h4 className={cx('info__text')}>
+                                    {customerDetail?.totalOrder}
+                                </h4>
                             </div>
                         </div>
                     </div>
@@ -491,14 +539,17 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                             <h3 className={cx('address__title')}>
                                 Default Address
                             </h3>
-                            <Button type='button' className={cx('address__modifier-btn')} onClick={() => {
-                                setShowChange(!showChange)
-                                setTimeout(() => {
-                                    refInput.current?.focus();
-                                }, 100);
-                                return;
-
-                            }}>
+                            <Button
+                                type="button"
+                                className={cx('address__modifier-btn')}
+                                onClick={() => {
+                                    setShowChange(!showChange);
+                                    setTimeout(() => {
+                                        refInput.current?.focus();
+                                    }, 100);
+                                    return;
+                                }}
+                            >
                                 <ModifierIcon />
                             </Button>
                         </div>
@@ -513,9 +564,11 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                                     value={address}
                                     disabled={!showChange}
                                     style={{
-                                        borderBottom: showChange ? '1px solid var(--text-color)' : 'none'
+                                        borderBottom: showChange
+                                            ? '1px solid var(--text-color)'
+                                            : 'none',
                                     }}
-                                    onChange={e => setAddress(e.target.value)}
+                                    onChange={(e) => setAddress(e.target.value)}
                                 />
                             </div>
                             <div className={cx('address__group')}>
@@ -531,26 +584,35 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                                 <h5 className={cx('address__label')}>Phone</h5>
                                 <input
                                     type="text"
-                                    name='phoneNumber'
-                                    id='phoneNumber'
+                                    name="phoneNumber"
+                                    id="phoneNumber"
                                     className={cx('address__phone')}
                                     value={formik.values.phoneNumber}
                                     disabled={!showChange}
                                     style={{
-                                        borderBottom: showChange ? '1px solid var(--text-color)' : 'none'
+                                        borderBottom: showChange
+                                            ? '1px solid var(--text-color)'
+                                            : 'none',
                                     }}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-
                                 />
-                                {formik.errors.phoneNumber && formik.touched.phoneNumber && (
-                                    <div className={cx('form__error')}>
-                                        <ErrorIcon width="1.4rem" height="1.4rem"></ErrorIcon>
-                                        <span className={cx('form__error-title')}>
-                                            {formik.errors.phoneNumber}
-                                        </span>
-                                    </div>
-                                )}
+                                {formik.errors.phoneNumber &&
+                                    formik.touched.phoneNumber && (
+                                        <div className={cx('form__error')}>
+                                            <ErrorIcon
+                                                width="1.4rem"
+                                                height="1.4rem"
+                                            ></ErrorIcon>
+                                            <span
+                                                className={cx(
+                                                    'form__error-title'
+                                                )}
+                                            >
+                                                {formik.errors.phoneNumber}
+                                            </span>
+                                        </div>
+                                    )}
                                 {/* <div
                                     // to={`tel:${customerDetail?.phone}`}
                                     className={cx('address__tel')}
@@ -558,13 +620,23 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
                                 </div> */}
                             </div>
                         </div>
-                        <div className={cx('address__actions', {
-                            'd-none': !showChange
-                        })} >
-                            <Button type='button' className={cx('address__btn')} onClick={() => setShowChange(false)}>
+                        <div
+                            className={cx('address__actions', {
+                                'd-none': !showChange,
+                            })}
+                        >
+                            <Button
+                                type="button"
+                                className={cx('address__btn')}
+                                onClick={() => setShowChange(false)}
+                            >
                                 Cancel
                             </Button>
-                            <Button type='submit' primary className={cx('address__btn')} >
+                            <Button
+                                type="submit"
+                                primary
+                                className={cx('address__btn')}
+                            >
                                 Save change
                             </Button>
                         </div>
@@ -573,7 +645,17 @@ const CustomerInfo = ({ modifier }: CustomerInfoProps) => {
             </div>
 
             {/* Modal confirm */}
-            <ModalConfirm show={showModal} title='Reset Password' handleCloseModal={handleCloseModal} handleConfirm={handleResetPassword}>An email will be sent to your registered email address with instructions to reset your password. Please check your inbox for a new password. If you do not see the email, please check your spam or unwanted email folder.</ModalConfirm>
+            <ModalConfirm
+                show={showModal}
+                title="Reset Password"
+                handleCloseModal={handleCloseModal}
+                handleConfirm={handleResetPassword}
+            >
+                An email will be sent to your registered email address with
+                instructions to reset your password. Please check your inbox for
+                a new password. If you do not see the email, please check your
+                spam or unwanted email folder.
+            </ModalConfirm>
         </form>
     );
 };

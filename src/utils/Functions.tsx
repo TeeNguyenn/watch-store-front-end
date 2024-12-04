@@ -6,7 +6,6 @@ import {
 } from '@fortawesome/free-regular-svg-icons';
 import { toast } from 'react-toastify';
 
-
 export const renderRating = (rate: number) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
@@ -272,19 +271,19 @@ export function timeAgo(orderTimeInMilliseconds: number) {
     const years = Math.floor(days / 365); // Giả sử năm có 365 ngày
 
     if (years > 0) {
-        return years === 1 ? "1 year ago" : `${years} years ago`;
+        return years === 1 ? '1 year ago' : `${years} years ago`;
     } else if (months > 0) {
-        return months === 1 ? "1 month ago" : `${months} months ago`;
+        return months === 1 ? '1 month ago' : `${months} months ago`;
     } else if (weeks > 0) {
-        return weeks === 1 ? "1 week ago" : `${weeks} weeks ago`;
+        return weeks === 1 ? '1 week ago' : `${weeks} weeks ago`;
     } else if (days > 0) {
-        return days === 1 ? "1 day ago" : `${days} days ago`;
+        return days === 1 ? '1 day ago' : `${days} days ago`;
     } else if (hours > 0) {
-        return hours === 1 ? "1 hour ago" : `${hours} hours ago`;
+        return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
     } else if (minutes > 0) {
-        return minutes === 1 ? "1 minute ago" : `${minutes} minutes ago`;
+        return minutes === 1 ? '1 minute ago' : `${minutes} minutes ago`;
     } else {
-        return seconds === 1 ? "1 second ago" : `${seconds} seconds ago`;
+        return seconds === 1 ? '1 second ago' : `${seconds} seconds ago`;
     }
 }
 
@@ -299,10 +298,10 @@ export function isToday(milliseconds: number) {
     );
 }
 
-export const notifySuccess = (message: string) => {
+export const notifySuccess = (message: string, time = 3000) => {
     toast.success(message, {
         position: 'top-right',
-        autoClose: 5000,
+        autoClose: time,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -311,10 +310,10 @@ export const notifySuccess = (message: string) => {
     });
 };
 
-export const notifyWarning = (message: string) => {
+export const notifyWarning = (message: string, time = 3000) => {
     toast.warning(message, {
         position: 'top-right',
-        autoClose: 5000,
+        autoClose: time,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -323,10 +322,10 @@ export const notifyWarning = (message: string) => {
     });
 };
 
-export const notifyError = (message: string) => {
+export const notifyError = (message: string, time = 3000) => {
     toast.error(message, {
         position: 'top-right',
-        autoClose: 5000,
+        autoClose: time,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,

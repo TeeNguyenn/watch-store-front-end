@@ -9,6 +9,7 @@ import NextArrow from './NextArrow';
 import Button from '../../../components/Button';
 import styles from './SlideShow.module.scss';
 import { useMediaQuery } from 'react-responsive';
+import config from '../../../config';
 
 const cx = classNames.bind(styles);
 
@@ -58,7 +59,7 @@ const SlideShow = () => {
                                 condimentum.
                             </p>
                             <Button
-                                to="#!"
+                                to={config.routes.shop}
                                 rounded
                                 primary
                                 className={cx('slide-show__btn', {
@@ -98,7 +99,7 @@ const SlideShow = () => {
                                 justo nec ultrice.
                             </p>
                             <Button
-                                to="#!"
+                                to={config.routes.shop}
                                 rounded
                                 primary
                                 className={cx('slide-show__btn', {
@@ -138,7 +139,7 @@ const SlideShow = () => {
                                 nisl rhoncus mattis.
                             </p>
                             <Button
-                                to="#!"
+                                to={config.routes.shop}
                                 rounded
                                 primary
                                 className={cx('slide-show__btn', {

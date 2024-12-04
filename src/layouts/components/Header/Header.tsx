@@ -34,7 +34,14 @@ import UserModel from '../../../models/UserModel';
 import { CartContext } from '../../../contexts/CartContext';
 import * as cartItemServices from '../../../services/cartItemServices';
 import PreLoader from '../../../components/PreLoader';
-import { RootState, useAppSelector } from '../../../redux/store';
+import {
+    RootState,
+    useAppDispatch,
+    useAppSelector,
+} from '../../../redux/store';
+import { putAvatarCustomer } from '../../../components/CustomerInfo/CustomerInfoSlice';
+import { ToastContainer } from 'react-toastify';
+import { notifySuccess } from '../../../utils/Functions';
 
 const cx = classNames.bind(styles);
 
@@ -56,6 +63,10 @@ const Header = () => {
     const navigate = useNavigate();
 
     const cartList = useAppSelector((state: RootState) => state.cartList.cart);
+    const avatar = useAppSelector(
+        (state: RootState) => state.customerInfo.avatar
+    );
+    const dispatch = useAppDispatch();
 
     // User status
     const currentUser = localStorage.getItem('user_id');
@@ -70,9 +81,11 @@ const Header = () => {
 
     useEffect(() => {
         if (currentUser) {
+            // setLoading(true);
             const fetchApi = async () => {
                 const res = await userServices.getUserDetail();
                 setUserDetail(res);
+                // setLoading(false);
             };
             fetchApi();
         }
@@ -123,18 +136,19 @@ const Header = () => {
 
     const handleLogout = () => {
         setShowDropdownProfile(false);
+        dispatch(putAvatarCustomer(''));
 
-        localStorage.removeItem('token');
-        localStorage.removeItem('user_id');
-        localStorage.removeItem('refresh_token');
+        localStorage.clear();
+
+        // localStorage.removeItem('token');
+        // localStorage.removeItem('user_id');
+        // localStorage.removeItem('refresh_token');
         // setCartList([]);
 
-        if (pathName === '/') {
-            navigate(0); //reload
-        } else {
-            navigate(config.routes.home);
-            navigate(0); //reload
-        }
+        navigate(config.routes.login);
+        setTimeout(() => {
+            notifySuccess('Logout successful.', 3000);
+        }, 0);
     };
 
     const handleMobileSubMenu = (isCloseMobileSubMenu: boolean) => {
@@ -487,45 +501,45 @@ const Header = () => {
                                 navList={
                                     isProfileDrawer
                                         ? [
-                                            {
-                                                to: '/profile',
-                                                name: 'Profile',
-                                            },
-                                            {
-                                                to: '/dashboard',
-                                                name: 'Dashboard',
-                                            },
-                                            {
-                                                to: '/posts-activity',
-                                                name: 'Posts & Activity',
-                                            },
-                                            {
-                                                to: '/setting-privacy',
-                                                name: 'Settings & Privacy ',
-                                            },
-                                            {
-                                                to: '/help-center',
-                                                name: 'Help Center',
-                                            },
-                                            {
-                                                to: '/logout',
-                                                name: 'Log out',
-                                            },
-                                        ]
+                                              {
+                                                  to: '/profile',
+                                                  name: 'Profile',
+                                              },
+                                              {
+                                                  to: '/dashboard',
+                                                  name: 'Dashboard',
+                                              },
+                                              {
+                                                  to: '/posts-activity',
+                                                  name: 'Posts & Activity',
+                                              },
+                                              {
+                                                  to: '/setting-privacy',
+                                                  name: 'Settings & Privacy ',
+                                              },
+                                              {
+                                                  to: '/help-center',
+                                                  name: 'Help Center',
+                                              },
+                                              {
+                                                  to: '/logout',
+                                                  name: 'Log out',
+                                              },
+                                          ]
                                         : [
-                                            {
-                                                to: config.routes.blog,
-                                                name: 'Blog',
-                                            },
-                                            {
-                                                to: config.routes.faq,
-                                                name: 'Faq',
-                                            },
-                                            {
-                                                to: config.routes.contact,
-                                                name: 'Contact',
-                                            },
-                                        ]
+                                              {
+                                                  to: config.routes.blog,
+                                                  name: 'Blog',
+                                              },
+                                              {
+                                                  to: config.routes.faq,
+                                                  name: 'Faq',
+                                              },
+                                              {
+                                                  to: config.routes.contact,
+                                                  name: 'Contact',
+                                              },
+                                          ]
                                 }
                                 handleMobileSubMenu={handleMobileSubMenu}
                             ></MobileSubMenu>
@@ -676,7 +690,13 @@ const Header = () => {
                                             )}
                                         >
                                             <Image
-                                                src={userDetail?.avatar ? userDetail.avatar : images.defaultAvatar}
+                                                src={
+                                                    avatar
+                                                        ? avatar
+                                                        : currentUser
+                                                        ? userDetail?.avatar
+                                                        : images.defaultAvatar
+                                                }
                                                 alt="avatar"
                                                 className={cx(
                                                     'dropdown-profile__avatar'
@@ -692,7 +712,9 @@ const Header = () => {
                                                 ', ' +
                                                 userDetail?.firstName +
                                                 ''} */}
-                                            {userDetail?.firstName + ' ' + userDetail?.lastName}
+                                            {userDetail?.firstName +
+                                                ' ' +
+                                                userDetail?.lastName}
                                         </h6>
                                     </div>
                                     <div
@@ -720,7 +742,14 @@ const Header = () => {
                                             to={config.routes.adminDashboard}
                                             className={cx(
                                                 'dropdown-profile__group',
-                                                { 'd-none': !userDetail?.role?.some(roleItem => roleItem.id === 1) }    // id = 1 is admin
+                                                {
+                                                    'd-none':
+                                                        !userDetail?.role?.some(
+                                                            (roleItem) =>
+                                                                roleItem.id ===
+                                                                1
+                                                        ),
+                                                } // id = 1 is admin
                                             )}
                                             onClick={() =>
                                                 setShowDropdownProfile(false)
@@ -791,7 +820,6 @@ const Header = () => {
                                         </Link>
                                     </div>
                                     <Button
-                                        to="/"
                                         leftIcon={<LogoutIcon></LogoutIcon>}
                                         className={cx(
                                             'dropdown-profile__logout-btn'
@@ -808,19 +836,34 @@ const Header = () => {
                                 onClick={
                                     currentUser
                                         ? () =>
-                                            setShowDropdownProfile(
-                                                !showDropdownProfile
-                                            )
+                                              setShowDropdownProfile(
+                                                  !showDropdownProfile
+                                              )
                                         : () => setShowLoginModal(true)
                                 }
                             >
-                                {
-                                    userDetail?.avatar ? <Image className={cx('avatar')} src={userDetail?.avatar} alt='avatar'></Image> : <UserIcon
+                                {avatar ? (
+                                    <Image
+                                        className={cx('avatar')}
+                                        src={avatar}
+                                        alt="avatar"
+                                    ></Image>
+                                ) : currentUser ? (
+                                    <Image
+                                        className={cx('avatar')}
+                                        src={
+                                            userDetail?.avatar
+                                                ? userDetail?.avatar
+                                                : images.defaultAvatar
+                                        }
+                                        alt="avatar"
+                                    ></Image>
+                                ) : (
+                                    <UserIcon
                                         width={'2.6rem'}
                                         height={'2.6rem'}
                                     ></UserIcon>
-                                }
-
+                                )}
                             </div>
                         </Tippy>
                     </div>

@@ -290,6 +290,8 @@ img:focus-visible {
 .product-detail-slider .slick-slider:last-child .slick-track {
     display: flex;
     gap: 10px;
+    margin: 0 auto 0 0;
+    transform: translate3d(0px, 0px, 0px) !important;
 }
 
 .product-detail-slider .slick-slider:last-child .slick-current img {
@@ -728,4 +730,17 @@ input[type='number']::-webkit-inner-spin-button {
     &:hover {
         color: var(--primary-color);
     }
+}
+
+// Custom antd
+
+.ant-spin {
+    height: 300px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.ant-spin-dot-holder {
+    color: #7c4eb9 !important;
 }

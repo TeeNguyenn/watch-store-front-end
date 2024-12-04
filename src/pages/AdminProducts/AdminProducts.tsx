@@ -11,9 +11,7 @@ import PreLoader from '../../components/PreLoader';
 import config from '../../config';
 import { ToastContainer, toast } from 'react-toastify';
 
-
 const cx = classNames.bind(styles);
-
 
 const AdminProducts = () => {
     // pagination
@@ -41,7 +39,6 @@ const AdminProducts = () => {
         });
     };
 
-
     // get all product
     useEffect(() => {
         const fetchApi = async () => {
@@ -50,10 +47,7 @@ const AdminProducts = () => {
                 currentPage,
                 limit
             );
-            const res = await productServices.getAllProduct(
-                currentPage,
-                1
-            );
+            const res = await productServices.getAllProduct(currentPage, 1);
 
             if (responseData) {
                 setProductList(responseData.result);
@@ -73,15 +67,9 @@ const AdminProducts = () => {
             const res = await productServices.deleteProductItem(productId);
 
             if (res.status === 'OK') {
-                const res = await productServices.getAllProduct(
-                    currentPage,
-                    6
-                );
+                const res = await productServices.getAllProduct(currentPage, 6);
                 // Get all product for get total product
-                const resData = await productServices.getAllProduct(
-                    1,
-                    1
-                );
+                const resData = await productServices.getAllProduct(1, 1);
 
                 setProductList(res.result);
                 setTotalProduct(resData.totalPage);
@@ -130,13 +118,20 @@ const AdminProducts = () => {
 
     return (
         <>
-            <ToastContainer />
             <div className={cx('product__list')}>
                 <div className={cx('product__title')}>
                     <span>Products</span>
-                    <Button to={config.routes.adminNewProduct} className={cx('product__btn')}>+ Add New</Button>
+                    <Button
+                        to={config.routes.adminNewProduct}
+                        className={cx('product__btn')}
+                    >
+                        + Add New
+                    </Button>
                 </div>
-                <ProductTable productList={productList} handleRemoveProductItem={handleRemoveProductItem}></ProductTable>
+                <ProductTable
+                    productList={productList}
+                    handleRemoveProductItem={handleRemoveProductItem}
+                ></ProductTable>
                 <div
                     className={cx('product__bottom', {
                         'd-none': totalPage === 1 && productList.length <= 6,
@@ -150,10 +145,11 @@ const AdminProducts = () => {
                         >
                             {viewAll
                                 ? `1 to ${totalProduct} items of ${totalProduct}`
-                                : `${limit * (currentPage - 1) + 1} to ${currentPage * 6 >= totalProduct
-                                    ? totalProduct
-                                    : currentPage * 6
-                                } items of ${totalProduct}`}
+                                : `${limit * (currentPage - 1) + 1} to ${
+                                      currentPage * 6 >= totalProduct
+                                          ? totalProduct
+                                          : currentPage * 6
+                                  } items of ${totalProduct}`}
                         </p>
                         <Button
                             className={cx('product__view-btn', {

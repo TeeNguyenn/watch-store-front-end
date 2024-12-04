@@ -56,29 +56,26 @@ const ChangePassword = () => {
         onSubmit: (values) => {
             const fetchApi = async () => {
                 setLoading(true);
-                const res = await userServices.changePassword(
-                    {
-                        email,
-                        old_password: values.oldPassword,
-                        password: values.password,
-                        retype_password: values.confirmPassword
-                    }
-                )
+                const res = await userServices.changePassword({
+                    email,
+                    old_password: values.oldPassword,
+                    password: values.password,
+                    retype_password: values.confirmPassword,
+                });
 
                 if (res.status === 'OK') {
                     setLoading(false);
-                    formik.resetForm()
+                    formik.resetForm();
                     setTimeout(() => {
                         notifySuccess(res.message);
                     }, 0);
                 } else {
                     setLoading(false);
-                    formik.resetForm()
+                    formik.resetForm();
                     setTimeout(() => {
                         notifyError('Password change failed');
                     }, 0);
                 }
-
             };
 
             fetchApi();
@@ -86,7 +83,7 @@ const ChangePassword = () => {
     });
 
     if (!currentUser) {
-        return <PageNotFound />
+        return <PageNotFound />;
     }
 
     if (loading) {
@@ -95,7 +92,6 @@ const ChangePassword = () => {
 
     return (
         <form className={cx('form')} onSubmit={formik.handleSubmit}>
-            <ToastContainer />
             <div className={cx('form__heading')}>
                 <h1 className={cx('form__title')}>👋 Change Password !</h1>
             </div>
@@ -104,10 +100,13 @@ const ChangePassword = () => {
                 <CheckIcon
                     className={cx('form__icon', {
                         valid:
-                            !formik.errors.oldPassword && formik.touched.oldPassword,
+                            !formik.errors.oldPassword &&
+                            formik.touched.oldPassword,
                     })}
                 ></CheckIcon>
-                <label htmlFor="oldPassword" className={cx('form__label')}>Current Password</label>
+                <label htmlFor="oldPassword" className={cx('form__label')}>
+                    Current Password
+                </label>
                 <input
                     value={formik.values.oldPassword}
                     type="password"
@@ -126,7 +125,6 @@ const ChangePassword = () => {
                         </span>
                     </div>
                 )}
-
             </div>
             {/* Password */}
             <div className={cx('form__group')}>
@@ -136,7 +134,9 @@ const ChangePassword = () => {
                             !formik.errors.password && formik.touched.password,
                     })}
                 ></CheckIcon>
-                <label htmlFor="oldPassword" className={cx('form__label')}>New Password</label>
+                <label htmlFor="oldPassword" className={cx('form__label')}>
+                    New Password
+                </label>
                 <input
                     value={formik.values.password}
                     type="password"
@@ -155,7 +155,6 @@ const ChangePassword = () => {
                         </span>
                     </div>
                 )}
-
             </div>
             {/* Confirm password */}
             <div className={cx('form__group')}>
@@ -166,7 +165,9 @@ const ChangePassword = () => {
                             formik.touched.confirmPassword,
                     })}
                 ></CheckIcon>
-                <label htmlFor="oldPassword" className={cx('form__label')}>Confirm Password</label>
+                <label htmlFor="oldPassword" className={cx('form__label')}>
+                    Confirm Password
+                </label>
                 <input
                     value={formik.values.confirmPassword}
                     type="password"

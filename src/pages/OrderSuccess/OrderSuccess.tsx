@@ -14,6 +14,8 @@ import * as cartItemServices from '../../services/cartItemServices';
 import PreLoader from '../../components/PreLoader';
 import { useNavigate } from 'react-router-dom';
 import PageNotFound from '../PageNotFound';
+import { useAppDispatch } from '../../redux/store';
+import { deleteCartByUserId, getCart } from '../../layouts/components/Cart/cartSlice';
 
 const cx = classNames.bind(styles);
 
@@ -26,9 +28,10 @@ const OrderSuccess = () => {
     const [total, setTotal] = useState(0);
     const [productList, setProductList] = useState<ProductModel[]>([]);
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
-        if (currentUser && products.length > 0) {
+        if (currentUser && products && products.length > 0) {
             window.scrollTo(0, 0);
 
             let result: ProductModel[] = [];
@@ -39,14 +42,6 @@ const OrderSuccess = () => {
 
                 result.push(res);
 
-                const resData = cartItemServices.deleteCartItem({
-                    userId: Number.parseInt(currentUser),
-                    productId: cartItem?.product_id,
-                    colorId: cartItem?.color_id,
-                    screenSizeId: cartItem?.screen_size_id,
-                    materialId: cartItem?.material_id,
-                });
-
                 if (result.length === products.length) {
                     setProductList(result);
                     let totalTemp = 0;
@@ -55,47 +50,42 @@ const OrderSuccess = () => {
                             totalTemp =
                                 totalTemp +
                                 products.at(index).quantity *
-                                    productItem.price *
-                                    (1 - productItem.discount / 100);
+                                productItem.price *
+                                (1 - productItem.discount / 100);
                         } else {
                             totalTemp =
                                 products.at(index).quantity * productItem.price;
                         }
                     });
                     setTotal(totalTemp);
-                    window.dispatchEvent(new Event('storageChanged')); // Phát sự kiện tuỳ chỉnh
+                    setLoading(false);
 
-                    setTimeout(() => {
-                        setLoading(false);
-                    }, 200);
+                    const orderId = localStorage.getItem('orderId');
+                    const res = await orderServices.getOrderByOrderId(orderId + '');
 
-                    setTimeout(() => {
-                        localStorage.setItem('products', JSON.stringify([]));
-                        localStorage.setItem('orderId', JSON.stringify(''));
-                        // navigate(config.routes.shop);
-                    }, 5000);
+                    setOrderDetail(res);
+
+                    //delete cart item
+                    await dispatch(deleteCartByUserId())
+
+                    await dispatch(getCart())
+
+                    localStorage.setItem('products', JSON.stringify([]));
+                    localStorage.setItem('orderId', JSON.stringify(''));
+
                 }
             };
-            products.forEach((item: any, index: number) => {
-                setTimeout(() => {
-                    fetchApi(item);
-                }, index * 500);
-            });
+
+            const fetchApis = async (products: any) => {
+                for await (const item of products) {
+                    await fetchApi(item);
+                }
+            };
+            fetchApis(products);
         }
     }, [currentUser]);
 
-    useEffect(() => {
-        if (products.length > 0) {
-            const fetchApi = async () => {
-                const orderId = localStorage.getItem('orderId');
-                const res = await orderServices.getOrderByOrderId(orderId + '');
 
-                setOrderDetail(res);
-            };
-
-            fetchApi();
-        }
-    }, []);
 
     if (
         products.length === 0 ||
@@ -204,10 +194,10 @@ const OrderSuccess = () => {
                                                         .filter(
                                                             (item) =>
                                                                 item.colorId ===
-                                                                    products.at(
-                                                                        index
-                                                                    )
-                                                                        .color_id &&
+                                                                products.at(
+                                                                    index
+                                                                )
+                                                                    .color_id &&
                                                                 item.isMainImage
                                                         )
                                                         .at(0)?.imageUrl || ''
@@ -283,18 +273,18 @@ const OrderSuccess = () => {
                                         >
                                             {productItem.discount
                                                 ? formatPrice(
-                                                      products.at(index)
-                                                          .quantity *
-                                                          productItem.price *
-                                                          (1 -
-                                                              productItem.discount /
-                                                                  100)
-                                                  )
+                                                    products.at(index)
+                                                        .quantity *
+                                                    productItem.price *
+                                                    (1 -
+                                                        productItem.discount /
+                                                        100)
+                                                )
                                                 : formatPrice(
-                                                      products.at(index)
-                                                          .quantity *
-                                                          productItem.price
-                                                  )}
+                                                    products.at(index)
+                                                        .quantity *
+                                                    productItem.price
+                                                )}
                                         </div>
                                     </div>
                                 ))}

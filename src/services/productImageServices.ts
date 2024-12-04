@@ -48,7 +48,8 @@ export const putProductImage = async (imageList: any, productId: number, colorId
 
         return response;
     } catch (error) {
-        throw (error);
+        console.log(error);
+
 
     }
 };

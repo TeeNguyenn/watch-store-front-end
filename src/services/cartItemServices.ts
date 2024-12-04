@@ -101,3 +101,22 @@ export const deleteCartItem = async (cartItem: any) => {
 
     }
 }
+
+export const deleteCartItemByUserId = async () => {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('user_id');
+
+    try {
+        const response = await request.del(`cart-items/user/${userId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+        });
+
+        return response;
+
+    } catch (error) {
+        throw (error);
+
+    }
+}

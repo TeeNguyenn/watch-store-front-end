@@ -7,6 +7,7 @@ import CardItem from '../CardItem';
 import SearchBar from '../../../components/SearchBar';
 import * as productServices from '../../../services/productServices';
 import { useSearchParams } from 'react-router-dom';
+import { Spin } from 'antd';
 
 const cx = classNames.bind(styles);
 
@@ -27,7 +28,9 @@ const SearchModal = ({ handleCloseSearchModal }: SearchModalProps) => {
         const fetchApi = async () => {
             setLoading(true);
 
-            const recommendProducts = await productServices.getAllProduct(0, 6);
+            const recommendProducts = await productServices.getAllProduct(1, 6);
+
+            console.log(recommendProducts);
 
             if (recommendProducts) {
                 setProductList(recommendProducts.result);
@@ -82,13 +85,23 @@ const SearchModal = ({ handleCloseSearchModal }: SearchModalProps) => {
                     </h3>
                     <div className={cx('card-list')}>
                         <div className="slider-container">
-                            <Slider {...settings}>
-                                {productList.map((productItem) => (
-                                    <CardItem
-                                        productItem={productItem}
-                                    ></CardItem>
-                                ))}
-                            </Slider>
+                            {loading ? (
+                                <Slider {...settings}>
+                                    <Spin style={{ color: '#7c4eb9' }} />
+                                    <Spin style={{ color: '#7c4eb9' }} />
+                                    <Spin style={{ color: '#7c4eb9' }} />
+                                    <Spin style={{ color: '#7c4eb9' }} />
+                                    <Spin style={{ color: '#7c4eb9' }} />
+                                </Slider>
+                            ) : (
+                                <Slider {...settings}>
+                                    {productList.map((productItem) => (
+                                        <CardItem
+                                            productItem={productItem}
+                                        ></CardItem>
+                                    ))}
+                                </Slider>
+                            )}
                         </div>
                     </div>
                 </div>

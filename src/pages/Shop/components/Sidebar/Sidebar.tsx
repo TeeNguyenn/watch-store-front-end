@@ -9,12 +9,13 @@ import Button from '../../../../components/Button';
 import styles from './Sidebar.module.scss';
 import Checkbox from '../../../../components/Checkbox';
 
-import { splitArrayAtIndex } from '../../../../utils/Functions';
+import { formatPrice, splitArrayAtIndex } from '../../../../utils/Functions';
 import * as productServices from '../../../../services/productServices';
 import ProductModel from '../../../../models/ProductModel';
 import BestSellerItem from '../BestSellerItem';
 import ColorItem from '../../../../components/ColorItem';
 import { boolean } from 'yup';
+import { useDebounce } from '../../../../hooks';
 
 const cx = classNames.bind(styles);
 
@@ -29,11 +30,16 @@ interface SidebarProps {
     colorList?: any[];
     materialFilter: any;
     materialList?: any[];
+    minPrice?: string;
+    maxPrice?: string;
 
     handleFilterCollection?: (activeCollection: string) => void;
     handleFilterCategory?: (data: any) => void;
     handleFilterColor?: (data: any) => void;
     handleFilterMaterial?: (data: any) => void;
+    handleShowQuickBuy?: (data: any) => void;
+    handleChangeMinPrice?: (value: string) => void;
+    handleChangeMaxPrice?: (value: string) => void;
 }
 
 const Sidebar = React.memo(
@@ -48,10 +54,15 @@ const Sidebar = React.memo(
         colorList = [],
         materialFilter,
         materialList = [],
+        minPrice,
+        maxPrice,
         handleFilterCollection,
-        handleFilterCategory = () => {},
-        handleFilterColor = () => {},
-        handleFilterMaterial = () => {},
+        handleFilterCategory = () => { },
+        handleFilterColor = () => { },
+        handleFilterMaterial = () => { },
+        handleShowQuickBuy = (isShow: boolean) => { },
+        handleChangeMinPrice = (value: string) => { },
+        handleChangeMaxPrice = (value: string) => { },
     }: SidebarProps) => {
         const [activeFilterPanel, setActiveFilterPanel] =
             useState(collectionId);
@@ -69,6 +80,13 @@ const Sidebar = React.memo(
         );
         const [colorShow, colorHide] = splitArrayAtIndex(colorList, 10);
 
+        const [minPriceValue, setMinPriceValue] = useState(minPrice || '');
+        const [maxPriceValue, setMaxPriceValue] = useState(maxPrice || '');
+
+        const debouncedMinPrice = useDebounce(minPriceValue, 500);
+        const debouncedMaxPrice = useDebounce(maxPriceValue, 500);
+
+
         useEffect(() => {
             const fetchApi = async () => {
                 const bestSellerData =
@@ -79,6 +97,22 @@ const Sidebar = React.memo(
 
             fetchApi();
         }, []);
+
+        useEffect(() => {
+            if (!debouncedMinPrice.trim()) {
+                return;
+            } else {
+                handleChangeMinPrice(debouncedMinPrice);
+            }
+        }, [debouncedMinPrice])
+
+        useEffect(() => {
+            if (!debouncedMaxPrice.trim()) {
+                return;
+            } else {
+                handleChangeMaxPrice(debouncedMaxPrice);
+            }
+        }, [debouncedMaxPrice])
 
         const settings = {
             dots: false,
@@ -120,9 +154,10 @@ const Sidebar = React.memo(
         // Remove all filter
         const handleRemoveFilter = () => {
             handleFilterCategory({});
-
             handleFilterColor({});
             handleFilterMaterial({});
+            handleChangeMinPrice('');
+            handleChangeMaxPrice('');
         };
 
         const handleCategoryChange = (data: any = {}) => {
@@ -178,7 +213,7 @@ const Sidebar = React.memo(
                                             className={cx('filter-panel__icon')}
                                         >
                                             {activeFilterPanel ===
-                                            item.collectionId + ''
+                                                item.collectionId + ''
                                                 ? '-'
                                                 : '+'}
                                         </span>
@@ -232,7 +267,8 @@ const Sidebar = React.memo(
                                     'd-none':
                                         categoryFilter.ids.length === 0 &&
                                         colorFilter.ids.length === 0 &&
-                                        materialFilter.ids.length === 0,
+                                        materialFilter.ids.length === 0 &&
+                                        !minPrice && !maxPrice
                                 })}
                                 onClick={() => handleRemoveFilter()}
                             >
@@ -240,6 +276,26 @@ const Sidebar = React.memo(
                             </Button>
                         </div>
                         <ul className={cx('filter__list')}>
+                            {
+                                (minPrice || maxPrice) && <li>
+                                    <Button
+                                        rightIcon={<span>×</span>}
+                                        className={cx('filter__item', {
+                                            'primary-hover': true,
+                                        })}
+                                        onClick={() => {
+                                            handleChangeMinPrice('');
+                                            handleChangeMaxPrice('');
+
+                                        }
+
+                                        }
+                                    >
+                                        {`${formatPrice(Number(minPrice || 0))}-${formatPrice(Number(maxPrice || 10000))}`}
+
+                                    </Button>
+                                </li>
+                            }
                             {categoryFilter.list.map(
                                 (item: any, index: any) => (
                                     <li key={index}>
@@ -298,11 +354,14 @@ const Sidebar = React.memo(
                                     </li>
                                 )
                             )}
+
                         </ul>
                     </div>
 
                     {/*Avalability */}
-                    <div className={cx('availability')}>
+                    <div className={cx('availability', {
+                        'd-none': true
+                    })}>
                         <p
                             className={cx('sidebar__title')}
                             onClick={() => handleShowOptionFilter(1)}
@@ -354,26 +413,40 @@ const Sidebar = React.memo(
                             })}
                         >
                             <p className={cx('price__header')}>
-                                The highest price is Rs. 5,149.00
+                                The highest price is 10000$
                             </p>
                             <div className={cx('price__range')}>
                                 <span className={cx('price__unit')}>$</span>
                                 <div className={cx('price__group')}>
                                     <input
+                                        value={minPriceValue}
                                         className={cx('price__input')}
                                         type="number"
                                         placeholder="0"
-                                        min={'0'}
-                                        max={'100'}
+                                        min={0}
+                                        max={10000}
+                                        onChange={(e) => setMinPriceValue(e.target.value)}
+                                        onBlur={(e) => {
+                                            if (Number(e.target.value) < 0) {
+                                                setMinPriceValue('0')
+                                            }
+                                        }}
                                     />
                                 </div>
                                 <div className={cx('price__group')}>
                                     <input
+                                        value={maxPriceValue}
                                         className={cx('price__input')}
                                         type="number"
-                                        placeholder="100"
-                                        min={'0'}
-                                        max={'100'}
+                                        placeholder="10000"
+                                        min={0}
+                                        max={10000}
+                                        onChange={(e) => setMaxPriceValue(e.target.value)}
+                                        onBlur={(e) => {
+                                            if (Number(e.target.value) > 10000) {
+                                                setMaxPriceValue('10000')
+                                            }
+                                        }}
                                     />
                                 </div>
                             </div>
@@ -606,7 +679,10 @@ const Sidebar = React.memo(
                     <div className="slider-container">
                         <Slider {...settings}>
                             {bestSeller.map((item, index) => (
-                                <BestSellerItem item={item}></BestSellerItem>
+                                <BestSellerItem
+                                    handleShowQuickBuy={handleShowQuickBuy}
+                                    item={item}
+                                ></BestSellerItem>
                             ))}
                         </Slider>
                     </div>

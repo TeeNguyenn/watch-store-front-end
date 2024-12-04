@@ -60,10 +60,13 @@ const ProductIcons = ({
     const [showCompareModal, setShowCompareModal] = useState(false);
     const [loadingWishlist, setLoadingWishlist] = useState(false);
 
-    const dispatch = useAppDispatch()
-    const wishlistStatus = useAppSelector((state: RootState) => state.wishlists.status);
-    const cartStatus = useAppSelector((state: RootState) => state.cartList.status);
-
+    const dispatch = useAppDispatch();
+    const wishlistStatus = useAppSelector(
+        (state: RootState) => state.wishlists.status
+    );
+    const cartStatus = useAppSelector(
+        (state: RootState) => state.cartList.status
+    );
 
     // Get customerId from url
     const { customerId } = useParams();
@@ -126,9 +129,9 @@ const ProductIcons = ({
     }, [pathName]);
 
     // get wishlist
-    const wishlist = useAppSelector((state: RootState) => state.wishlists.wishlist);
-
-
+    const wishlist = useAppSelector(
+        (state: RootState) => state.wishlists.wishlist
+    );
 
     // get compareList
     useEffect(() => {
@@ -162,17 +165,19 @@ const ProductIcons = ({
             }, 300);
         } else {
             const fetchData = async () => {
-                await dispatch(postCart({
-                    productId: productItem?.productId,
-                    colorId: productItem?.colors.at(0)?.colorId,
-                    screenSizeId: screenSizeId,
-                    materialId: materialId
-                }))
+                await dispatch(
+                    postCart({
+                        productId: productItem?.productId,
+                        colorId: productItem?.colors.at(0)?.colorId,
+                        screenSizeId: screenSizeId,
+                        materialId: materialId,
+                    })
+                );
                 await dispatch(getCart());
                 if (cartStatus === 'fulfilled') {
                     context?.handleCart();
                 }
-            }
+            };
             fetchData();
         }
     };
@@ -193,13 +198,15 @@ const ProductIcons = ({
             if (liked) {
                 return;
             } else {
-                dispatch(postWishlistItem({
-                    userId: currentUser,
-                    productId: productItem?.productId,
-                    colorId: productItem?.colors.at(0)?.colorId,
-                    screenSizeId: screenSizeId,
-                    materialId: materialId,
-                }))
+                dispatch(
+                    postWishlistItem({
+                        userId: currentUser,
+                        productId: productItem?.productId,
+                        colorId: productItem?.colors.at(0)?.colorId,
+                        screenSizeId: screenSizeId,
+                        materialId: materialId,
+                    })
+                );
                 setLiked(true);
                 // if (wishlistStatus === 'fulfilled') {    no work=))
                 //     setTimeout(() => {
@@ -326,7 +333,6 @@ const ProductIcons = ({
 
     return (
         <>
-            <ToastContainer />
             <div
                 className={cx('product-icons', className, {
                     'custom-wishlist': isWishlist,
@@ -344,7 +350,10 @@ const ProductIcons = ({
                             })}
                             onClick={handleAddWishlist}
                         >
-                            {wishlist.some(item => item.productId === productItem?.productId) ? (
+                            {wishlist.some(
+                                (item) =>
+                                    item.productId === productItem?.productId
+                            ) ? (
                                 <Button
                                     to={config.routes.wishlist}
                                     className={cx('btn')}

@@ -1,5 +1,11 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, useParams } from 'react-router-dom';
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+    useLocation,
+    useParams,
+} from 'react-router-dom';
 
 import { publicRoutes, privateRoutes } from './routes';
 import { DefaultLayout, AdminLayout } from './layouts';
@@ -12,15 +18,12 @@ import { getWishlist } from './components/Wishlist/wishlistSlice';
 import { getCart } from './layouts/components/Cart/cartSlice';
 import * as favoriteServices from './services/favoriteServices';
 
-
 function App() {
-    const dispatch = useAppDispatch()
+    const dispatch = useAppDispatch();
     const currentUser = localStorage.getItem('user_id');
-
 
     // Get customerId from url
     const { customerId } = useParams();
-
 
     let customerIdNumber = 0;
     try {
@@ -51,7 +54,6 @@ function App() {
 
     return (
         <Router>
-            {/* <ScrollToTop></ScrollToTop> */}
             <Routes>
                 {publicRoutes.map((route, index) => {
                     let Layout: any = DefaultLayout;

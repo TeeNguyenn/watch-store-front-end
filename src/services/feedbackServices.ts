@@ -100,6 +100,34 @@ export const getAllFeedbackByUserId = async (userId: string, currentPage = 1, li
     }
 };
 
+export const getAllFeedback = async (currentPage = 1, limit: number = 6, sort = 'latest') => {
+    // const userId = localStorage.getItem('user_id');
+    const token = localStorage.getItem('token');
+
+    try {
+        const result: FeedbackModel[] = [];
+
+        const res = await request.get(`feedbacks`, {
+            params: {
+                page: currentPage - 1,
+                limit,
+                sort
+            },
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        return res;
+
+
+    } catch (error) {
+        console.log(error);
+
+        // throw (error)
+    }
+};
+
 
 export const postFeedback = async (feedbackItem: any) => {
     const token = localStorage.getItem('token');
